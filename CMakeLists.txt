@@ -4,4 +4,13 @@ project(pacman LANGUAGES CXX)
 add_subdirectory(headers)
 add_subdirectory(src)
 
+message(STATUS "Source files being compiled:")
+foreach(source_file ${SOURCE_FILES})
+    message(STATUS "  ${source_file}")
+endforeach()
+
+add_executable(pacman ${SOURCE_FILES})
+
+target_link_libraries(pacman sfml-graphics sfml-window sfml-system)
+
 install(TARGETS pacman)

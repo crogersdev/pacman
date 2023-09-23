@@ -1,10 +1,7 @@
-# Define the source files for the pacman target
-set(SOURCES
-    main.cpp
-)
+# List all source files in the "src" directory
+file(GLOB SOURCE_FILES *.cpp)
 
-# Add the sources to the pacman target
-add_executable(pacman ${SOURCES})
+include_directories(${CMAKE_SOURCE_DIR}/headers)
 
-# Link against any necessary libraries (e.g., SFML)
-target_link_libraries(pacman sfml-graphics sfml-window sfml-system)
+set(SOURCE_FILES ${SOURCE_FILES} PARENT_SCOPE)
+#src/main.cpp) target_sources(pacman PRIVATE ${SOURCE_FILES} ${HEADER_FILES})

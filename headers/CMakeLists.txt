@@ -1,2 +1,7 @@
-# Add the headers directory to the include paths
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+# gonna use a glob to collect header files
+file(GLOB HEADER_FILES "*.hpp")
+
+# the source_group is for CMakeLists "virtual folders" so it's not necessary but helps
+source_group("Header Files" FILES ${HEADER_FILES})
+
+set(HEADER_FILES ${HEADER_FILES} PARENT_SCOPE)
