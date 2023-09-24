@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.21)
 project(pacman LANGUAGES CXX)
 
+file(GLOB_RECURSE SUBDIRECTORIES RELATIVE ${CMAKE_SOURCE_DIR} */)
+
 add_subdirectory(headers)
 add_subdirectory(src)
 

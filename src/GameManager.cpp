@@ -1,4 +1,4 @@
-#include "../headers/GameManager.hpp"
+#include "GameManager.hpp"
 
 using std::unique_ptr;
 using std::make_unique;
