@@ -3,9 +3,9 @@
 
 #include <SFML/Graphics.hpp>
 
-typedef std::unique_ptr<State> StatePointer;
-
 class State;
+
+typedef std::unique_ptr<State> StatePointer;
 
 class GameManager
 {
