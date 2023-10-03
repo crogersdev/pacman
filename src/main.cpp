@@ -1,8 +1,11 @@
 #include <SFML/Graphics.hpp>
 
+#include <iostream>
 #include <memory>
 #include <functional>
 #include <unordered_map>
+
+void movePacman(sf::CircleShape &, float, float);
 
 int main()
 {
@@ -16,10 +19,10 @@ int main()
     float movementSpeed = 200.0f;
 
     std::unordered_map<sf::Keyboard::Key, std::function<void()>> keyActions = {
-        {sf::Keyboard::Left,  [&]() { pacman.move(-movementSpeed * deltaTime.asSeconds(), 0); }},
-        {sf::Keyboard::Right, [&]() { pacman.move( movementSpeed * deltaTime.asSeconds(), 0); }},
-        {sf::Keyboard::Up,    [&]() { pacman.move(0, -movementSpeed * deltaTime.asSeconds()); }},
-        {sf::Keyboard::Down,  [&]() { pacman.move(0,  movementSpeed * deltaTime.asSeconds()); }}
+        {sf::Keyboard::Left,  [&]() { movePacman(pacman, -movementSpeed * deltaTime.asSeconds(), 0); }},
+        {sf::Keyboard::Right, [&]() { movePacman(pacman,  movementSpeed * deltaTime.asSeconds(), 0); }},
+        {sf::Keyboard::Up,    [&]() { movePacman(pacman, 0, -movementSpeed * deltaTime.asSeconds()); }},
+        {sf::Keyboard::Down,  [&]() { movePacman(pacman, 0,  movementSpeed * deltaTime.asSeconds()); }}
     };
 
     while (window.isOpen())
@@ -48,4 +51,8 @@ int main()
     }
 
     return 0;
+}
+
+void movePacman(sf::CircleShape &rPacman, float offset, float direction) {
+    rPacman.move(sf::Vector2f(offset, direction));
 }
