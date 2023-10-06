@@ -71,5 +71,4 @@ void movePacman(sf::CircleShape &rPacman, float offset, float direction, sf::Ren
     {
         std::cout << "in!!!\n";
     }
-    // std::cout << "current position x: " << newPosition.x << "\t\ty: " << newPosition.y << "\n";
 }
