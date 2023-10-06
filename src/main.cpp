@@ -5,7 +5,7 @@
 #include <functional>
 #include <unordered_map>
 
-void movePacman(sf::CircleShape &, float, float);
+void movePacman(sf::CircleShape &, float, float, sf::RenderWindow &);
 
 int main()
 {
@@ -19,10 +19,10 @@ int main()
     float movementSpeed = 200.0f;
 
     std::unordered_map<sf::Keyboard::Key, std::function<void()>> keyActions = {
-        {sf::Keyboard::Left,  [&]() { movePacman(pacman, -movementSpeed * deltaTime.asSeconds(), 0); }},
-        {sf::Keyboard::Right, [&]() { movePacman(pacman,  movementSpeed * deltaTime.asSeconds(), 0); }},
-        {sf::Keyboard::Up,    [&]() { movePacman(pacman, 0, -movementSpeed * deltaTime.asSeconds()); }},
-        {sf::Keyboard::Down,  [&]() { movePacman(pacman, 0,  movementSpeed * deltaTime.asSeconds()); }}
+        {sf::Keyboard::Left,  [&]() { movePacman(pacman, -movementSpeed * deltaTime.asSeconds(), 0, window); }},
+        {sf::Keyboard::Right, [&]() { movePacman(pacman,  movementSpeed * deltaTime.asSeconds(), 0, window); }},
+        {sf::Keyboard::Up,    [&]() { movePacman(pacman, 0, -movementSpeed * deltaTime.asSeconds(), window); }},
+        {sf::Keyboard::Down,  [&]() { movePacman(pacman, 0,  movementSpeed * deltaTime.asSeconds(), window); }}
     };
 
     while (window.isOpen())
@@ -53,6 +53,23 @@ int main()
     return 0;
 }
 
-void movePacman(sf::CircleShape &rPacman, float offset, float direction) {
+void movePacman(sf::CircleShape &rPacman, float offset, float direction, sf::RenderWindow &rWindow) {
+    sf::FloatRect windowBounds(0, 0, rWindow.getSize().x, rWindow.getSize().y);
     rPacman.move(sf::Vector2f(offset, direction));
+
+    sf::Vector2f newPosition = rPacman.getPosition();
+
+    // tricky: this breaks when rPacman is no longer a CircleShape - to say nothing of the function signataure
+    if (newPosition.x < windowBounds.left ||
+        newPosition.x + 60.0f > windowBounds.left + windowBounds.width ||
+        newPosition.y < windowBounds.top ||
+        newPosition.y + 60.0f > windowBounds.top + windowBounds.height)
+    {
+        std::cout << "out!\n";
+    }
+    else
+    {
+        std::cout << "in!!!\n";
+    }
+    // std::cout << "current position x: " << newPosition.x << "\t\ty: " << newPosition.y << "\n";
 }
