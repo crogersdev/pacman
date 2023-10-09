@@ -5,7 +5,7 @@
 #include <functional>
 #include <unordered_map>
 
-void movePacman(sf::CircleShape &, float, float, sf::RenderWindow &);
+void movePacman(sf::CircleShape &, sf::Vector2f, sf::RenderWindow &);
 
 int main()
 {
@@ -20,10 +20,10 @@ int main()
 
     std::unordered_map<sf::Keyboard::Key, std::function<void()>> keyActions =
     {
-        {sf::Keyboard::Left,  [&]() { movePacman(pacman, -movementSpeed * deltaTime.asSeconds(), 0, window); }},
-        {sf::Keyboard::Right, [&]() { movePacman(pacman,  movementSpeed * deltaTime.asSeconds(), 0, window); }},
-        {sf::Keyboard::Up,    [&]() { movePacman(pacman, 0, -movementSpeed * deltaTime.asSeconds(), window); }},
-        {sf::Keyboard::Down,  [&]() { movePacman(pacman, 0,  movementSpeed * deltaTime.asSeconds(), window); }}
+        {sf::Keyboard::Left,  [&]() { movePacman(pacman, sf::Vector2f(-movementSpeed * deltaTime.asSeconds(), 0), window); }},
+        {sf::Keyboard::Right, [&]() { movePacman(pacman, sf::Vector2f( movementSpeed * deltaTime.asSeconds(), 0), window); }},
+        {sf::Keyboard::Up,    [&]() { movePacman(pacman, sf::Vector2f(0, -movementSpeed * deltaTime.asSeconds()), window); }},
+        {sf::Keyboard::Down,  [&]() { movePacman(pacman, sf::Vector2f(0,  movementSpeed * deltaTime.asSeconds()), window); }}
     };
 
     while (window.isOpen())
@@ -55,47 +55,24 @@ int main()
     return 0;
 }
 
-void movePacman(sf::CircleShape &rPacman, float offset, float direction, sf::RenderWindow &rWindow)
+void movePacman(sf::CircleShape &rPacman, sf::Vector2f movement, sf::RenderWindow &rWindow)
 {
     sf::FloatRect windowBounds(0, 0, rWindow.getSize().x, rWindow.getSize().y);
-    rPacman.move(sf::Vector2f(offset, direction));
+    const float radius = rPacman.getRadius();
+    rPacman.move(movement);
 
     sf::Vector2f newPosition = rPacman.getPosition();
+    
+    auto wrapCoordinate = [](float &coord, float min, float max)
+    {
+        if (coord < min)
+            coord = max;
+        else if (coord > max)
+            coord = min;
+    };
 
-/*
-    if (newPosition.x + rPacman.getRadius() * 2 > rWindow.getSize().x) {
-        newPosition.x = -rPacman.getRadius() * 2; // Move to the left side
-    } else {
-        newPosition.x += rPacman.getRadius() * 2; // Keep moving to the right
-    }
-    */
-
-    if (newPosition.x < -rPacman.getRadius() * 2)
-    {
-        std::cout << "out left\n";
-        newPosition.x = windowBounds.width;
-    } 
-    else if (newPosition.x > windowBounds.width)
-    {
-        std::cout << "out right\n";
-        newPosition.x = 0 - rPacman.getRadius() * 2;
-    }
-    else if (newPosition.y < -rPacman.getRadius() * 2)
-    {
-        std::cout << "out top\n";
-        newPosition.y = windowBounds.height;
-    }
-    else if (newPosition.y > windowBounds.height)
-    {
-        std::cout << "out bottom\n";
-        newPosition.y = 0 - rPacman.getRadius() * 2;
-    }
-    /*
-    else 
-    {
-        std::cout << "in!!!\n";
-    }
-    */
+    wrapCoordinate(newPosition.x, -radius * 2, windowBounds.width);
+    wrapCoordinate(newPosition.y, -radius * 2, windowBounds.height);
 
     rPacman.setPosition(newPosition.x, newPosition.y);
 }
