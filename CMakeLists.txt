@@ -19,6 +19,12 @@ endforeach()
 
 add_executable(pacman src/main.cpp ${SOURCE_FILES})
 
-target_link_libraries(pacman sfml-graphics sfml-window sfml-system)
+target_link_libraries(
+    pacman
+    sfml-graphics
+    sfml-system
+    sfml-window
+    game-manager
+)
 
 install(TARGETS pacman)

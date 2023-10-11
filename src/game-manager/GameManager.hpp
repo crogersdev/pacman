@@ -1,28 +1,31 @@
 #pragma once
-#include <stack>
 
 #include <SFML/Graphics.hpp>
 
-class State;
-
-typedef std::unique_ptr<State> StatePointer;
+#include <functional>
+#include <memory>
+#include <stack>
+#include <unordered_map>
 
 class GameManager
 {
 private:
-    sf::Clock mClock;
+    sf::Clock m_clock;
+    sf::FloatRect m_windowBounds;
+    sf::Time m_deltaTime;
+
+    float m_movementSpeed;
+
+    std::shared_ptr<sf::RenderWindow> m_pWindow;
 
 public:
-    // NOTE: i think the reason there's no ctor is because the startGameManager initializes
-    //       the values for the GameManager object and it also doesn't look like there's
-    //       gonna be multiple 
-    std::unique_ptr<sf::RenderWindow> m_pWindow;
-    std::stack<StatePointer> m_gameStates;
-    float m_deltaTime;
-    float m_aspectRatio;
-
+    std::unordered_map<sf::Keyboard::Key, std::function<void()>> m_keyActions;
+    sf::CircleShape m_pacman;
+    float m_pacmanRadius;
+    GameManager(std::shared_ptr<sf::RenderWindow> pWindow);
     ~GameManager();
 
-    void update();
-    void startGameManager();
+    void handleInputs();
+    void movePacman(sf::Vector2f);
+    void updateWindow();
 };

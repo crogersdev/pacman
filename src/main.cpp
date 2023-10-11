@@ -1,25 +1,21 @@
 #include <SFML/Graphics.hpp>
 
+#include <iostream>
 #include <memory>
+#include <functional>
+#include <unordered_map>
+
+#include "GameManager.hpp"
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(200, 200), "SFML works!");
-    sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
+    auto window = std::make_shared<sf::RenderWindow>(sf::VideoMode(500, 720), "Pacman!");
+    GameManager gameManager = GameManager(window);
 
-    while (window.isOpen())
+    while (window->isOpen())
     {
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed)
-                window.close();
-        }
+        gameManager.handleInputs();
 
-        window.clear();
-        window.draw(shape);
-        window.display();
     }
 
     return 0;

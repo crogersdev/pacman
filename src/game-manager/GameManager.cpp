@@ -1,30 +1,73 @@
 #include "GameManager.hpp"
 
-using std::unique_ptr;
-using std::make_unique;
-
-void GameManager::startGameManager()
+GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
+  : m_pWindow(std::move(pWindow))
 {
-    m_pWindow = make_unique<sf::RenderWindow>();
-    m_pWindow->create(
-        sf::VideoMode(1000, 1100),
-        "Pacman",
-        sf::Style::Fullscreen
-    );
+    m_windowBounds = sf::FloatRect(0, 0, m_pWindow->getSize().x, m_pWindow->getSize().y);
+    m_pacmanRadius = 30.f;
+    m_pacman = sf::CircleShape(m_pacmanRadius);
+    m_pacman.setFillColor(sf::Color::Yellow);
 
-    sf::Vector2u windowSize = m_pWindow->getSize();
+    m_movementSpeed = 200.0f;
 
-    float x = static_cast<float>(windowSize.x);
-    float y = static_cast<float>(windowSize.y);
+    m_keyActions =
+    {
+        {sf::Keyboard::Left,  [&]() { movePacman(sf::Vector2f(-m_movementSpeed * m_deltaTime.asSeconds(), 0)); }},
+        {sf::Keyboard::Right, [&]() { movePacman(sf::Vector2f( m_movementSpeed * m_deltaTime.asSeconds(), 0)); }},
+        {sf::Keyboard::Up,    [&]() { movePacman(sf::Vector2f(0, -m_movementSpeed * m_deltaTime.asSeconds())); }},
+        {sf::Keyboard::Down,  [&]() { movePacman(sf::Vector2f(0,  m_movementSpeed * m_deltaTime.asSeconds())); }}
+    };
+}
 
-    m_aspectRatio = (x / y) - 100;
+GameManager::~GameManager() {}
 
-    sf::View v(
-        sf::Vector2f(400, 450),
-        sf::Vector2f(800 * m_aspectRatio, 900)
-    );
+void GameManager::handleInputs()
+{
+    sf::Event event;
+    while (m_pWindow->pollEvent(event))
+    {
+        if (event.type == sf::Event::Closed)
+            m_pWindow->close();
+        if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
+            m_pWindow->close();
+        }
+    }
 
-    m_pWindow->setView(v);
+    m_deltaTime = m_clock.restart();
 
-    //m_gameStates.push(a new main menu state)
+    for (const auto& pair : m_keyActions)
+    {
+        if (sf::Keyboard::isKeyPressed(pair.first)) {
+            pair.second();
+        }
+    }
+}
+
+void GameManager::movePacman(sf::Vector2f movement)
+{
+    const float radius = m_pacman.getRadius();
+    m_pacman.move(movement);
+
+    sf::Vector2f newPosition = m_pacman.getPosition();
+    
+    auto wrapCoordinate = [](float &coord, float min, float max)
+    {
+        if (coord < min)
+            coord = max;
+        else if (coord > max)
+            coord = min;
+    };
+
+    wrapCoordinate(newPosition.x, -radius * 2, m_windowBounds.width);
+    wrapCoordinate(newPosition.y, -radius * 2, m_windowBounds.height);
+
+    m_pacman.setPosition(newPosition.x, newPosition.y);
+}
+
+void GameManager::updateWindow()
+{
+    m_pWindow->clear();
+    m_pWindow->draw(m_pacman);
+    m_pWindow->display();
+
 }
