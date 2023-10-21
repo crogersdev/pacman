@@ -21,7 +21,9 @@ private:
 public:
     std::unordered_map<sf::Keyboard::Key, std::function<void()>> m_keyActions;
     sf::CircleShape m_pacman;
+    sf::RectangleShape m_wall;
     float m_pacmanRadius;
+
     GameManager(std::shared_ptr<sf::RenderWindow> pWindow);
     ~GameManager();
 

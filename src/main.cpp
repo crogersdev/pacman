@@ -15,7 +15,7 @@ int main()
     while (window->isOpen())
     {
         gameManager.handleInputs();
-
+        gameManager.updateWindow();
     }
 
     return 0;
