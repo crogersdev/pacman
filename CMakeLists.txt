@@ -19,12 +19,16 @@ endforeach()
 
 add_executable(pacman src/main.cpp ${SOURCE_FILES})
 
+# having linker errors?  undefined references to things?  make sure
+# the appropriate folder's named library from its CMakeLists.txt file
+# is appended here
 target_link_libraries(
     pacman
     sfml-graphics
     sfml-system
     sfml-window
     game-manager
+    entities
 )
 
 install(TARGETS pacman)

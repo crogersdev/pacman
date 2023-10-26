@@ -1,4 +1,5 @@
 #include "GameManager.hpp"
+#include "../entities/Labyrinth.hpp"
 #include <iostream>
 
 GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
@@ -19,6 +20,7 @@ GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
         )
     );
 
+    m_labyrinth = Labyrinth();
 
     m_movementSpeed = 200.0f;
 

@@ -7,6 +7,8 @@
 #include <stack>
 #include <unordered_map>
 
+#include "../entities/Labyrinth.hpp"
+
 class GameManager
 {
 private:
@@ -18,14 +20,16 @@ private:
 
     std::shared_ptr<sf::RenderWindow> m_pWindow;
 
+    Labyrinth m_labyrinth;
+
 public:
+    GameManager(std::shared_ptr<sf::RenderWindow> pWindow);
+    ~GameManager();
+
     std::unordered_map<sf::Keyboard::Key, std::function<void()>> m_keyActions;
     sf::CircleShape m_pacman;
     sf::RectangleShape m_wall;
     float m_pacmanRadius;
-
-    GameManager(std::shared_ptr<sf::RenderWindow> pWindow);
-    ~GameManager();
 
     void handleInputs();
     void movePacman(sf::Vector2f);
