@@ -1,13 +1,11 @@
 cmake_minimum_required(VERSION 3.21)
 project(pacman LANGUAGES CXX)
 
-# file(GLOB_RECURSE SUBDIRECTORIES CMAKE_USE_RELATIVE_PATHS ${CMAKE_SOURCE_DIR} */)
-
-# file(GLOB_RECURSE SUBDIRECTORIES RELATIVE ${CMAKE_SOURCE_DIR}/src "${CMAKE_SOURCE_DIR}/src/*/")
-file(GLOB_RECURSE SUBDIRECTORIES LIST_DIRECTORIES true "${CMAKE_SOURCE_DIR}/src/*")
 set(LIBRARIES_TO_LINK)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Print the list of subdirectories
+file(GLOB_RECURSE SUBDIRECTORIES LIST_DIRECTORIES true "${CMAKE_SOURCE_DIR}/src/*")
+
 message(STATUS "Subdirectories found:")
 foreach(SUBDIR ${SUBDIRECTORIES})
     if(IS_DIRECTORY ${SUBDIR})
@@ -18,6 +16,19 @@ foreach(SUBDIR ${SUBDIRECTORIES})
 endforeach()
 
 add_executable(pacman src/main.cpp ${SOURCE_FILES})
+
+find_program(CPPCHECK cppcheck)
+if(CPPCHECK)
+    set(CMAKE_CXX_CPPCHECK "${CPPCHECK}" "--enable=all" "--inconclusive")
+endif()
+
+add_custom_target(run-cppcheck
+    COMMAND ${CMAKE_CXX_CPPCHECK} --project=compile_commands.json
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMENT "Running cppcheck on the project"
+)
+
+add_dependencies(pacman run-cppcheck)
 
 # having linker errors?  undefined references to things?  make sure
 # the appropriate folder's named library from its CMakeLists.txt file

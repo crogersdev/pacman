@@ -15,11 +15,9 @@ private:
     sf::Clock m_clock;
     sf::FloatRect m_windowBounds;
     sf::Time m_deltaTime;
-
-    float m_movementSpeed;
-
     std::shared_ptr<sf::RenderWindow> m_pWindow;
-
+    std::vector<sf::RectangleShape> m_walls;
+    float m_movementSpeed;
     Labyrinth m_labyrinth;
 
 public:
@@ -28,9 +26,10 @@ public:
 
     std::unordered_map<sf::Keyboard::Key, std::function<void()>> m_keyActions;
     sf::CircleShape m_pacman;
-    sf::RectangleShape m_wall;
+    sf::RectangleShape m_wallTile;
     float m_pacmanRadius;
 
+    void drawLabyrinth();
     void handleInputs();
     void movePacman(sf::Vector2f);
     void updateWindow();

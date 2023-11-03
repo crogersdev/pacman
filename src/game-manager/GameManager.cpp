@@ -10,16 +10,11 @@ GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
     m_pacmanRadius = 30.f;
     m_pacman = sf::CircleShape(m_pacmanRadius);
     m_pacman.setFillColor(sf::Color::Yellow);
+    m_pacman.setPosition(sf::Vector2f(60., 60.));
 
-    m_wall = sf::RectangleShape(sf::Vector2f(100.f, 200.f));
-    m_wall.setFillColor(sf::Color::Blue);
-    m_wall.setPosition(
-        sf::Vector2f(
-            (m_pWindow->getSize().x / 2) - (m_wall.getSize().x / 2),
-            (m_pWindow->getSize().y / 2) - (m_wall.getSize().y / 2)
-        )
-    );
-
+    m_wallTile = sf::RectangleShape(sf::Vector2f(60.f, 60.f));
+    m_wallTile.setFillColor(sf::Color::Blue);
+    
     m_labyrinth = Labyrinth();
 
     m_movementSpeed = 200.0f;
@@ -51,6 +46,8 @@ void GameManager::handleInputs()
     for (const auto& pair : m_keyActions)
     {
         if (sf::Keyboard::isKeyPressed(pair.first))
+            // note: this invokes the lambdas defined in the ctdor that 
+            //       move pacman
             pair.second();
     }
 }
@@ -73,21 +70,37 @@ void GameManager::movePacman(sf::Vector2f movement)
 
     sf::CircleShape virtualPacman(radius);
     virtualPacman.setPosition(newPosition.x, newPosition.y);
-    if (virtualPacman.getGlobalBounds().intersects(m_wall.getGlobalBounds()))
+
+    int tileCol = static_cast<int>(newPosition.x / 60);
+    int tileRow = static_cast<int>(newPosition.y / 60);
+
+    if (static_cast<bool>(m_labyrinth.m_labyrinth[tileCol][tileRow]))
     {
         return;
     }
-        
+
     // TRICKY: we avoid .move(movement) here because doing so would ignore
     //         the arithmetic we implemented to wrap pacman around the edges
     m_pacman.setPosition(newPosition);
-    m_wall.setFillColor(sf::Color::Blue);
 }
 
 void GameManager::updateWindow()
 {
     m_pWindow->clear();
-    m_pWindow->draw(m_wall);
+
+    for (int row = 0; row < m_labyrinth.m_labyrinthRows; ++row)
+    {
+        for (int col = 0; col < m_labyrinth.m_labyrinthCols; ++col)
+        {
+            if (bool(m_labyrinth.m_labyrinth[row][col]))
+            {
+                m_wallTile.setPosition(sf::Vector2f((float)60*col, (float)60*row));
+                m_walls.push_back(m_wallTile);
+                m_pWindow->draw(m_wallTile);
+            }
+        }
+    }
+
     m_pWindow->draw(m_pacman);
     m_pWindow->display();
 }

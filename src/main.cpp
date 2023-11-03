@@ -9,7 +9,7 @@
 
 int main()
 {
-    auto window = std::make_shared<sf::RenderWindow>(sf::VideoMode(500, 720), "Pacman!");
+    auto window = std::make_shared<sf::RenderWindow>(sf::VideoMode(60*10, 60*15), "Pacman!");
     GameManager gameManager = GameManager(window);
 
     while (window->isOpen())
