@@ -1,0 +1,32 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build",
+      "type": "shell",
+      "command": "make", // Use the appropriate build command (e.g., make, cmake --build, etc.)
+      "args": [
+        "-j6"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder/build}"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "clean",
+      "type": "shell",
+      "command": "make", // Use the appropriate clean command (e.g., make clean, cmake --build . --target clean, etc.)
+      "args": [
+        "clean"
+      ], // Specify clean arguments
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}
