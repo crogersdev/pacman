@@ -68,16 +68,28 @@ void GameManager::movePacman(sf::Vector2f movement)
     wrapCoordinate(newPosition.x, -radius * 2, m_windowBounds.width);
     wrapCoordinate(newPosition.y, -radius * 2, m_windowBounds.height);
 
-    sf::CircleShape virtualPacman(radius);
-    virtualPacman.setPosition(newPosition.x, newPosition.y);
+    int currentLeft = static_cast<int>(m_pacman.getPosition().x / 60);
+    int currentTop = static_cast<int>(m_pacman.getPosition().y / 60);
+    int currentRight = static_cast<int>((m_pacman.getPosition().x + 60) / 60);
+    int currentBottom = static_cast<int>((m_pacman.getPosition().y + 60) / 60);
 
-    int tileCol = static_cast<int>(newPosition.x / 60);
-    int tileRow = static_cast<int>(newPosition.y / 60);
+    int leftNeighbor = static_cast<int>(newPosition.x / 60);
+    int topNeighbor = static_cast<int>(newPosition.y / 60);
+    int rightNeighbor = static_cast<int>((newPosition.x + 60) / 60);
+    int bottomNeighbor = static_cast<int>((newPosition.y + 60) / 60);
+   
 
-    if (static_cast<bool>(m_labyrinth.m_labyrinth[tileCol][tileRow]))
-    {
-        return;
-    }
+    if (static_cast<bool>(m_labyrinth.m_labyrinth[currentTop][leftNeighbor])) { std::cout << "you have collided with tile (" << currentTop << ", " << leftNeighbor << ")\n"; return; }
+    if (static_cast<bool>(m_labyrinth.m_labyrinth[currentTop][rightNeighbor])) { std::cout << "you have collided with tile (" << currentTop << ", " << rightNeighbor << ")\n"; return; }
+
+    if (static_cast<bool>(m_labyrinth.m_labyrinth[currentBottom][leftNeighbor])) { std::cout << "you have collided with tile (" << currentBottom << ", " << leftNeighbor << ")\n"; return; }
+    if (static_cast<bool>(m_labyrinth.m_labyrinth[currentBottom][rightNeighbor])) { std::cout << "you have collided with tile (" << currentBottom << ", " << rightNeighbor << ")\n"; return; }
+
+    if (static_cast<bool>(m_labyrinth.m_labyrinth[topNeighbor][currentLeft])) { std::cout << "you have collided with tile (" << topNeighbor << ", " << currentLeft << ")\n"; return; }
+    if (static_cast<bool>(m_labyrinth.m_labyrinth[bottomNeighbor][currentLeft])) { std::cout << "you have collided with tile (" << bottomNeighbor << ", " << currentLeft << ")\n"; return; }
+
+    if (static_cast<bool>(m_labyrinth.m_labyrinth[topNeighbor][currentRight])) { std::cout << "you have collided with tile (" << topNeighbor << ", " << currentRight << ")\n"; return; }
+    if (static_cast<bool>(m_labyrinth.m_labyrinth[bottomNeighbor][currentLeft])) { std::cout << "you have collided with tile (" << bottomNeighbor << ", " << currentRight << ")\n"; return; }
 
     // TRICKY: we avoid .move(movement) here because doing so would ignore
     //         the arithmetic we implemented to wrap pacman around the edges
