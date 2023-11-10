@@ -14,13 +14,12 @@ GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
 
     m_wallTile = sf::RectangleShape(sf::Vector2f(60.f, 60.f));
     m_wallTile.setFillColor(sf::Color::Blue);
-    
+
     m_labyrinth = Labyrinth();
 
     m_movementSpeed = 200.0f;
 
-    m_keyActions =
-    {
+    m_keyActions = {
         {sf::Keyboard::Left,  [&]() { movePacman(sf::Vector2f(-m_movementSpeed * m_deltaTime.asSeconds(), 0)); }},
         {sf::Keyboard::Right, [&]() { movePacman(sf::Vector2f( m_movementSpeed * m_deltaTime.asSeconds(), 0)); }},
         {sf::Keyboard::Up,    [&]() { movePacman(sf::Vector2f(0, -m_movementSpeed * m_deltaTime.asSeconds())); }},
@@ -30,11 +29,9 @@ GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
 
 GameManager::~GameManager() {}
 
-void GameManager::handleInputs()
-{
+void GameManager::handleInputs() {
     sf::Event event;
-    while (m_pWindow->pollEvent(event))
-    {
+    while (m_pWindow->pollEvent(event)) {
         if (event.type == sf::Event::Closed)
             m_pWindow->close();
         if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)
@@ -43,12 +40,12 @@ void GameManager::handleInputs()
 
     m_deltaTime = m_clock.restart();
 
-    for (const auto& pair : m_keyActions)
-    {
-        if (sf::Keyboard::isKeyPressed(pair.first))
-            // note: this invokes the lambdas defined in the ctdor that 
-            //       move pacman
+    for (const auto& pair : m_keyActions) {
+         if (sf::Keyboard::isKeyPressed(pair.first)) {
+            // note: this invokes the lambdas defined in
+            //       the ctor that move pacman
             pair.second();
+        }
     }
 }
 
@@ -57,8 +54,7 @@ void GameManager::movePacman(sf::Vector2f movement)
     const float radius = m_pacman.getRadius();
     sf::Vector2f newPosition = m_pacman.getPosition() + movement;
 
-    auto wrapCoordinate = [](float &coord, float min, float max)
-    {
+    auto wrapCoordinate = [](float &coord, float min, float max) {
         if (coord < min)
             coord = max;
         else if (coord > max)
@@ -77,13 +73,20 @@ void GameManager::movePacman(sf::Vector2f movement)
     int topNeighbor = static_cast<int>(newPosition.y / 60);
     int rightNeighbor = static_cast<int>((newPosition.x + 60) / 60);
     int bottomNeighbor = static_cast<int>((newPosition.y + 60) / 60);
-   
 
-    if (static_cast<bool>(m_labyrinth.m_labyrinth[currentTop][leftNeighbor])) { std::cout << "you have collided with tile (" << currentTop << ", " << leftNeighbor << ")\n"; return; }
-    if (static_cast<bool>(m_labyrinth.m_labyrinth[currentTop][rightNeighbor])) { std::cout << "you have collided with tile (" << currentTop << ", " << rightNeighbor << ")\n"; return; }
+    if (static_cast<bool>(m_labyrinth.m_labyrinth[currentTop][leftNeighbor])) {
+        std::cout << "you have collided with tile (" << currentTop << ", " << leftNeighbor << ")\n"; return;
+    }
+    if (static_cast<bool>(m_labyrinth.m_labyrinth[currentTop][rightNeighbor])) {
+        std::cout << "you have collided with tile (" << currentTop << ", " << rightNeighbor << ")\n"; return;
+    }
 
-    if (static_cast<bool>(m_labyrinth.m_labyrinth[currentBottom][leftNeighbor])) { std::cout << "you have collided with tile (" << currentBottom << ", " << leftNeighbor << ")\n"; return; }
-    if (static_cast<bool>(m_labyrinth.m_labyrinth[currentBottom][rightNeighbor])) { std::cout << "you have collided with tile (" << currentBottom << ", " << rightNeighbor << ")\n"; return; }
+    if (static_cast<bool>(m_labyrinth.m_labyrinth[currentBottom][leftNeighbor])) {
+        std::cout << "you have collided with tile (" << currentBottom << ", " << leftNeighbor << ")\n"; return;
+    }
+    if (static_cast<bool>(m_labyrinth.m_labyrinth[currentBottom][rightNeighbor])) {
+        std::cout << "you have collided with tile (" << currentBottom << ", " << rightNeighbor << ")\n"; return;
+    }
 
     if (static_cast<bool>(m_labyrinth.m_labyrinth[topNeighbor][currentLeft])) { std::cout << "you have collided with tile (" << topNeighbor << ", " << currentLeft << ")\n"; return; }
     if (static_cast<bool>(m_labyrinth.m_labyrinth[bottomNeighbor][currentLeft])) { std::cout << "you have collided with tile (" << bottomNeighbor << ", " << currentLeft << ")\n"; return; }

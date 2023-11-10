@@ -8,9 +8,6 @@
       "args": [
         "-j6"
       ],
-      "options": {
-        "cwd": "${workspaceFolder/build}"
-      },
       "group": {
         "kind": "build",
         "isDefault": true
