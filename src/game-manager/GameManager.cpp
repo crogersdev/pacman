@@ -12,6 +12,12 @@ GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
     m_pacman.setFillColor(sf::Color::Yellow);
     m_pacman.setPosition(sf::Vector2f(60., 60.));
 
+    for (int i = 0; i < 4; ++i) {
+        m_collisionTiles.push_back(sf::RectangleShape(sf::Vector2f(60.f, 60.f)));
+        m_collisionTiles.back().setPosition(sf::Vector2f(60.f, 60.f));
+        m_collisionTiles.back().setFillColor(sf::Color::Red);
+    }
+
     m_wallTile = sf::RectangleShape(sf::Vector2f(60.f, 60.f));
     m_wallTile.setFillColor(sf::Color::Blue);
 
@@ -64,45 +70,37 @@ void GameManager::movePacman(sf::Vector2f movement)
     wrapCoordinate(newPosition.x, -radius * 2, m_windowBounds.width);
     wrapCoordinate(newPosition.y, -radius * 2, m_windowBounds.height);
 
-    int currentLeft = static_cast<int>(m_pacman.getPosition().x / 60);
-    int currentTop = static_cast<int>(m_pacman.getPosition().y / 60);
-    int currentRight = static_cast<int>((m_pacman.getPosition().x + 60) / 60);
-    int currentBottom = static_cast<int>((m_pacman.getPosition().y + 60) / 60);
+    auto upperLeftCollision = sf::Vector2f(
+        (int(newPosition.x)/60)*60.f, (int(newPosition.y)/60)*60.f
+    );
 
-    int leftNeighbor = static_cast<int>(newPosition.x / 60);
-    int topNeighbor = static_cast<int>(newPosition.y / 60);
-    int rightNeighbor = static_cast<int>((newPosition.x + 60) / 60);
-    int bottomNeighbor = static_cast<int>((newPosition.y + 60) / 60);
+    auto upperRightCollision = sf::Vector2f(
+        ((int(newPosition.x)/60)*60.f)+60.f, (int(newPosition.y)/60)*60.f
+    );
 
-    if (static_cast<bool>(m_labyrinth.m_labyrinth[currentTop][leftNeighbor])) {
-        std::cout << "you have collided with tile (" << currentTop << ", " << leftNeighbor << ")\n"; return;
-    }
-    if (static_cast<bool>(m_labyrinth.m_labyrinth[currentTop][rightNeighbor])) {
-        std::cout << "you have collided with tile (" << currentTop << ", " << rightNeighbor << ")\n"; return;
-    }
+    auto bottomLeftCollision = sf::Vector2f(
+       (int(newPosition.x)/60)*60.f, (int(newPosition.y)/60)*60.f+60.f
+    );
 
-    if (static_cast<bool>(m_labyrinth.m_labyrinth[currentBottom][leftNeighbor])) {
-        std::cout << "you have collided with tile (" << currentBottom << ", " << leftNeighbor << ")\n"; return;
-    }
-    if (static_cast<bool>(m_labyrinth.m_labyrinth[currentBottom][rightNeighbor])) {
-        std::cout << "you have collided with tile (" << currentBottom << ", " << rightNeighbor << ")\n"; return;
-    }
+    auto bottomRightCollision = sf::Vector2f(
+        (int(newPosition.x)/60)*60.f+60.f, (int(newPosition.y)/60)*60.f+60.f
+    );
 
-    if (static_cast<bool>(m_labyrinth.m_labyrinth[topNeighbor][currentLeft])) { std::cout << "you have collided with tile (" << topNeighbor << ", " << currentLeft << ")\n"; return; }
-    if (static_cast<bool>(m_labyrinth.m_labyrinth[bottomNeighbor][currentLeft])) { std::cout << "you have collided with tile (" << bottomNeighbor << ", " << currentLeft << ")\n"; return; }
-
-    if (static_cast<bool>(m_labyrinth.m_labyrinth[topNeighbor][currentRight])) { std::cout << "you have collided with tile (" << topNeighbor << ", " << currentRight << ")\n"; return; }
-    if (static_cast<bool>(m_labyrinth.m_labyrinth[bottomNeighbor][currentLeft])) { std::cout << "you have collided with tile (" << bottomNeighbor << ", " << currentRight << ")\n"; return; }
+    m_collisionTiles.at(0).setPosition(upperLeftCollision);
+    m_collisionTiles.at(1).setPosition(bottomLeftCollision);
+    m_collisionTiles.at(2).setPosition(upperRightCollision);
+    m_collisionTiles.at(3).setPosition(bottomRightCollision);
 
     // TRICKY: we avoid .move(movement) here because doing so would ignore
     //         the arithmetic we implemented to wrap pacman around the edges
     m_pacman.setPosition(newPosition);
+
 }
 
 void GameManager::updateWindow()
 {
     m_pWindow->clear();
-
+ 
     for (int row = 0; row < m_labyrinth.m_labyrinthRows; ++row)
     {
         for (int col = 0; col < m_labyrinth.m_labyrinthCols; ++col)
@@ -114,6 +112,10 @@ void GameManager::updateWindow()
                 m_pWindow->draw(m_wallTile);
             }
         }
+    }
+
+    for (auto tile: m_collisionTiles) {
+        m_pWindow->draw(tile);
     }
 
     m_pWindow->draw(m_pacman);
