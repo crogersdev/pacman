@@ -5,6 +5,7 @@
 GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
   : m_pWindow(std::move(pWindow))
 {
+    m_pWindow->setFramerateLimit(60);
     m_windowBounds = sf::FloatRect(0, 0, m_pWindow->getSize().x, m_pWindow->getSize().y);
 
     m_pacmanRadius = 30.f;
@@ -94,7 +95,7 @@ void GameManager::movePacman(sf::Vector2f movement)
     // TRICKY: we avoid .move(movement) here because doing so would ignore
     //         the arithmetic we implemented to wrap pacman around the edges
     m_pacman.setPosition(newPosition);
-
+    std::cout<<"(" << newPosition.x << ", " << newPosition.y << ")\n";
 }
 
 void GameManager::updateWindow()

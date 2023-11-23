@@ -39,6 +39,7 @@ target_link_libraries(
     sfml-system
     sfml-window
     game-manager
+    helpers
     entities
 )
 
