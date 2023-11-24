@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 project(pacman LANGUAGES CXX)
 
-set(LIBRARIES_TO_LINK)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 file(GLOB_RECURSE SUBDIRECTORIES LIST_DIRECTORIES true "${CMAKE_SOURCE_DIR}/src/*")
@@ -11,7 +10,6 @@ foreach(SUBDIR ${SUBDIRECTORIES})
     if(IS_DIRECTORY ${SUBDIR})
         message(STATUS "  Adding: ${SUBDIR}")
         add_subdirectory(${SUBDIR})
-        list(APPEND LIBRARIES_TO_LINK ${SUBDIR})
     endif()
 endforeach()
 
