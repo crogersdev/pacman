@@ -3,28 +3,29 @@
 #include <iostream>
 
 GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
-  : m_pWindow(std::move(pWindow))
+  : m_initialPosition(sf::Vector2f(m_tileSizeX, m_tileSizeY)),
+    m_pWindow(std::move(pWindow)),
+    m_movementSpeed(200.0f),
+    m_labyrinth(Labyrinth()),
+    m_tileSizeX(50.f),
+    m_tileSizeY(50.f),
+    m_pacmanRadius(25.f)
 {
-    m_pWindow->setFramerateLimit(60);
+    m_pWindow->setFramerateLimit(m_tileSizeX);
     m_windowBounds = sf::FloatRect(0, 0, m_pWindow->getSize().x, m_pWindow->getSize().y);
 
-    m_pacmanRadius = 30.f;
     m_pacman = sf::CircleShape(m_pacmanRadius);
     m_pacman.setFillColor(sf::Color::Yellow);
-    m_pacman.setPosition(sf::Vector2f(60., 60.));
+    m_pacman.setPosition(m_initialPosition);
 
     for (int i = 0; i < 4; ++i) {
-        m_collisionTiles.push_back(sf::RectangleShape(sf::Vector2f(60.f, 60.f)));
-        m_collisionTiles.back().setPosition(sf::Vector2f(60.f, 60.f));
+        m_collisionTiles.push_back(sf::RectangleShape(sf::Vector2f(m_tileSizeX, m_tileSizeY)));
+        m_collisionTiles.back().setPosition(m_initialPosition);
         m_collisionTiles.back().setFillColor(sf::Color::Red);
     }
 
-    m_wallTile = sf::RectangleShape(sf::Vector2f(60.f, 60.f));
+    m_wallTile = sf::RectangleShape(sf::Vector2f(m_tileSizeX, m_tileSizeY));
     m_wallTile.setFillColor(sf::Color::Blue);
-
-    m_labyrinth = Labyrinth();
-
-    m_movementSpeed = 200.0f;
 
     m_keyActions = {
         {sf::Keyboard::Left,  [&]() { movePacman(sf::Vector2f(-m_movementSpeed * m_deltaTime.asSeconds(), 0)); }},
@@ -72,19 +73,19 @@ void GameManager::movePacman(sf::Vector2f movement)
     wrapCoordinate(newPosition.y, -radius * 2, m_windowBounds.height);
 
     auto upperLeftCollision = sf::Vector2f(
-        (int(newPosition.x)/60)*60.f, (int(newPosition.y)/60)*60.f
-    );
-
-    auto upperRightCollision = sf::Vector2f(
-        ((int(newPosition.x)/60)*60.f)+60.f, (int(newPosition.y)/60)*60.f
+        (int(newPosition.x)/int(m_tileSizeX))*m_tileSizeX, (int(newPosition.y)/int(m_tileSizeY))*m_tileSizeY
     );
 
     auto bottomLeftCollision = sf::Vector2f(
-       (int(newPosition.x)/60)*60.f, (int(newPosition.y)/60)*60.f+60.f
+        (int(newPosition.x)/int(m_tileSizeX))*m_tileSizeX, (int(newPosition.y)/int(m_tileSizeY))*m_tileSizeY+m_tileSizeY
+    );
+
+    auto upperRightCollision = sf::Vector2f(
+        ((int(newPosition.x)/int(m_tileSizeX))*m_tileSizeX)+m_tileSizeX, (int(newPosition.y)/int(m_tileSizeY))*m_tileSizeY
     );
 
     auto bottomRightCollision = sf::Vector2f(
-        (int(newPosition.x)/60)*60.f+60.f, (int(newPosition.y)/60)*60.f+60.f
+        ((int(newPosition.x)/int(m_tileSizeX))*m_tileSizeX)+m_tileSizeX, (int(newPosition.y)/int(m_tileSizeY))*m_tileSizeY+m_tileSizeY
     );
 
     m_collisionTiles.at(0).setPosition(upperLeftCollision);
@@ -108,7 +109,7 @@ void GameManager::updateWindow()
         {
             if (bool(m_labyrinth.m_labyrinth[row][col]))
             {
-                m_wallTile.setPosition(sf::Vector2f((float)60*col, (float)60*row));
+                m_wallTile.setPosition(sf::Vector2f(m_tileSizeX*col, m_tileSizeY*row));
                 m_walls.push_back(m_wallTile);
                 m_pWindow->draw(m_wallTile);
             }

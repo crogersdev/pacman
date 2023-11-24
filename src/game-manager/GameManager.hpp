@@ -15,10 +15,14 @@ private:
     sf::Clock m_clock;
     sf::FloatRect m_windowBounds;
     sf::Time m_deltaTime;
+    sf::Vector2f m_initialPosition;
     std::shared_ptr<sf::RenderWindow> m_pWindow;
     std::vector<sf::RectangleShape> m_walls;
     float m_movementSpeed;
     Labyrinth m_labyrinth;
+
+    const float m_tileSizeX;
+    const float m_tileSizeY;
 
 public:
     GameManager(std::shared_ptr<sf::RenderWindow> pWindow);
