@@ -31,6 +31,7 @@ add_dependencies(pacman run-cppcheck)
 # having linker errors?  undefined references to things?  make sure
 # the appropriate folder's named library from its CMakeLists.txt file
 # is appended here
+# TODO: can we auto-detect these...?
 target_link_libraries(
     pacman
     sfml-graphics
