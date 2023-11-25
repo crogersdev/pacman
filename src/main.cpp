@@ -9,14 +9,14 @@
 
 int main()
 {
-    auto window = std::make_shared<sf::RenderWindow>(sf::VideoMode(60*10, 60*15), "Pacman!");
-    GameManager gameManager = GameManager(window);
+  auto window = std::make_shared<sf::RenderWindow>(sf::VideoMode(60*10, 60*15), "Pacman!");
+  GameManager gameManager = GameManager(window);
 
-    while (window->isOpen())
-    {
-        gameManager.handleInputs();
-        gameManager.updateWindow();
-    }
+  while (window->isOpen())
+  {
+    gameManager.handleInputs();
+    gameManager.updateWindow();
+  }
 
-    return 0;
+  return 0;
 }

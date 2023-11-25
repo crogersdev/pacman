@@ -5,37 +5,46 @@
 #include <array>
 
 const int LABYRINTH_ROWS = 18;
-const int LABYRINTH_COLS = 12;
+const int LABYRINTH_COLS = 12 + 1;
 
 class Labyrinth
 {
 public:
-    int m_labyrinthRows;
-    int m_labyrinthCols;
+  int m_labyrinthRows;
+  int m_labyrinthCols;
 
-    std::array<std::array<int, LABYRINTH_COLS>, LABYRINTH_ROWS> m_labyrinth =
-        {{
-            {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}},
-            {{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
-            {{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
-            {{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
-            {{1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1}},
-            {{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
-            {{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
-            {{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
-            {{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
-            {{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
-            {{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
-            {{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
-            {{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
-            {{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
-            {{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
-            {{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
-            {{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
-            {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}}
-        }};
+  std::array<std::array<char, LABYRINTH_COLS>, LABYRINTH_ROWS> m_labyrinth =
+  {
+    "############",
+    "#          #",
+    "#          #",
+    "#          #",
+    "#          #",
+    "#          #",
+    "#          #",
+    "#     #    #",
+    "#          #",
+    "#          #",
+    "#          #",
+    "#          #",
+    "#          #",
+    "#          #",
+    "#          #",
+    "#          #",
+    "#          #",
+    "############",
+  };
 
-    std::array<int, LABYRINTH_COLS * LABYRINTH_ROWS> m_levelOne;
+  std::array<int, LABYRINTH_COLS * LABYRINTH_ROWS> m_levelOne;
 
-    Labyrinth();
+  enum Tile {
+    WALL  = '#',
+    PELLET  = '.',
+    POWERUP = 'O'
+  };
+
+  Tile at(int, int);
+  std::unordered_map<char, Tile> m_tileLut;
+
+  Labyrinth();
 };
