@@ -74,7 +74,7 @@ void GameManager::movePacman(sf::Vector2f movement)
   // TRICKY: we avoid .move(movement) here because doing so would ignore
   //         the arithmetic we implemented to wrap pacman around the edges
   m_pacman.setPosition(newPosition);
-  std::cout <<"(" << newPosition.x << ", " << newPosition.y << ")\n";
+  //std::cout <<"(" << newPosition.x << ", " << newPosition.y << ")\n";
 }
 
 void GameManager::updateWindow()

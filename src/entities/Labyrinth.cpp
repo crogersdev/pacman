@@ -2,14 +2,9 @@
 
 Labyrinth::Labyrinth()
   : m_labyrinthRows(LABYRINTH_ROWS),
-  m_labyrinthCols(LABYRINTH_COLS)
-{
-  m_tileLut = {
-    {'#', WALL},
-    {'.', PELLET},
-    {'O', POWERUP}
-  };
-}
+    m_labyrinthCols(LABYRINTH_COLS),
+    m_tileLut({{'#', WALL}, {'.', PELLET}, {'O', POWERUP}})
+{}
 
 Labyrinth::Tile Labyrinth::at(int x, int y) {
   // NOTE: x is a column

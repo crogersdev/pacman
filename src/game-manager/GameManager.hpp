@@ -29,7 +29,7 @@ private:
   const float m_tileSizeY = TILE_SIZE;
 
 public:
-  GameManager(std::shared_ptr<sf::RenderWindow> pWindow);
+  explicit GameManager(std::shared_ptr<sf::RenderWindow> pWindow);
   ~GameManager();
 
   std::unordered_map<sf::Keyboard::Key, std::function<void()>> m_keyActions;
