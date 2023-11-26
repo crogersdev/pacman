@@ -39,6 +39,7 @@ target_link_libraries(
     sfml-window
     game-manager
     entities
+    helpers
 )
 
 install(TARGETS pacman)

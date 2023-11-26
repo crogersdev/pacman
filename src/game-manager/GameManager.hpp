@@ -8,6 +8,9 @@
 #include <unordered_map>
 
 #include "../entities/Labyrinth.hpp"
+#include "../helpers/TileCoordConversion.hpp"
+
+const float TILE_SIZE = 50.f;
 
 class GameManager
 {
@@ -21,9 +24,9 @@ private:
   Labyrinth m_labyrinth;
 
   const float m_movementSpeed = 200.f;
-  const float m_pacmanRadius = 25.f;
-  const float m_tileSizeX = 50.f;
-  const float m_tileSizeY = 50.f;
+  const float m_pacmanRadius = TILE_SIZE / 2;
+  const float m_tileSizeX = TILE_SIZE;
+  const float m_tileSizeY = TILE_SIZE;
 
 public:
   GameManager(std::shared_ptr<sf::RenderWindow> pWindow);
