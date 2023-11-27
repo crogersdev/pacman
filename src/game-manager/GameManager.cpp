@@ -8,16 +8,14 @@ GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
   m_pWindow->setFramerateLimit(60);
   m_windowBounds = sf::FloatRect(0, 0, m_pWindow->getSize().x, m_pWindow->getSize().y);
 
-  m_initialPosition = sf::Vector2f(m_tileSizeX+1, m_tileSizeY+1);
+  m_initialPosition = sf::Vector2f(m_tileSizeX, m_tileSizeY);
   m_pacman = sf::CircleShape(m_pacmanRadius);
   m_pacman.setFillColor(sf::Color::Yellow);
-  m_pacman.setPosition(m_tileSizeX, m_tileSizeY);
+  m_pacman.setPosition(m_initialPosition);
 
-  for (int i = 0; i < 4; ++i) {
-    m_collisionTiles.push_back(sf::RectangleShape(sf::Vector2f(m_tileSizeX, m_tileSizeY)));
-    m_collisionTiles.back().setPosition(m_initialPosition);
-    m_collisionTiles.back().setFillColor(sf::Color::Red);
-  }
+  m_collisionTiles.push_back(sf::RectangleShape(sf::Vector2f(m_tileSizeX, m_tileSizeY)));
+  m_collisionTiles.back().setPosition(m_initialPosition);
+  m_collisionTiles.back().setFillColor(sf::Color::Red);
 
   m_wallTile = sf::RectangleShape(sf::Vector2f(m_tileSizeX, m_tileSizeY));
   m_wallTile.setFillColor(sf::Color::Blue);
@@ -61,20 +59,36 @@ void GameManager::movePacman(sf::Vector2f movement)
   wrapCoordinate(newPosition.x, -radius * 2, m_windowBounds.width);
   wrapCoordinate(newPosition.y, -radius * 2, m_windowBounds.height);
 
-  auto upperLeftCollision   = tileCoordsAtPosition(sf::Vector2f(newPosition.x, newPosition.y));
-  auto upperRightCollision  = tileCoordsAtPosition(sf::Vector2f(newPosition.x + TILE_SIZE, newPosition.y));
-  auto bottomLeftCollision  = tileCoordsAtPosition(sf::Vector2f(newPosition.x, newPosition.y + TILE_SIZE));
-  auto bottomRightCollision = tileCoordsAtPosition(sf::Vector2f(newPosition.x + TILE_SIZE, newPosition.y + TILE_SIZE));
+  auto upperLeftCollision  = tileCoordsAtPosition(sf::Vector2f(newPosition.x, newPosition.y));
+  auto upperRightCollision = tileCoordsAtPosition(sf::Vector2f(newPosition.x + PACMAN_RADIUS*2, newPosition.y));
+  auto lowerLeftCollision  = tileCoordsAtPosition(sf::Vector2f(newPosition.x, newPosition.y + PACMAN_RADIUS*2));
+  auto lowerRightCollision = tileCoordsAtPosition(sf::Vector2f(newPosition.x + PACMAN_RADIUS*2, newPosition.y + PACMAN_RADIUS*2));
 
-  m_collisionTiles.at(0).setPosition(upperLeftCollision);
-  m_collisionTiles.at(1).setPosition(bottomLeftCollision);
-  m_collisionTiles.at(2).setPosition(upperRightCollision);
-  m_collisionTiles.at(3).setPosition(bottomRightCollision);
- 
+  m_collisionTiles.clear();
+
+  auto foo = sf::RectangleShape(sf::Vector2f(50, 50));
+  foo.setFillColor(sf::Color::Cyan);
+  foo.setPosition(upperLeftCollision);
+  m_collisionTiles.push_back(foo);
+
+  auto bar = sf::RectangleShape(sf::Vector2f(50, 50));
+  bar.setFillColor(sf::Color(144, 12, 200));
+  bar.setPosition(upperRightCollision);
+  m_collisionTiles.push_back(bar);
+
+  auto baz = sf::RectangleShape(sf::Vector2f(50, 50));
+  baz.setFillColor(sf::Color(128, 0, 22));
+  baz.setPosition(lowerLeftCollision);
+  m_collisionTiles.push_back(baz);
+
+  auto puke = sf::RectangleShape(sf::Vector2f(50, 50));
+  puke.setFillColor(sf::Color::Magenta);
+  puke.setPosition(lowerRightCollision);
+  m_collisionTiles.push_back(puke);
+
   // TRICKY: we avoid .move(movement) here because doing so would ignore
   //         the arithmetic we implemented to wrap pacman around the edges
   m_pacman.setPosition(newPosition);
-  //std::cout <<"(" << newPosition.x << ", " << newPosition.y << ")\n";
 }
 
 void GameManager::updateWindow()

@@ -11,6 +11,7 @@
 #include "../helpers/TileCoordConversion.hpp"
 
 const float TILE_SIZE = 50.f;
+const float PACMAN_RADIUS = (TILE_SIZE / 2) - 2;
 
 class GameManager
 {
@@ -24,7 +25,7 @@ private:
   Labyrinth m_labyrinth;
 
   const float m_movementSpeed = 200.f;
-  const float m_pacmanRadius = TILE_SIZE / 2;
+  const float m_pacmanRadius = PACMAN_RADIUS;
   const float m_tileSizeX = TILE_SIZE;
   const float m_tileSizeY = TILE_SIZE;
 
