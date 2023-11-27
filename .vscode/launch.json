@@ -1,0 +1,33 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C++ Launch & Build",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/pacman",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Build your project",
+          "text": "build",
+          "ignoreFailures": true,
+          "cwd": "${workspaceFolder}/build"  // Use your specific build path if different
+        }
+      ],
+      "preLaunchTask": "build",
+      "postDebugTask": "clean"  // Add this to clean after debugging if needed
+    },
+    // Add your build configuration if not already defined in tasks.json
+  ]
+}
