@@ -1,4 +1,7 @@
+#include <iostream>
+
 #include "Labyrinth.hpp"
+#include "../helpers/TileCoordConversion.hpp"
 
 Labyrinth::Labyrinth()
   : m_labyrinthRows(LABYRINTH_ROWS),
@@ -11,4 +14,18 @@ Labyrinth::Tile Labyrinth::at(int x, int y) {
   //   y is a row
   char tile = static_cast<char>(m_labyrinth[y][x]);
   return m_tileLut[tile];
+}
+
+void Labyrinth::set(sf::Vector2f pos, Labyrinth::Tile entity) {
+  auto coords = tileCoordsAtPosition(pos);
+
+  m_labyrinth[coords.x][coords.y] = entity;
+}
+
+void Labyrinth::print() {
+  for (auto row: m_labyrinth) {
+    for (auto col: row) {
+      std::cout << "\n";
+    }
+  }
 }

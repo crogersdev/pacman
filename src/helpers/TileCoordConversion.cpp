@@ -7,10 +7,6 @@ std::pair<int, int> positionToCoords(sf::Vector2f pos) {
     );
 }
 
-sf::Vector2f coordsToPosition(int col, int row) {
-    return sf::Vector2f((col * TILE_SIZE), (row * TILE_SIZE));
-}
-
 sf::Vector2f tileCoordsAtPosition(sf::Vector2f pos) {
     auto p = positionToCoords(pos);
     return sf::Vector2f(

@@ -35,7 +35,6 @@ public:
 
   std::unordered_map<sf::Keyboard::Key, std::function<void()>> m_keyActions;
   sf::CircleShape m_pacman;
-  std::vector<sf::RectangleShape> m_collisionTiles;
   sf::RectangleShape m_wallTile;
 
   void drawLabyrinth();
