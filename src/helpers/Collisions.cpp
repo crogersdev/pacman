@@ -4,4 +4,5 @@
 // is occupyable
 
 bool collides(sf::Vector2f position_a, sf::Vector2f position_b) {
+    return false;
 }

@@ -4,14 +4,13 @@
 
 #include <functional>
 #include <memory>
-#include <stack>
 #include <unordered_map>
 
 #include "../entities/Labyrinth.hpp"
 #include "../helpers/TileCoordConversion.hpp"
 
 const float TILE_SIZE = 50.f;
-const float PACMAN_RADIUS = (TILE_SIZE / 2) - 2;
+const float PACMAN_RADIUS = (TILE_SIZE / 2) - 1;
 
 class GameManager
 {

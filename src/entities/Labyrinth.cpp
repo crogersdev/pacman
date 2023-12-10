@@ -19,7 +19,7 @@ Labyrinth::Tile Labyrinth::at(int x, int y) {
 void Labyrinth::set(sf::Vector2f pos, Labyrinth::Tile entity) {
   auto coords = tileCoordsAtPosition(pos);
 
-  m_labyrinth[coords.x][coords.y] = entity;
+  m_labyrinth[coords.first][coords.second] = entity;
 }
 
 void Labyrinth::print() {

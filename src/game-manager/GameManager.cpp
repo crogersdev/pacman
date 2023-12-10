@@ -1,4 +1,5 @@
 #include "GameManager.hpp"
+#include <algorithm>
 #include <iostream>
 
 GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
@@ -8,7 +9,7 @@ GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
   m_pWindow->setFramerateLimit(60);
   m_windowBounds = sf::FloatRect(0, 0, m_pWindow->getSize().x, m_pWindow->getSize().y);
 
-  m_initialPosition = sf::Vector2f(m_tileSizeX, m_tileSizeY);
+  m_initialPosition = sf::Vector2f(m_tileSizeX + 1, m_tileSizeY + 1);
   m_pacman = sf::CircleShape(m_pacmanRadius);
   m_pacman.setFillColor(sf::Color::Yellow);
   m_pacman.setPosition(m_initialPosition);
@@ -57,14 +58,26 @@ void GameManager::movePacman(sf::Vector2f movement)
   wrapCoordinate(newPosition.x, -radius * 2, m_windowBounds.width);
   wrapCoordinate(newPosition.y, -radius * 2, m_windowBounds.height);
 
-  auto upperLeftCollision  = tileCoordsAtPosition(sf::Vector2f(newPosition.x, newPosition.y));
-  auto upperRightCollision = tileCoordsAtPosition(sf::Vector2f(newPosition.x + PACMAN_RADIUS*2, newPosition.y));
-  auto lowerLeftCollision  = tileCoordsAtPosition(sf::Vector2f(newPosition.x, newPosition.y + PACMAN_RADIUS*2));
-  auto lowerRightCollision = tileCoordsAtPosition(sf::Vector2f(newPosition.x + PACMAN_RADIUS*2, newPosition.y + PACMAN_RADIUS*2));
+  std::vector<std::pair<int, int>> collisionCorners;
+  collisionCorners.push_back(tileCoordsAtPosition(sf::Vector2f(newPosition.x, newPosition.y)));
+  collisionCorners.push_back(tileCoordsAtPosition(sf::Vector2f(newPosition.x + PACMAN_RADIUS*2, newPosition.y)));
+  collisionCorners.push_back(tileCoordsAtPosition(sf::Vector2f(newPosition.x, newPosition.y + PACMAN_RADIUS*2)));
+  collisionCorners.push_back(tileCoordsAtPosition(sf::Vector2f(newPosition.x + PACMAN_RADIUS*2, newPosition.y + PACMAN_RADIUS*2)));
+
+  bool wallCollision = std::any_of(
+    collisionCorners.begin(),
+    collisionCorners.end(),
+    [&](auto coords) {
+      if (m_labyrinth.at(coords.first, coords.second) == m_labyrinth.WALL)
+        return true;
+      else
+        return false;
+  });
 
   // TRICKY: we avoid .move(movement) here because doing so would ignore
   //         the arithmetic we implemented to wrap pacman around the edges
-  m_pacman.setPosition(newPosition);
+  if (!wallCollision) 
+    m_pacman.setPosition(newPosition);
 }
 
 void GameManager::updateWindow()

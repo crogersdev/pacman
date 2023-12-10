@@ -11,14 +11,15 @@ class Labyrinth
 {
 public:
   enum Tile {
-    WALL  = '#',
+    EMPTY   = ' ',
+    WALL    = '#',
     PELLET  = '.',
     POWERUP = 'O',
-    PACMAN = 'M',
-    BLINKY = 'B',
-    PINKY = 'P',
-    INKY = 'I',
-    CLYDE = 'C'
+    PACMAN  = 'M',
+    BLINKY  = 'B',
+    PINKY   = 'P',
+    INKY    = 'I',
+    CLYDE   = 'C'
   };
 
   int m_labyrinthRows;
