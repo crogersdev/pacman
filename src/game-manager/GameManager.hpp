@@ -17,11 +17,15 @@ class GameManager
 private:
   sf::Clock m_clock;
   sf::FloatRect m_windowBounds;
+  sf::Font m_debugFont;
+  sf::Text m_debugText;
   sf::Time m_deltaTime;
   sf::Vector2f m_initialPosition;
   std::shared_ptr<sf::RenderWindow> m_pWindow;
   std::vector<sf::RectangleShape> m_walls;
   Labyrinth m_labyrinth;
+
+  float m_fps;
 
   const float m_movementSpeed = 200.f;
   const float m_pacmanRadius = PACMAN_RADIUS;

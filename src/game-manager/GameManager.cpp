@@ -1,10 +1,12 @@
 #include "GameManager.hpp"
 #include <algorithm>
 #include <iostream>
+#include <sstream>
 
 GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
   : m_pWindow(std::move(pWindow)),
-    m_labyrinth(Labyrinth())
+    m_labyrinth(Labyrinth()),
+    m_fps(60.0)
 {
   m_pWindow->setFramerateLimit(60);
   m_windowBounds = sf::FloatRect(0, 0, m_pWindow->getSize().x, m_pWindow->getSize().y);
@@ -14,6 +16,12 @@ GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
   m_pacman.setFillColor(sf::Color::Yellow);
   m_pacman.setPosition(m_initialPosition);
   m_labyrinth.set(m_initialPosition, Labyrinth::PACMAN);
+
+  m_debugFont.loadFromFile("./res/zector.regular.ttf");
+  m_debugText.setFont(m_debugFont);
+  m_debugText.setCharacterSize(20);
+  m_debugText.setFillColor(sf::Color::White);
+  m_debugText.setPosition(10.f, 10.f);
 
   m_wallTile = sf::RectangleShape(sf::Vector2f(m_tileSizeX, m_tileSizeY));
   m_wallTile.setFillColor(sf::Color::Blue);
@@ -77,7 +85,7 @@ void GameManager::movePacman(sf::Vector2f movement)
   // TRICKY: we avoid .move(movement) here because doing so would ignore
   //         the arithmetic we implemented to wrap pacman around the edges
   if (!wallCollision) 
-    m_pacman.setPosition(newPosition);
+    m_pacman.move(movement);
 }
 
 void GameManager::updateWindow()
@@ -95,6 +103,16 @@ void GameManager::updateWindow()
       }
     }
   }
+
+  sf::Time elapsed = m_clock.restart();
+  m_fps = 1.f / elapsed.asSeconds();
+
+  // Update debug information
+  std::ostringstream oss;
+  oss << "FPS: " << m_fps << std::endl;
+  // Add more debug information as needed
+  m_debugText.setString(oss.str());
+  m_pWindow->draw(m_debugText);
 
   m_pWindow->draw(m_pacman);
   m_pWindow->display();
