@@ -17,7 +17,8 @@ GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
   m_pacman.setPosition(m_initialPosition);
   m_labyrinth.set(m_initialPosition, Labyrinth::PACMAN);
 
-  m_debugFont.loadFromFile("./res/zector.regular.ttf");
+  //m_debugFont.loadFromFile("./res/zector.regular.ttf");
+  m_debugFont.loadFromFile("./res/PublicPixel.ttf");
   m_debugText.setFont(m_debugFont);
   m_debugText.setCharacterSize(20);
   m_debugText.setFillColor(sf::Color::White);
