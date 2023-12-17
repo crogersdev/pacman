@@ -5,13 +5,24 @@
 
 Labyrinth::Labyrinth()
   : m_labyrinthRows(LABYRINTH_ROWS),
-    m_labyrinthCols(LABYRINTH_COLS),
-    m_tileLut({{'#', WALL}, {'.', PELLET}, {'O', POWERUP}})
+    m_labyrinthCols(LABYRINTH_COLS-1), // pesky \0!!!
+    m_tileLut({
+      {' ', EMPTY},
+      {'#', WALL},
+      {'.', PELLET},
+      {'@', POWERUP},
+      {'M', PACMAN},
+      {'B', BLINKY},
+      {'P', PINKY},
+      {'I', INKY},
+      {'C', CLYDE},
+      {'-', GATE}
+    })
 {}
 
 Labyrinth::Tile Labyrinth::at(int x, int y) {
   // NOTE: x is a column
-  //   y is a row
+  //       y is a row
   char tile = static_cast<char>(m_labyrinth[y][x]);
   return m_tileLut[tile];
 }

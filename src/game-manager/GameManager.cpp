@@ -22,7 +22,7 @@ GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
   m_debugText.setFont(m_debugFont);
   m_debugText.setCharacterSize(20);
   m_debugText.setFillColor(sf::Color::White);
-  m_debugText.setPosition(10.f, 10.f);
+  m_debugText.setPosition(10.f, TILE_SIZE * LABYRINTH_ROWS);
 
   m_wallTile = sf::RectangleShape(sf::Vector2f(m_tileSizeX, m_tileSizeY));
   m_wallTile.setFillColor(sf::Color::Blue);
@@ -64,14 +64,16 @@ void GameManager::movePacman(sf::Vector2f movement)
   const float radius = m_pacman.getRadius();
   sf::Vector2f newPosition = m_pacman.getPosition() + movement;
 
-  wrapCoordinate(newPosition.x, -radius * 2, m_windowBounds.width);
-  wrapCoordinate(newPosition.y, -radius * 2, m_windowBounds.height);
-
   std::vector<std::pair<int, int>> collisionCorners;
   collisionCorners.push_back(tileCoordsAtPosition(sf::Vector2f(newPosition.x, newPosition.y)));
-  collisionCorners.push_back(tileCoordsAtPosition(sf::Vector2f(newPosition.x + PACMAN_RADIUS*2, newPosition.y)));
-  collisionCorners.push_back(tileCoordsAtPosition(sf::Vector2f(newPosition.x, newPosition.y + PACMAN_RADIUS*2)));
-  collisionCorners.push_back(tileCoordsAtPosition(sf::Vector2f(newPosition.x + PACMAN_RADIUS*2, newPosition.y + PACMAN_RADIUS*2)));
+  collisionCorners.push_back(tileCoordsAtPosition(sf::Vector2f(newPosition.x + PACMAN_RADIUS*2 - 1, newPosition.y)));
+  collisionCorners.push_back(tileCoordsAtPosition(sf::Vector2f(newPosition.x, newPosition.y + PACMAN_RADIUS*2 - 1)));
+  collisionCorners.push_back(tileCoordsAtPosition(sf::Vector2f(newPosition.x + PACMAN_RADIUS*2 - 1, newPosition.y + PACMAN_RADIUS*2 - 1)));
+
+  std::array<sf::RectangleShape, 4> collisionTiles;
+  for (auto tile : collisionTiles) {
+    tile.setFillColor(sf::Color::Red);
+  }
 
   bool wallCollision = std::any_of(
     collisionCorners.begin(),
@@ -83,24 +85,46 @@ void GameManager::movePacman(sf::Vector2f movement)
         return false;
   });
 
+  wrapCoordinate(newPosition.x, -radius * 2, m_windowBounds.width);
+  wrapCoordinate(newPosition.y, -radius * 2, m_windowBounds.height);
   // TRICKY: we avoid .move(movement) here because doing so would ignore
   //         the arithmetic we implemented to wrap pacman around the edges
   if (!wallCollision) 
-    m_pacman.move(movement);
+    m_pacman.setPosition(newPosition);
 }
 
 void GameManager::updateWindow()
 {
   m_pWindow->clear();
 
+/*
+switch(expression) {
+  case x:
+    // code block
+    break;
+  case y:
+    // code block
+    break;
+  default:
+    // code block
+}
+*/
+
   for (int row = 0; row < m_labyrinth.m_labyrinthRows; ++row)
   {
     for (int col = 0; col < m_labyrinth.m_labyrinthCols; ++col)
     {
-      if (m_labyrinth.at(col, row) == m_labyrinth.WALL) {
-        m_wallTile.setPosition(sf::Vector2f(m_tileSizeX*col, m_tileSizeY*row));
-        m_walls.push_back(m_wallTile);
-        m_pWindow->draw(m_wallTile);
+      auto tile = m_labyrinth.at(col, row);
+      switch(tile) {
+        case m_labyrinth.WALL:
+          m_wallTile.setPosition(sf::Vector2f(m_tileSizeX*col, m_tileSizeY*row));
+          m_pWindow->draw(m_wallTile);
+        case m_labyrinth.GATE:
+        case m_labyrinth.PELLET:
+        case m_labyrinth.POWERUP:
+          break;
+        default:
+          break;
       }
     }
   }
@@ -110,7 +134,8 @@ void GameManager::updateWindow()
 
   // Update debug information
   std::ostringstream oss;
-  oss << "FPS: " << m_fps << std::endl;
+  oss << "FPS: " << m_fps << "\n";
+  oss << "Row: " << m_pacman.getPosition().x << "  Col: " << m_pacman.getPosition().y << "\n";
   // Add more debug information as needed
   m_debugText.setString(oss.str());
   m_pWindow->draw(m_debugText);
