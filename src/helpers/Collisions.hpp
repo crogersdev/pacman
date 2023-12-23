@@ -4,4 +4,5 @@
 
 #include "../entities/Labyrinth.hpp"
 
-bool collides(sf::Vector2f, sf::Vector2f);
+bool wallCollides(sf::Vector2f, sf::Vector2f, const Labyrinth &);
+bool entityCollides(sf::RectangleShape, sf::RectangleShape);

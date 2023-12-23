@@ -1,10 +1,15 @@
 #include "GameManager.hpp"
+#include "../helpers/Collisions.hpp"
+
 #include <algorithm>
 #include <iostream>
 #include <sstream>
 
 GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
-  : m_pWindow(std::move(pWindow)),
+  : m_pinky(pWindow, 400.f),
+    m_clock(),
+    m_deltaTime(),
+    m_pWindow(pWindow),
     m_labyrinth(Labyrinth()),
     m_fps(60.0)
 {
@@ -15,9 +20,9 @@ GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
   m_pacman = sf::CircleShape(m_pacmanRadius);
   m_pacman.setFillColor(sf::Color::Yellow);
   m_pacman.setPosition(m_initialPosition);
+
   m_labyrinth.set(m_initialPosition, Labyrinth::PACMAN);
 
-  //m_debugFont.loadFromFile("./res/zector.regular.ttf");
   m_debugFont.loadFromFile("./res/PublicPixel.ttf");
   m_debugText.setFont(m_debugFont);
   m_debugText.setCharacterSize(20);
@@ -33,7 +38,6 @@ GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
     {sf::Keyboard::Up,    [&]() { movePacman(sf::Vector2f(0, -m_movementSpeed * m_deltaTime.asSeconds())); }},
     {sf::Keyboard::Down,  [&]() { movePacman(sf::Vector2f(0,  m_movementSpeed * m_deltaTime.asSeconds())); }}
   };
-  m_labyrinth.print();
 }
 
 GameManager::~GameManager() {}
@@ -59,34 +63,26 @@ void GameManager::handleInputs() {
   }
 }
 
+void GameManager::updateEntities()
+{
+  m_pinky.meander(m_clock, m_labyrinth);
+}
+
 void GameManager::movePacman(sf::Vector2f movement)
 {
   const float radius = m_pacman.getRadius();
   sf::Vector2f newPosition = m_pacman.getPosition() + movement;
 
-  std::vector<std::pair<int, int>> collisionCorners;
-  collisionCorners.push_back(tileCoordsAtPosition(sf::Vector2f(newPosition.x, newPosition.y)));
-  collisionCorners.push_back(tileCoordsAtPosition(sf::Vector2f(newPosition.x + PACMAN_RADIUS*2 - 1, newPosition.y)));
-  collisionCorners.push_back(tileCoordsAtPosition(sf::Vector2f(newPosition.x, newPosition.y + PACMAN_RADIUS*2 - 1)));
-  collisionCorners.push_back(tileCoordsAtPosition(sf::Vector2f(newPosition.x + PACMAN_RADIUS*2 - 1, newPosition.y + PACMAN_RADIUS*2 - 1)));
-
-  std::array<sf::RectangleShape, 4> collisionTiles;
-  for (auto tile : collisionTiles) {
-    tile.setFillColor(sf::Color::Red);
-  }
-
-  bool wallCollision = std::any_of(
-    collisionCorners.begin(),
-    collisionCorners.end(),
-    [&](auto coords) {
-      if (m_labyrinth.at(coords.first, coords.second) == m_labyrinth.WALL)
-        return true;
-      else
-        return false;
-  });
-
   wrapCoordinate(newPosition.x, -radius * 2, m_windowBounds.width);
   wrapCoordinate(newPosition.y, -radius * 2, m_windowBounds.height);
+
+  auto width = (m_pacman.getRadius() * 2) - 1;
+  bool wallCollision = wallCollides(
+    newPosition,
+    sf::Vector2f(width, width),
+    m_labyrinth
+  );
+
   // TRICKY: we avoid .move(movement) here because doing so would ignore
   //         the arithmetic we implemented to wrap pacman around the edges
   if (!wallCollision) 
@@ -96,19 +92,6 @@ void GameManager::movePacman(sf::Vector2f movement)
 void GameManager::updateWindow()
 {
   m_pWindow->clear();
-
-/*
-switch(expression) {
-  case x:
-    // code block
-    break;
-  case y:
-    // code block
-    break;
-  default:
-    // code block
-}
-*/
 
   for (int row = 0; row < m_labyrinth.m_labyrinthRows; ++row)
   {
@@ -136,10 +119,11 @@ switch(expression) {
   std::ostringstream oss;
   oss << "FPS: " << m_fps << "\n";
   oss << "Row: " << m_pacman.getPosition().x << "  Col: " << m_pacman.getPosition().y << "\n";
-  // Add more debug information as needed
   m_debugText.setString(oss.str());
+
   m_pWindow->draw(m_debugText);
 
   m_pWindow->draw(m_pacman);
+  m_pinky.draw();
   m_pWindow->display();
 }

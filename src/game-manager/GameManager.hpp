@@ -6,13 +6,29 @@
 #include <memory>
 #include <unordered_map>
 
+#include "../entities/Ghosts.hpp"
 #include "../entities/Labyrinth.hpp"
-#include "../helpers/TileCoordConversion.hpp"
 
 const float PACMAN_RADIUS = (TILE_SIZE / 2) - 1;
 
 class GameManager
 {
+public:
+  // NOTE: apparently single arg ctors _should_ be explicit.
+  explicit GameManager(std::shared_ptr<sf::RenderWindow> pWindow);
+  ~GameManager();
+
+  std::unordered_map<sf::Keyboard::Key, std::function<void()>> m_keyActions;
+  sf::CircleShape m_pacman;
+  Ghost m_pinky;
+  sf::RectangleShape m_wallTile;
+
+  void drawLabyrinth();
+  void handleInputs();
+  void updateEntities();
+  void movePacman(sf::Vector2f);
+  void updateWindow();
+
 private:
   sf::Clock m_clock;
   sf::FloatRect m_windowBounds;
@@ -21,7 +37,6 @@ private:
   sf::Time m_deltaTime;
   sf::Vector2f m_initialPosition;
   std::shared_ptr<sf::RenderWindow> m_pWindow;
-  std::vector<sf::RectangleShape> m_walls;
   Labyrinth m_labyrinth;
 
   float m_fps;
@@ -31,16 +46,4 @@ private:
   const float m_tileSizeX = TILE_SIZE;
   const float m_tileSizeY = TILE_SIZE;
 
-public:
-  explicit GameManager(std::shared_ptr<sf::RenderWindow> pWindow);
-  ~GameManager();
-
-  std::unordered_map<sf::Keyboard::Key, std::function<void()>> m_keyActions;
-  sf::CircleShape m_pacman;
-  sf::RectangleShape m_wallTile;
-
-  void drawLabyrinth();
-  void handleInputs();
-  void movePacman(sf::Vector2f);
-  void updateWindow();
 };
