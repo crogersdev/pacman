@@ -5,14 +5,13 @@
 bool wallCollides(sf::Vector2f entity, sf::Vector2f dimensions, const Labyrinth &rLabyrinth)
 {
   std::vector<std::pair<int, int>> collisionCorners;
+
   collisionCorners.push_back(tileCoordsAtPosition(sf::Vector2f(entity.x, entity.y)));
   collisionCorners.push_back(tileCoordsAtPosition(sf::Vector2f(entity.x + dimensions.x, entity.y)));
   collisionCorners.push_back(tileCoordsAtPosition(sf::Vector2f(entity.x, entity.y + dimensions.y)));
   collisionCorners.push_back(tileCoordsAtPosition(sf::Vector2f(entity.x + dimensions.x, entity.y + dimensions.y)));
 
-  bool wallCollision = false;
-
-  wallCollision = std::any_of(
+  bool wallCollision = std::any_of(
     collisionCorners.begin(),
     collisionCorners.end(),
     [&](auto coords) {

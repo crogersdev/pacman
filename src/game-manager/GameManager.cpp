@@ -76,7 +76,7 @@ void GameManager::movePacman(sf::Vector2f movement)
   wrapCoordinate(newPosition.x, -radius * 2, m_windowBounds.width);
   wrapCoordinate(newPosition.y, -radius * 2, m_windowBounds.height);
 
-  auto width = (m_pacman.getRadius() * 2) - 1;
+  auto width = (m_pacman.getRadius() * 2.f) - 1.f;
   bool wallCollision = wallCollides(
     newPosition,
     sf::Vector2f(width, width),

@@ -1,9 +1,10 @@
 #include <iostream>
 #include "Ghosts.hpp"
+#include "../helpers/Collisions.hpp"
 
 Ghost::Ghost(std::shared_ptr<sf::RenderWindow> pGameWindow, float speed)
   : m_speed(speed),
-    m_ghostShape(sf::Vector2f(20.f, 25.f)),
+    m_ghostShape(sf::Vector2f(25.f, 25.f)),
     m_deltaTime(),
     m_movement(sf::Vector2f(1, 0)),
     m_position(sf::Vector2f(350.f, 125.f)),
@@ -23,7 +24,15 @@ void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth& labyrinth)
   auto newPosition = m_ghostShape.getPosition() + m_movement;
   auto coords = tileCoordsAtPosition(sf::Vector2f(newPosition.x + 20.f, newPosition.y));
 
-  if (labyrinth.at(coords.first, coords.second) == labyrinth.WALL) {
+  bool wallCollision = wallCollides(
+    newPosition,
+    sf::Vector2f(24.f, 24.f),
+    labyrinth
+  );
+
+  //if (labyrinth.at(coords.first, coords.second) == labyrinth.WALL) {
+  if (wallCollision)
+  {
     m_movement = sf::Vector2f(0, 1);
     return;
   }
