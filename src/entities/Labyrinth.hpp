@@ -32,6 +32,7 @@ public:
   int m_labyrinthCols;
 
   Tile at(int, int) const;
+  Tile at(std::pair<int, int>) const;
   void set(sf::Vector2f, Tile);
   void set(int, int, Tile);
   

@@ -24,8 +24,17 @@ Labyrinth::Tile Labyrinth::at(int x, int y) const
 {
   // NOTE: x is a column
   //       y is a row
+  if (x < 0) return Labyrinth::WALL;
+  if (y < 0) return Labyrinth::WALL;
+
   char tile = static_cast<char>(m_labyrinth[y][x]);
   return m_tileLut.at(tile);
+}
+
+Labyrinth::Tile Labyrinth::at(std::pair<int, int> coords) const
+{
+  // TODO: do i need "this", e.g. this.at() ?
+  return at(coords.first, coords.second);
 }
 
 void Labyrinth::set(sf::Vector2f pos, Tile entity)

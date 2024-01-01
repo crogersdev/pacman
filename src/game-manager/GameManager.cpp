@@ -42,7 +42,8 @@ GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
 
 GameManager::~GameManager() {}
 
-void GameManager::handleInputs() {
+void GameManager::handleInputs()
+{
   sf::Event event;
 
   while (m_pWindow->pollEvent(event)) {
@@ -54,8 +55,10 @@ void GameManager::handleInputs() {
 
   m_deltaTime = m_clock.restart();
 
-  for (const auto& pair : m_keyActions) {
-    if (sf::Keyboard::isKeyPressed(pair.first)) {
+  for (const auto& pair : m_keyActions)
+  {
+    if (sf::Keyboard::isKeyPressed(pair.first))
+    {
       // note: this invokes the lambdas defined in
       //       the ctor that move pacman
       pair.second();
@@ -76,10 +79,10 @@ void GameManager::movePacman(sf::Vector2f movement)
   wrapCoordinate(newPosition.x, -radius * 2, m_windowBounds.width);
   wrapCoordinate(newPosition.y, -radius * 2, m_windowBounds.height);
 
-  auto width = (m_pacman.getRadius() * 2.f) - 1.f;
+  auto pacmanWidth = (m_pacman.getRadius() * 2.f) - 1.f;
   bool wallCollision = wallCollides(
     newPosition,
-    sf::Vector2f(width, width),
+    sf::Vector2f(pacmanWidth, pacmanWidth),
     m_labyrinth
   );
 

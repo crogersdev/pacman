@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 
 #include <memory>
+#include <random>
 
 #include "Labyrinth.hpp"
 #include "../helpers/TileCoordConversion.hpp"
@@ -13,10 +14,13 @@ public:
   Ghost(std::shared_ptr<sf::RenderWindow>, float);
   ~Ghost();
 
-  //void chase();
+  float m_meanderOdds;
+
+  void chase();
+  void changeDirection(Direction);
+  void draw();
   void meander(sf::Clock &, const Labyrinth &);
   //void scatter();
-  void draw();
 
 private:
   enum State {
@@ -27,6 +31,9 @@ private:
     WAIT       = 5 
   };
 
+  unsigned m_seed;
+  std::mt19937 m_randGenerator;
+
   float m_speed;
   //sf::Sprite m_ghost;
   sf::RectangleShape m_ghostShape;
@@ -34,11 +41,7 @@ private:
   sf::Time m_deltaTime;
   sf::Vector2f m_movement;
   sf::Vector2f m_position;
+  Direction m_direction;
   std::shared_ptr<sf::RenderWindow> m_pGameWindow;
   State m_state;
-
-  // i want a direction so i can decide
-  // which sprite to render
-
-  
 };
