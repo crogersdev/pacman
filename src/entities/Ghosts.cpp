@@ -80,8 +80,9 @@ void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth& labyrinth)
 
   if (wallCollision)
   {
-    auto newDirection = m_randGenerator() % 4;
-    changeDirection(static_cast<Direction>(m_randGenerator() % turns.size()));
+    Direction newDirection = static_cast<Direction>(m_randGenerator() % turns.size());
+    changeDirection(newDirection);
+    m_ghostShape.move(m_movement);
     return;
   } 
 
@@ -93,7 +94,6 @@ void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth& labyrinth)
       changeDirection(static_cast<Direction>(m_randGenerator() % turns.size()));
   }
   */
-
   m_ghostShape.move(m_movement);
 }
 
