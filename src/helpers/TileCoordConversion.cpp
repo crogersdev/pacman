@@ -31,10 +31,10 @@ Direction directionVecToDirection(sf::Vector2f direction)
   //         {sf::Vector2f(0.f, -1.f), Direction::UP},
   //         {sf::Vector2f(1.f, 0.f), Direction::RIGHT},
   //         {sf::Vector2f(-1.f, 0.f), Direction::LEFT}};
-  //       As a result, in order to use a std::map,
-  //       we have to implement a function and this is
-  //       just as easy as a custom comparator function
-  //       override.
+  //       As a result, in order to use a std::map for this
+  //       converter function, we'd have to overload the 
+  //       comparator signs lke <, > or maybe others.
+  //       This if/else feels easier.
   if (direction == sf::Vector2f(0.f, 1.f))
     return Direction::DOWN;
   else if (direction == sf::Vector2f(0.f, -1.f))
