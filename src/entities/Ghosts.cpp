@@ -58,32 +58,17 @@ void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth& labyrinth)
   auto ghostSizeX = m_ghostShape.getGlobalBounds().width;
   auto ghostSizeY = m_ghostShape.getGlobalBounds().height;
 
-  // EXPLAIN:
-  // i want to make an unordered set of std::pair<int, int> objects to keep
-  // track of how many unique coordinates we have for each corner.  this is
-  // how i want to make sure we're in a single tile.  so i want a set.
-  // but we need to be able to define a hash function for the objects in that
-  // set, as std::pair<int, int> doesn't have one defined.
-  struct PairHash {
-      size_t operator()(const std::pair<int, int>& p) const {
-        // Custom hash function combining hashes of first and second elements
-        return std::hash<int>()(p.first) ^ (std::hash<int>()(p.second) << 1);
-        //     std::hash<int>()  <-- this is a function, a ctor (i think it's a ctor)
-        //     std::hash<int>()(p.first)  <-- this is also a function with an arg of p.first
-      }
-  };
-
-  // make an unordered set of std::pair<int, int> coords for all corners of ghost
-  std::unordered_set<std::pair<int, int>, PairHash> coords;
-  coords.emplace(tileCoordsAtPosition(sf::Vector2f(m_position.x, m_position.y)));
-  coords.emplace(tileCoordsAtPosition(sf::Vector2f(m_position.x + ghostSizeX, m_position.y)));
-  coords.emplace(tileCoordsAtPosition(sf::Vector2f(m_position.x, m_position.y + ghostSizeY)));
-  coords.emplace(tileCoordsAtPosition(sf::Vector2f(m_position.x + ghostSizeX, m_position.y + ghostSizeY)));
+  auto isTileX = m_ghostShape.getPosition().x / 25.f;
+  auto isTileY = m_ghostShape.getPosition().y / 25.f;
+  bool ghostOccupiesSingleTile = (floor(isTileX) == isTileX && floor(isTileY) == isTileY);
 
   // EXPLAIN:
   // now let's calculate some helpful values like our direction as a sf::Vector2f,
   // our direction as a Direction enum, and our available turns at the current position.
   auto newPosition = m_ghostShape.getPosition() + m_movement;
+
+  // TODO: wrap the ghost coords so it can go through from one side to the other
+  // wrapCoordinate(newPosition.x, -)
 
   auto x2 = newPosition.x;
   auto y2 = newPosition.y;
@@ -98,15 +83,7 @@ void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth& labyrinth)
   auto currentDirection = directionVecToDirection(calculatedDirection);
   auto turns = availableTurns(m_ghostShape.getPosition(), calculatedDirection, labyrinth);
 
-  // EXPLAIN:
-  // check if length of set of tile coords for ghost's 4 corner sf::Vector2f position
-  // vectors == 1.  e.g., all corners occupy a single tile.
-  // for debug purposes, if we never move the ghost in the first place, we should be able
-  // to position him (or her!) somewhere in the labyrinth and have it stay put while
-  // we take the previous measurements and they'll come back as a set with a single
-  // entry.
-  /*
-  if (coords.size() == 1 && turns.size() >= 2)
+  if (ghostOccupiesSingleTile && turns.size() >= 2)
   {
     // EXPLAIN: let's roll the dice to see if we're going to turn
     bool doesGhostTurn = (m_randGenerator() % 100) <= m_meanderOdds;
@@ -116,7 +93,6 @@ void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth& labyrinth)
       m_ghostShape.move(m_movement);
     }
   }
-  */
 
   bool wallCollision = wallCollides(
     newPosition,
@@ -124,13 +100,23 @@ void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth& labyrinth)
     labyrinth
   );
 
-  if (wallCollision)
+  while (wallCollision)
   {
-    Direction newDirection = static_cast<Direction>(m_randGenerator() % 4);
+    auto newDirection = static_cast<Direction>(m_randGenerator() % 4);
     changeDirection(newDirection);
-    m_ghostShape.move(m_movement);
-    return;
-  } 
+    auto newPosition = m_ghostShape.getPosition() + m_movement;
+    bool wallCollision = wallCollides(
+      newPosition,
+      sf::Vector2f(24.f, 24.f),
+      labyrinth
+    );
+
+    if (!wallCollision)
+    {
+      m_ghostShape.move(m_movement);
+      return;
+    }
+  }
 
   // EXPLAIN:
   // if we've gotten here, we didn't take a turn nor did we collide with a wall.  

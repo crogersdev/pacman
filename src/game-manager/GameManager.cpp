@@ -75,6 +75,8 @@ void GameManager::movePacman(sf::Vector2f movement)
 {
   const float radius = m_pacman.getRadius();
   sf::Vector2f newPosition = m_pacman.getPosition() + movement;
+  
+  // TODO: fix wrapping coords, pacman throws an error
 
   wrapCoordinate(newPosition.x, -radius * 2, m_windowBounds.width);
   wrapCoordinate(newPosition.y, -radius * 2, m_windowBounds.height);
