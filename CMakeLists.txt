@@ -2,8 +2,10 @@ cmake_minimum_required(VERSION 3.21)
 project(pacman LANGUAGES CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_BUILD_TYPE Debug)
 
 file(GLOB_RECURSE SUBDIRECTORIES LIST_DIRECTORIES true "${CMAKE_SOURCE_DIR}/src/*")
+file(COPY res DESTINATION ${CMAKE_BINARY_DIR})
 
 message(STATUS "Subdirectories found:")
 foreach(SUBDIR ${SUBDIRECTORIES})

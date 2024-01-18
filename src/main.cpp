@@ -9,12 +9,15 @@
 
 int main()
 {
-  auto window = std::make_shared<sf::RenderWindow>(sf::VideoMode(60*10, 60*15), "Pacman!");
+  auto height = TILE_SIZE * LABYRINTH_ROWS + 4 * TILE_SIZE;
+  auto width  = TILE_SIZE * (LABYRINTH_COLS - 1);
+  auto window = std::make_shared<sf::RenderWindow>(sf::VideoMode(width, height), "Pacman!");
   GameManager gameManager = GameManager(window);
 
   while (window->isOpen())
   {
     gameManager.handleInputs();
+    gameManager.updateEntities();
     gameManager.updateWindow();
   }
 
