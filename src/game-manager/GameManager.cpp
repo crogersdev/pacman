@@ -76,8 +76,6 @@ void GameManager::movePacman(sf::Vector2f movement)
   const float radius = m_pacman.getRadius();
   sf::Vector2f newPosition = m_pacman.getPosition() + movement;
   
-  // TODO: fix wrapping coords, pacman throws an error
-
   wrapCoordinate(newPosition.x, -radius * 2, m_windowBounds.width);
   wrapCoordinate(newPosition.y, -radius * 2, m_windowBounds.height);
 
@@ -123,7 +121,10 @@ void GameManager::updateWindow()
   // Update debug information
   std::ostringstream oss;
   oss << "FPS: " << m_fps << "\n";
-  oss << "Row: " << m_pacman.getPosition().x << "  Col: " << m_pacman.getPosition().y << "\n";
+  auto row = floor(static_cast<int>(m_pacman.getPosition().y) / m_tileSizeY);
+  auto col = floor(static_cast<int>(m_pacman.getPosition().x) / m_tileSizeX);
+  oss << "Row: " << row << "  Col: " << col << "\n";
+  oss << "Map LUT at " << row << ", " << col << ": " << m_labyrinth.at(row, col) << "\n";
   m_debugText.setString(oss.str());
 
   m_pWindow->draw(m_debugText);

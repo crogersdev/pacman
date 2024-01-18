@@ -1,12 +1,12 @@
 #include "TileCoordConversion.hpp"
 #include "../game-manager/GameManager.hpp"
+#include <cmath>
+#include <iostream>
 
 void wrapCoordinate(float &coord, float min, float max)
 {
-  if (coord < min)
-    coord = max;
-  else if (coord > max)
-    coord = min;
+  float range = max - min;
+  coord = fmod((coord - min + range), range) + min;
 }
 
 std::pair<int, int> tileCoordsAtPosition(sf::Vector2f pos)
@@ -14,6 +14,15 @@ std::pair<int, int> tileCoordsAtPosition(sf::Vector2f pos)
   return std::make_pair<int, int>(
     floor(pos.x / TILE_SIZE),
     floor(pos.y / TILE_SIZE));
+}
+
+sf::Vector2f normalize(const sf::Vector2f &vec)
+{
+  auto length = sqrt(vec.x * vec.x + vec.y * vec.y);
+  if (length != 0)
+    return sf::Vector2f(vec.x / length, vec.y / length);
+  else
+    return sf::Vector2f(0.f, 0.f);
 }
 
 Direction directionVecToDirection(sf::Vector2f direction)
@@ -35,6 +44,9 @@ Direction directionVecToDirection(sf::Vector2f direction)
   //       converter function, we'd have to overload the 
   //       comparator signs lke <, > or maybe others.
   //       This if/else feels easier.
+
+  direction = normalize(direction);
+
   if (direction == sf::Vector2f(0.f, 1.f))
     return Direction::DOWN;
   else if (direction == sf::Vector2f(0.f, -1.f))

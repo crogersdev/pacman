@@ -13,4 +13,5 @@ enum Direction {
 
 void wrapCoordinate(float &, float min, float);
 std::pair<int, int> tileCoordsAtPosition(sf::Vector2f);
+sf::Vector2f normalize(const sf::Vector2f &);
 Direction directionVecToDirection(sf::Vector2f);

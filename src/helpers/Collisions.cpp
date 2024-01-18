@@ -11,14 +11,14 @@ std::vector<Direction> availableTurns(sf::Vector2f currentPosition,
   auto dir = directionVecToDirection(currentDirection);
 
   std::vector<Direction> turns;
-  
-  if (rLabyrinth.at(coords.first, coords.second - 1) != Labyrinth::WALL && dir != Direction::DOWN)
+
+  if (rLabyrinth.at(coords.first, coords.second - 1) != Labyrinth::WALL)
     turns.push_back(Direction::UP);
-  if (rLabyrinth.at(coords.first, coords.second + 1) != Labyrinth::WALL && dir != Direction::UP)
+  if (rLabyrinth.at(coords.first, coords.second + 1) != Labyrinth::WALL)
     turns.push_back(Direction::DOWN);
-  if (rLabyrinth.at(coords.first + 1, coords.second) != Labyrinth::WALL && dir != Direction::RIGHT)
+  if (rLabyrinth.at(coords.first + 1, coords.second) != Labyrinth::WALL)
     turns.push_back(Direction::RIGHT);
-  if (rLabyrinth.at(coords.first - 1, coords.second) != Labyrinth::WALL && dir != Direction::LEFT)
+  if (rLabyrinth.at(coords.first - 1, coords.second) != Labyrinth::WALL)
     turns.push_back(Direction::LEFT);
   
   return turns;
