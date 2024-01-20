@@ -74,27 +74,6 @@ void GameManager::updateEntities()
     std::cout << "YOU AND I COLLIDE\n";
 }
 
-void GameManager::movePacman(sf::Vector2f movement)
-{
-  const float radius = m_pacman.getRadius();
-  sf::Vector2f newPosition = m_pacman.getPosition() + movement;
-  
-  wrapCoordinate(newPosition.x, -radius * 2, m_windowBounds.width);
-  wrapCoordinate(newPosition.y, -radius * 2, m_windowBounds.height);
-
-  auto pacmanWidth = (m_pacman.getRadius() * 2.f) - 1.f;
-  bool wallCollision = wallCollides(
-    newPosition,
-    sf::Vector2f(pacmanWidth, pacmanWidth),
-    m_labyrinth
-  );
-
-  // TRICKY: we avoid .move(movement) here because doing so would ignore
-  //         the arithmetic we implemented to wrap pacman around the edges
-  if (!wallCollision) 
-    m_pacman.setPosition(newPosition);
-}
-
 void GameManager::updateWindow()
 {
   m_pWindow->clear();

@@ -57,7 +57,7 @@ sf::Vector2f Ghost::getPosition()
   return m_ghostShape.getPosition();
 }
 
-void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth& labyrinth)
+void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth &r_labyrinth)
 {
   // EXPLAIN:
   // let's check for a collision
@@ -77,8 +77,8 @@ void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth& labyrinth)
   // EXPLAIN:
   // now let's calculate some helpful values like our direction as a sf::Vector2f,
   // our direction as a Direction enum, and our available turns at the current position.
-  auto maxLabyrinthWidth = labyrinth.m_labyrinthCols * labyrinth.m_labyrinthTileSize;
-  auto maxLabyrinthHeight = labyrinth.m_labyrinthRows * labyrinth.m_labyrinthTileSize;
+  auto maxLabyrinthWidth = r_labyrinth.m_labyrinthCols * r_labyrinth.m_labyrinthTileSize;
+  auto maxLabyrinthHeight = r_labyrinth.m_labyrinthRows * r_labyrinth.m_labyrinthTileSize;
   wrapCoordinate(newPosition.x, -ghostSizeX, maxLabyrinthWidth);
   wrapCoordinate(newPosition.y, -ghostSizeY, maxLabyrinthHeight);
 
