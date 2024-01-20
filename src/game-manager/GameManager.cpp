@@ -69,6 +69,9 @@ void GameManager::handleInputs()
 void GameManager::updateEntities()
 {
   m_pinky.meander(m_clock, m_labyrinth);
+
+  if (entityCollides(m_pinky, m_pacman))
+    std::cout << "YOU AND I COLLIDE\n";
 }
 
 void GameManager::movePacman(sf::Vector2f movement)

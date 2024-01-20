@@ -47,8 +47,22 @@ void Ghost::changeDirection(Direction newDirection)
   }
 }
 
+void Ghost::draw()
+{
+  m_pGameWindow->draw(m_ghostShape);
+}
+
+sf::Vector2f Ghost::getPosition()
+{ 
+  return m_ghostShape.getPosition();
+}
+
 void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth& labyrinth)
 {
+  // EXPLAIN:
+  // let's check for a collision
+  auto newPosition = m_ghostShape.getPosition() + m_movement;
+
   // EXPLAIN:
   // first check to see if we have any available turns, before we start moving
   // let's do this by assuring ourselves that the ghost is in a single tile
@@ -63,7 +77,6 @@ void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth& labyrinth)
   // EXPLAIN:
   // now let's calculate some helpful values like our direction as a sf::Vector2f,
   // our direction as a Direction enum, and our available turns at the current position.
-  auto newPosition = m_ghostShape.getPosition() + m_movement;
   auto maxLabyrinthWidth = labyrinth.m_labyrinthCols * labyrinth.m_labyrinthTileSize;
   auto maxLabyrinthHeight = labyrinth.m_labyrinthRows * labyrinth.m_labyrinthTileSize;
   wrapCoordinate(newPosition.x, -ghostSizeX, maxLabyrinthWidth);
@@ -110,7 +123,7 @@ void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth& labyrinth)
       */
 
       changeDirection(turns.at(newDirection));
-      m_ghostShape.move(m_movement);
+      m_ghostShape.setPosition(newPosition);
       return;
     }
   }
@@ -145,7 +158,7 @@ void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth& labyrinth)
 
     if (!wallCollision)
     {
-      m_ghostShape.move(m_movement);
+      m_ghostShape.setPosition(newPosition);
       return;
     }
   }
@@ -158,7 +171,3 @@ void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth& labyrinth)
 
 //void Ghost::scatter() {}
 
-void Ghost::draw()
-{
-  m_pGameWindow->draw(m_ghostShape);
-}
