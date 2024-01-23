@@ -25,7 +25,7 @@ public:
     CLYDE   = 'C'
   };
 
-  std::unordered_map<char, Tile> m_tileLut;
+  std::map<char, Tile> m_tileLut;
 
   int m_labyrinthRows;
   int m_labyrinthCols;

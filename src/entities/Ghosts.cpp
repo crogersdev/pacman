@@ -10,7 +10,6 @@ Ghost::Ghost(std::shared_ptr<sf::RenderWindow> pGameWindow, float speed)
   : m_meanderOdds(66.6),
     m_speed(speed),
     m_ghostShape(sf::Vector2f(25.f, 25.f)),
-    m_deltaTime(),
     m_movement(sf::Vector2f(1.f, 0.f)),
     m_position(sf::Vector2f(650.f, 350.f)),
     //m_position(sf::Vector2f(550.f, 550.f)),
@@ -57,7 +56,7 @@ sf::Vector2f Ghost::getPosition()
   return m_ghostShape.getPosition();
 }
 
-void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth &r_labyrinth)
+void Ghost::meander(const Labyrinth &r_labyrinth)
 {
   // EXPLAIN:
   // let's check for a collision
@@ -70,8 +69,8 @@ void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth &r_labyrinth)
   auto ghostSizeX = m_ghostShape.getGlobalBounds().width;
   auto ghostSizeY = m_ghostShape.getGlobalBounds().height;
 
-  auto isTileX = m_ghostShape.getPosition().x / 25.f;
-  auto isTileY = m_ghostShape.getPosition().y / 25.f;
+  auto isTileX = m_ghostShape.getPosition().x / TILE_SIZE;
+  auto isTileY = m_ghostShape.getPosition().y / TILE_SIZE; 
   bool ghostOccupiesSingleTile = (floor(isTileX) == isTileX && floor(isTileY) == isTileY);
 
   // EXPLAIN:
@@ -100,7 +99,7 @@ void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth &r_labyrinth)
   );
 
   auto currentDirection = directionVecToDirection(calculatedDirection);
-  auto turns = availableTurns(m_ghostShape.getPosition(), calculatedDirection, labyrinth);
+  auto turns = availableTurns(m_ghostShape.getPosition(), calculatedDirection, r_labyrinth);
 
   if (ghostOccupiesSingleTile && turns.size() > 2)
    {
@@ -131,7 +130,7 @@ void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth &r_labyrinth)
   bool wallCollision = wallCollides(
     newPosition,
     sf::Vector2f(24.f, 24.f),
-    labyrinth
+    r_labyrinth
   );
 
   while (wallCollision)
@@ -153,7 +152,7 @@ void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth &r_labyrinth)
     bool wallCollision = wallCollides(
       newPosition,
       sf::Vector2f(24.f, 24.f),
-      labyrinth
+      r_labyrinth
     );
 
     if (!wallCollision)

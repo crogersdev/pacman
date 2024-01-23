@@ -5,16 +5,16 @@
 
 Labyrinth::Labyrinth()
   : m_tileLut({
-      {' ', EMPTY},
-      {'#', WALL},
-      {'.', PELLET},
-      {'@', POWERUP},
-      {'M', PACMAN},
-      {'B', BLINKY},
-      {'P', PINKY},
-      {'I', INKY},
-      {'C', CLYDE},
-      {'-', GATE}
+      {' ', Labyrinth::EMPTY},
+      {'#', Labyrinth::WALL},
+      {'.', Labyrinth::PELLET},
+      {'@', Labyrinth::POWERUP},
+      {'M', Labyrinth::PACMAN},
+      {'B', Labyrinth::BLINKY},
+      {'P', Labyrinth::PINKY},
+      {'I', Labyrinth::INKY},
+      {'C', Labyrinth::CLYDE},
+      {'-', Labyrinth::GATE}
     }),
     m_labyrinthRows(LABYRINTH_ROWS),
     m_labyrinthCols(LABYRINTH_COLS),
