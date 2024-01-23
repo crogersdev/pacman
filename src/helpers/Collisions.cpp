@@ -3,9 +3,10 @@
 #include "Collisions.hpp"
 #include "../entities/Labyrinth.hpp"
 
-std::vector<Direction> availableTurns(sf::Vector2f currentPosition,
-                         sf::Vector2f currentDirection,
-                         const Labyrinth &rLabyrinth)
+std::vector<Direction> availableTurns(
+  sf::Vector2f currentPosition,
+  sf::Vector2f currentDirection,
+  const Labyrinth &rLabyrinth)
 {
   auto coords = tileCoordsAtPosition(currentPosition);
   auto dir = directionVecToDirection(currentDirection);
@@ -24,9 +25,9 @@ std::vector<Direction> availableTurns(sf::Vector2f currentPosition,
   return turns;
 }
 
-bool entityCollides(sf::RectangleShape entity_a, sf::RectangleShape entity_b)
+bool entityCollides(const sf::Shape &r_entity_a, const sf::Shape &r_entity_b)
 {
-  if (entity_a.getGlobalBounds().intersects(entity_b.getGlobalBounds()))
+  if (r_entity_a.getGlobalBounds().intersects(r_entity_b.getGlobalBounds()))
     return true;
   return false;
 }

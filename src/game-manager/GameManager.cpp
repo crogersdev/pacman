@@ -7,21 +7,19 @@
 
 GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
   : m_pinky(pWindow, 400.f),
+    m_pacman(pWindow, (TILE_SIZE / 2) - 1, 200.f, sf::Vector2f(TILE_SIZE + 1.f, TILE_SIZE + 1.f)),
     m_clock(),
     m_deltaTime(),
     m_pWindow(pWindow),
-    m_labyrinth(Labyrinth()),
+    m_labyrinth(),
     m_fps(60.0)
 {
   m_pWindow->setFramerateLimit(60);
   m_windowBounds = sf::FloatRect(0, 0, m_pWindow->getSize().x, m_pWindow->getSize().y);
 
-  m_initialPosition = sf::Vector2f(m_tileSizeX + 1, m_tileSizeY + 1);
-  m_pacman = sf::CircleShape(m_pacmanRadius);
-  m_pacman.setFillColor(sf::Color::Yellow);
-  m_pacman.setPosition(m_initialPosition);
+  auto pacmanPosition = sf::Vector2f(m_tileSizeX + 1, m_tileSizeY + 1);
 
-  m_labyrinth.set(m_initialPosition, Labyrinth::PACMAN);
+  m_labyrinth.set(pacmanPosition, Labyrinth::PACMAN);
 
   m_debugFont.loadFromFile("./res/PublicPixel.ttf");
   m_debugText.setFont(m_debugFont);
@@ -33,10 +31,10 @@ GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
   m_wallTile.setFillColor(sf::Color::Blue);
 
   m_keyActions = {
-    {sf::Keyboard::Left,  [&]() { movePacman(sf::Vector2f(-m_movementSpeed * m_deltaTime.asSeconds(), 0)); }},
-    {sf::Keyboard::Right, [&]() { movePacman(sf::Vector2f( m_movementSpeed * m_deltaTime.asSeconds(), 0)); }},
-    {sf::Keyboard::Up,    [&]() { movePacman(sf::Vector2f(0, -m_movementSpeed * m_deltaTime.asSeconds())); }},
-    {sf::Keyboard::Down,  [&]() { movePacman(sf::Vector2f(0,  m_movementSpeed * m_deltaTime.asSeconds())); }}
+    {sf::Keyboard::Left,  [&](sf::Time dt) { m_pacman.move(sf::Vector2f(-1.f, 0.f), dt, m_labyrinth); }},
+    {sf::Keyboard::Right, [&](sf::Time dt) { m_pacman.move(sf::Vector2f( 1.f, 0.f), dt, m_labyrinth); }},
+    {sf::Keyboard::Up,    [&](sf::Time dt) { m_pacman.move(sf::Vector2f(0.f, -1.f), dt, m_labyrinth); }},
+    {sf::Keyboard::Down,  [&](sf::Time dt) { m_pacman.move(sf::Vector2f(0.f,  1.f), dt, m_labyrinth); }}
   };
 }
 
@@ -61,35 +59,17 @@ void GameManager::handleInputs()
     {
       // note: this invokes the lambdas defined in
       //       the ctor that move pacman
-      pair.second();
+      pair.second(m_deltaTime);
     }
   }
 }
 
 void GameManager::updateEntities()
 {
-  m_pinky.meander(m_clock, m_labyrinth);
-}
+  m_pinky.meander(m_labyrinth);
 
-void GameManager::movePacman(sf::Vector2f movement)
-{
-  const float radius = m_pacman.getRadius();
-  sf::Vector2f newPosition = m_pacman.getPosition() + movement;
-  
-  wrapCoordinate(newPosition.x, -radius * 2, m_windowBounds.width);
-  wrapCoordinate(newPosition.y, -radius * 2, m_windowBounds.height);
-
-  auto pacmanWidth = (m_pacman.getRadius() * 2.f) - 1.f;
-  bool wallCollision = wallCollides(
-    newPosition,
-    sf::Vector2f(pacmanWidth, pacmanWidth),
-    m_labyrinth
-  );
-
-  // TRICKY: we avoid .move(movement) here because doing so would ignore
-  //         the arithmetic we implemented to wrap pacman around the edges
-  if (!wallCollision) 
-    m_pacman.setPosition(newPosition);
+  if (entityCollides(m_pinky, m_pacman))
+    std::cout << "YOU AND I COLLIDE\n";
 }
 
 void GameManager::updateWindow()
@@ -129,7 +109,7 @@ void GameManager::updateWindow()
 
   m_pWindow->draw(m_debugText);
 
-  m_pWindow->draw(m_pacman);
+  m_pacman.draw();
   m_pinky.draw();
   m_pWindow->display();
 }

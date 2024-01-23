@@ -8,5 +8,5 @@
 #include "../helpers/TileCoordConversion.hpp"
 
 std::vector<Direction> availableTurns(sf::Vector2f, sf::Vector2f, const Labyrinth &);
-bool entityCollides(sf::RectangleShape, sf::RectangleShape);
+bool entityCollides(const sf::Shape &, const sf::Shape &);
 bool wallCollides(sf::Vector2f, sf::Vector2f, const Labyrinth &);

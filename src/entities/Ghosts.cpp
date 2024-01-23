@@ -10,7 +10,6 @@ Ghost::Ghost(std::shared_ptr<sf::RenderWindow> pGameWindow, float speed)
   : m_meanderOdds(66.6),
     m_speed(speed),
     m_ghostShape(sf::Vector2f(25.f, 25.f)),
-    m_deltaTime(),
     m_movement(sf::Vector2f(1.f, 0.f)),
     m_position(sf::Vector2f(650.f, 350.f)),
     //m_position(sf::Vector2f(550.f, 550.f)),
@@ -47,8 +46,22 @@ void Ghost::changeDirection(Direction newDirection)
   }
 }
 
-void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth& labyrinth)
+void Ghost::draw()
 {
+  m_pGameWindow->draw(m_ghostShape);
+}
+
+sf::Vector2f Ghost::getPosition()
+{ 
+  return m_ghostShape.getPosition();
+}
+
+void Ghost::meander(const Labyrinth &r_labyrinth)
+{
+  // EXPLAIN:
+  // let's check for a collision
+  auto newPosition = m_ghostShape.getPosition() + m_movement;
+
   // EXPLAIN:
   // first check to see if we have any available turns, before we start moving
   // let's do this by assuring ourselves that the ghost is in a single tile
@@ -56,16 +69,15 @@ void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth& labyrinth)
   auto ghostSizeX = m_ghostShape.getGlobalBounds().width;
   auto ghostSizeY = m_ghostShape.getGlobalBounds().height;
 
-  auto isTileX = m_ghostShape.getPosition().x / 25.f;
-  auto isTileY = m_ghostShape.getPosition().y / 25.f;
+  auto isTileX = m_ghostShape.getPosition().x / TILE_SIZE;
+  auto isTileY = m_ghostShape.getPosition().y / TILE_SIZE; 
   bool ghostOccupiesSingleTile = (floor(isTileX) == isTileX && floor(isTileY) == isTileY);
 
   // EXPLAIN:
   // now let's calculate some helpful values like our direction as a sf::Vector2f,
   // our direction as a Direction enum, and our available turns at the current position.
-  auto newPosition = m_ghostShape.getPosition() + m_movement;
-  auto maxLabyrinthWidth = labyrinth.m_labyrinthCols * labyrinth.m_labyrinthTileSize;
-  auto maxLabyrinthHeight = labyrinth.m_labyrinthRows * labyrinth.m_labyrinthTileSize;
+  auto maxLabyrinthWidth = r_labyrinth.m_labyrinthCols * r_labyrinth.m_labyrinthTileSize;
+  auto maxLabyrinthHeight = r_labyrinth.m_labyrinthRows * r_labyrinth.m_labyrinthTileSize;
   wrapCoordinate(newPosition.x, -ghostSizeX, maxLabyrinthWidth);
   wrapCoordinate(newPosition.y, -ghostSizeY, maxLabyrinthHeight);
 
@@ -87,7 +99,7 @@ void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth& labyrinth)
   );
 
   auto currentDirection = directionVecToDirection(calculatedDirection);
-  auto turns = availableTurns(m_ghostShape.getPosition(), calculatedDirection, labyrinth);
+  auto turns = availableTurns(m_ghostShape.getPosition(), calculatedDirection, r_labyrinth);
 
   if (ghostOccupiesSingleTile && turns.size() > 2)
    {
@@ -110,7 +122,7 @@ void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth& labyrinth)
       */
 
       changeDirection(turns.at(newDirection));
-      m_ghostShape.move(m_movement);
+      m_ghostShape.setPosition(newPosition);
       return;
     }
   }
@@ -118,7 +130,7 @@ void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth& labyrinth)
   bool wallCollision = wallCollides(
     newPosition,
     sf::Vector2f(24.f, 24.f),
-    labyrinth
+    r_labyrinth
   );
 
   while (wallCollision)
@@ -140,12 +152,12 @@ void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth& labyrinth)
     bool wallCollision = wallCollides(
       newPosition,
       sf::Vector2f(24.f, 24.f),
-      labyrinth
+      r_labyrinth
     );
 
     if (!wallCollision)
     {
-      m_ghostShape.move(m_movement);
+      m_ghostShape.setPosition(newPosition);
       return;
     }
   }
@@ -158,7 +170,3 @@ void Ghost::meander(sf::Clock &rGameMgrClock, const Labyrinth& labyrinth)
 
 //void Ghost::scatter() {}
 
-void Ghost::draw()
-{
-  m_pGameWindow->draw(m_ghostShape);
-}
