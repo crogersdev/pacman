@@ -34,7 +34,7 @@ private:
   sf::Font m_debugFont;
   sf::Text m_debugText;
   sf::Time m_deltaTime;
-  std::shared_ptr<sf::RenderWindow> m_pWindow;
+  std::shared_ptr<sf::RenderWindow> m_pGameWindow;
   Labyrinth m_labyrinth;
 
   float m_fps;

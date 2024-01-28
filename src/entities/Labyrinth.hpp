@@ -33,9 +33,9 @@ public:
 
   Tile at(int, int) const;
   Tile at(std::pair<int, int>) const;
+  void draw(std::shared_ptr<sf::RenderWindow>);
   void set(sf::Vector2f, Tile);
   void set(int, int, Tile);
-  void draw(); // todo: implement me, i'm currently in game manager
 
   Labyrinth();
 

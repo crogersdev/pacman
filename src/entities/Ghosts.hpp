@@ -11,14 +11,14 @@
 class Ghost
 {
 public:
-  Ghost(std::shared_ptr<sf::RenderWindow>, float);
+  Ghost(float);
   ~Ghost();
 
   float m_meanderOdds;
 
   void chase();
   void changeDirection(Direction);
-  void draw();
+  void draw(std::shared_ptr<sf::RenderWindow>);
   sf::Vector2f getPosition();
   void meander(const Labyrinth &);
   //void scatter();

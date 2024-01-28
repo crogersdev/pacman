@@ -3,13 +3,17 @@
 
 #include "../helpers/Collisions.hpp"
 
-Pacman::Pacman(std::shared_ptr<sf::RenderWindow> pGameWindow, float radius, float speed, sf::Vector2f initialPosition)
-  : m_speed(speed),
+Pacman::Pacman(
+  float radius,
+  float speed,
+  sf::Vector2f initialPosition
+  )
+  : m_guys(4), 
+    m_speed(speed),
 	  m_radius(radius),
     m_pacman(sf::CircleShape(radius)),
     m_position(initialPosition),
-    m_direction(Direction::DOWN),
-    m_pGameWindow(pGameWindow)
+    m_direction(Direction::DOWN)
 {
   m_pacman.setFillColor(sf::Color::Yellow);
   m_pacman.setPosition(m_position);
@@ -17,9 +21,9 @@ Pacman::Pacman(std::shared_ptr<sf::RenderWindow> pGameWindow, float radius, floa
 
 Pacman::~Pacman() {}
 
-void Pacman::draw()
+void Pacman::draw(std::shared_ptr<sf::RenderWindow> p_Window)
 {
-  m_pGameWindow->draw(m_pacman);
+  p_Window->draw(m_pacman);
 }
 
 void Pacman::move(sf::Vector2f direction, sf::Time t, const Labyrinth &r_labyrinth)

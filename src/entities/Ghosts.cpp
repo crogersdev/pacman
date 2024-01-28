@@ -6,15 +6,13 @@
 #include "Ghosts.hpp"
 #include "../helpers/Collisions.hpp"
 
-Ghost::Ghost(std::shared_ptr<sf::RenderWindow> pGameWindow, float speed)
+Ghost::Ghost(float speed)
   : m_meanderOdds(66.6),
     m_speed(speed),
     m_ghostShape(sf::Vector2f(25.f, 25.f)),
     m_movement(sf::Vector2f(1.f, 0.f)),
     m_position(sf::Vector2f(650.f, 350.f)),
-    //m_position(sf::Vector2f(550.f, 550.f)),
     m_direction(RIGHT),
-    m_pGameWindow(pGameWindow),
     m_state(MEANDER)
 {
   m_seed = std::chrono::system_clock::now().time_since_epoch().count(),
@@ -46,9 +44,9 @@ void Ghost::changeDirection(Direction newDirection)
   }
 }
 
-void Ghost::draw()
+void Ghost::draw(std::shared_ptr<sf::RenderWindow> pGameWindow)
 {
-  m_pGameWindow->draw(m_ghostShape);
+  pGameWindow->draw(m_ghostShape);
 }
 
 sf::Vector2f Ghost::getPosition()

@@ -6,16 +6,16 @@
 #include <sstream>
 
 GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
-  : m_pinky(pWindow, 400.f),
-    m_pacman(pWindow, (TILE_SIZE / 2) - 1, 200.f, sf::Vector2f(TILE_SIZE + 1.f, TILE_SIZE + 1.f)),
+  : m_pinky(400.f),
+    m_pacman((TILE_SIZE / 2) - 1, 200.f, sf::Vector2f(TILE_SIZE + 1.f, TILE_SIZE + 1.f)),
     m_clock(),
     m_deltaTime(),
-    m_pWindow(pWindow),
+    m_pGameWindow(pWindow),
     m_labyrinth(),
     m_fps(60.0)
 {
-  m_pWindow->setFramerateLimit(60);
-  m_windowBounds = sf::FloatRect(0, 0, m_pWindow->getSize().x, m_pWindow->getSize().y);
+  m_pGameWindow->setFramerateLimit(60);
+  m_windowBounds = sf::FloatRect(0, 0, m_pGameWindow->getSize().x, m_pGameWindow->getSize().y);
 
   auto pacmanPosition = sf::Vector2f(m_tileSizeX + 1, m_tileSizeY + 1);
 
@@ -44,11 +44,11 @@ void GameManager::handleInputs()
 {
   sf::Event event;
 
-  while (m_pWindow->pollEvent(event)) {
+  while (m_pGameWindow->pollEvent(event)) {
     if (event.type == sf::Event::Closed)
-      m_pWindow->close();
+      m_pGameWindow->close();
     if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)
-      m_pWindow->close();
+      m_pGameWindow->close();
   }
 
   m_deltaTime = m_clock.restart();
@@ -70,11 +70,12 @@ void GameManager::updateEntities()
 
   if (entityCollides(m_pinky, m_pacman))
     std::cout << "YOU AND I COLLIDE\n";
+
 }
 
 void GameManager::updateWindow()
 {
-  m_pWindow->clear();
+  m_pGameWindow->clear();
 
   for (int row = 0; row < m_labyrinth.m_labyrinthRows; ++row)
   {
@@ -82,12 +83,12 @@ void GameManager::updateWindow()
     {
       auto tile = m_labyrinth.at(col, row);
       switch(tile) {
-        case m_labyrinth.WALL:
+        case Labyrinth::WALL:
           m_wallTile.setPosition(sf::Vector2f(m_tileSizeX*col, m_tileSizeY*row));
-          m_pWindow->draw(m_wallTile);
-        case m_labyrinth.GATE:
-        case m_labyrinth.PELLET:
-        case m_labyrinth.POWERUP:
+          m_pGameWindow->draw(m_wallTile);
+        case Labyrinth::GATE:
+        case Labyrinth::PELLET:
+        case Labyrinth::POWERUP:
           break;
         default:
           break;
@@ -107,9 +108,9 @@ void GameManager::updateWindow()
   oss << "Map LUT at " << row << ", " << col << ": " << m_labyrinth.at(row, col) << "\n";
   m_debugText.setString(oss.str());
 
-  m_pWindow->draw(m_debugText);
+  m_pGameWindow->draw(m_debugText);
 
-  m_pacman.draw();
-  m_pinky.draw();
-  m_pWindow->display();
+  m_pacman.draw(m_pGameWindow);
+  m_pinky.draw(m_pGameWindow);
+  m_pGameWindow->display();
 }

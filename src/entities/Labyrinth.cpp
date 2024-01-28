@@ -35,16 +35,16 @@ Labyrinth::Tile Labyrinth::at(int x, int y) const
     y = LABYRINTH_ROWS - 1;
 
   char tile = static_cast<char>(m_labyrinth[y][x]);
-  Tile foo;
+  Tile t;
   try
   {
-    foo = m_tileLut.at(tile);
+    t = m_tileLut.at(tile);
   }
   catch (std::out_of_range& exc)
   {
     std::cout << "oh no!  failed to access m_labyrinth[" << y << "][" << x << "]\n";
   }
-  return foo;
+  return t;
 }
 
 Labyrinth::Tile Labyrinth::at(std::pair<int, int> coords) const
