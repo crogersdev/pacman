@@ -21,7 +21,6 @@ public:
   // TODO: should these guys be private?
   Pacman m_pacman;
   Ghost m_pinky;
-  sf::RectangleShape m_wallTile;
 
   void drawLabyrinth();
   void handleInputs();

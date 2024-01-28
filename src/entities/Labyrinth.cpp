@@ -19,7 +19,10 @@ Labyrinth::Labyrinth()
     m_labyrinthRows(LABYRINTH_ROWS),
     m_labyrinthCols(LABYRINTH_COLS),
     m_labyrinthTileSize(TILE_SIZE)
-{}
+{
+  m_wallTile = sf::RectangleShape(sf::Vector2f(TILE_SIZE, TILE_SIZE));
+  m_wallTile.setFillColor(sf::Color::Blue);
+}
 
 Labyrinth::Tile Labyrinth::at(int x, int y) const
 {
@@ -51,6 +54,28 @@ Labyrinth::Tile Labyrinth::at(std::pair<int, int> coords) const
 {
   // TODO: do i need "this", e.g. this.at() ?
   return at(coords.first, coords.second);
+}
+
+void Labyrinth::draw(std::shared_ptr<sf::RenderWindow> pGameWindow)
+{
+  for (int row = 0; row < m_labyrinthRows; ++row)
+  {
+    for (int col = 0; col < m_labyrinthCols; ++col)
+    {
+      auto tile = at(col, row);
+      switch(tile) {
+        case Labyrinth::WALL:
+          m_wallTile.setPosition(sf::Vector2f(TILE_SIZE * col, TILE_SIZE * row));
+          pGameWindow->draw(m_wallTile);
+        case Labyrinth::GATE:
+        case Labyrinth::PELLET:
+        case Labyrinth::POWERUP:
+          break;
+        default:
+          break;
+      }
+    }
+  }
 }
 
 void Labyrinth::set(sf::Vector2f pos, Tile entity)
