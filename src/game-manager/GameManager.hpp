@@ -41,5 +41,4 @@ private:
 
   const float m_tileSizeX = TILE_SIZE;
   const float m_tileSizeY = TILE_SIZE;
-
 };

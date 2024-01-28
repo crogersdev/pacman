@@ -70,7 +70,6 @@ void GameManager::updateEntities()
 
   if (entityCollides(m_pinky, m_pacman))
     std::cout << "YOU AND I COLLIDE\n";
-
 }
 
 void GameManager::updateWindow()
