@@ -26,6 +26,7 @@ public:
   };
 
   std::map<char, Tile> m_tileLut;
+  std::map<Tile, std::string> m_tileLabelLut;
 
   int m_labyrinthRows;
   int m_labyrinthCols;

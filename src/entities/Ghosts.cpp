@@ -54,7 +54,7 @@ sf::Vector2f Ghost::getPosition()
   return m_ghostShape.getPosition();
 }
 
-void Ghost::meander(const Labyrinth &r_labyrinth)
+void Ghost::meander(const Labyrinth &rLabyrinth)
 {
   // EXPLAIN:
   // let's check for a collision
@@ -74,8 +74,8 @@ void Ghost::meander(const Labyrinth &r_labyrinth)
   // EXPLAIN:
   // now let's calculate some helpful values like our direction as a sf::Vector2f,
   // our direction as a Direction enum, and our available turns at the current position.
-  auto maxLabyrinthWidth = r_labyrinth.m_labyrinthCols * r_labyrinth.m_labyrinthTileSize;
-  auto maxLabyrinthHeight = r_labyrinth.m_labyrinthRows * r_labyrinth.m_labyrinthTileSize;
+  auto maxLabyrinthWidth = rLabyrinth.m_labyrinthCols * rLabyrinth.m_labyrinthTileSize;
+  auto maxLabyrinthHeight = rLabyrinth.m_labyrinthRows * rLabyrinth.m_labyrinthTileSize;
   wrapCoordinate(newPosition.x, -ghostSizeX, maxLabyrinthWidth);
   wrapCoordinate(newPosition.y, -ghostSizeY, maxLabyrinthHeight);
 
@@ -97,7 +97,7 @@ void Ghost::meander(const Labyrinth &r_labyrinth)
   );
 
   auto currentDirection = directionVecToDirection(calculatedDirection);
-  auto turns = availableTurns(m_ghostShape.getPosition(), calculatedDirection, r_labyrinth);
+  auto turns = availableTurns(m_ghostShape.getPosition(), calculatedDirection, rLabyrinth);
 
   if (ghostOccupiesSingleTile && turns.size() > 2)
    {
@@ -128,7 +128,7 @@ void Ghost::meander(const Labyrinth &r_labyrinth)
   bool wallCollision = wallCollides(
     newPosition,
     sf::Vector2f(24.f, 24.f),
-    r_labyrinth
+    rLabyrinth
   );
 
   while (wallCollision)
@@ -150,7 +150,7 @@ void Ghost::meander(const Labyrinth &r_labyrinth)
     bool wallCollision = wallCollides(
       newPosition,
       sf::Vector2f(24.f, 24.f),
-      r_labyrinth
+      rLabyrinth
     );
 
     if (!wallCollision)

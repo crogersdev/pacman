@@ -16,12 +16,23 @@ Labyrinth::Labyrinth()
       {'C', Labyrinth::CLYDE},
       {'-', Labyrinth::GATE}
     }),
+    m_tileLabelLut({
+      {Labyrinth::EMPTY, "Empty"},
+      {Labyrinth::WALL, "Wall"},
+      {Labyrinth::PELLET, "Pellet"},
+      {Labyrinth::POWERUP, "Powerup"},
+      {Labyrinth::PACMAN, "Pacman"},
+      {Labyrinth::BLINKY, "Blinky"},
+      {Labyrinth::PINKY, "Pinky"},
+      {Labyrinth::INKY, "Inky"},
+      {Labyrinth::CLYDE, "Clyde"},
+      {Labyrinth::GATE, "Gate"}
+    }),
     m_labyrinthRows(LABYRINTH_ROWS),
     m_labyrinthCols(LABYRINTH_COLS),
     m_labyrinthTileSize(TILE_SIZE),
     m_wallTile(sf::RectangleShape(sf::Vector2f(TILE_SIZE, TILE_SIZE))),
     m_pellet(sf::CircleShape(3.f))
-
 {
   m_wallTile.setFillColor(sf::Color::Blue);
   m_pellet.setFillColor(sf::Color(255, 255, 191)); // "faint yellow, #FFFFBF"
@@ -29,8 +40,6 @@ Labyrinth::Labyrinth()
 
 Labyrinth::Tile Labyrinth::at(int x, int y) const
 {
-  // NOTE: x is a column
-  //       y is a row
   if (x <= 0)
     x = 0;
   if (y <= 0)
@@ -74,9 +83,11 @@ void Labyrinth::draw(std::shared_ptr<sf::RenderWindow> pGameWindow)
         case Labyrinth::PELLET:
         { // EXPLAIN: new scope is needed for declaring a variable in
           //          a case that might not be invoked at runtime, causing
-          //          why,
-          // float x = ((TILE_SIZE * col) / 2.f) - m_pellet.getRadius();
-          // float y = ((TILE_SIZE * row) / 2.f) - m_pellet.getRadius();
+          //          some weird memory errors because we'd be avoiding 
+          //          an outcome of executing this program
+          //          where the variables were not initialized - and
+          //          in C++ you must initialize variables that are used
+          //          in switch statements
           auto x = TILE_SIZE * col + TILE_SIZE / 2.f - m_pellet.getRadius();
           auto y = TILE_SIZE * row + TILE_SIZE / 2.f - m_pellet.getRadius();
           m_pellet.setPosition(sf::Vector2f(x, y));
@@ -102,5 +113,5 @@ void Labyrinth::set(sf::Vector2f pos, Tile entity)
 
 void Labyrinth::set(int row, int col, Tile entity)
 {
-  m_labyrinth[col][row] = entity;
+  m_labyrinth[row][col] = entity;
 }

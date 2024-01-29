@@ -26,15 +26,15 @@ void Pacman::draw(std::shared_ptr<sf::RenderWindow> p_Window)
   p_Window->draw(m_pacman);
 }
 
-void Pacman::move(sf::Vector2f direction, sf::Time t, const Labyrinth &r_labyrinth)
+void Pacman::move(sf::Vector2f direction, sf::Time t, const Labyrinth &rLabyrinth)
 {
   auto movement = direction * (m_speed * t.asSeconds());
   m_direction = directionVecToDirection(direction);
 
   sf::Vector2f newPosition = m_pacman.getPosition() + movement;
 
-  auto maxLabyrinthWidth = r_labyrinth.m_labyrinthCols * r_labyrinth.m_labyrinthTileSize;
-  auto maxLabyrinthHeight = r_labyrinth.m_labyrinthRows * r_labyrinth.m_labyrinthTileSize;
+  auto maxLabyrinthWidth = rLabyrinth.m_labyrinthCols * rLabyrinth.m_labyrinthTileSize;
+  auto maxLabyrinthHeight = rLabyrinth.m_labyrinthRows * rLabyrinth.m_labyrinthTileSize;
 
   wrapCoordinate(newPosition.x, -m_radius * 2, maxLabyrinthWidth);
   wrapCoordinate(newPosition.y, -m_radius * 2, maxLabyrinthHeight);
@@ -43,7 +43,7 @@ void Pacman::move(sf::Vector2f direction, sf::Time t, const Labyrinth &r_labyrin
   bool wallCollision = wallCollides(
     newPosition,
     sf::Vector2f(pacmanWidth, pacmanWidth),
-    r_labyrinth
+    rLabyrinth
   );
 
   // TRICKY: we avoid .move(movement) here because doing so would ignore

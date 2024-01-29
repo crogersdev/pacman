@@ -67,6 +67,12 @@ void GameManager::updateEntities()
 
   if (entityCollides(m_pinky, m_pacman))
     std::cout << "YOU AND I COLLIDE\n";
+  
+  auto row = floor(static_cast<int>(m_pacman.getPosition().y + (TILE_SIZE / 2.f)) / m_tileSizeY);
+  auto col = floor(static_cast<int>(m_pacman.getPosition().x + (TILE_SIZE / 2.f)) / m_tileSizeX);
+  auto whatDidPacmanEat = m_labyrinth.at(row, col);
+  if (whatDidPacmanEat == Labyrinth::PELLET)
+    m_labyrinth.set(row, col, Labyrinth::EMPTY);
 }
 
 void GameManager::updateWindow()
