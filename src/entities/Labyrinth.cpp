@@ -18,10 +18,13 @@ Labyrinth::Labyrinth()
     }),
     m_labyrinthRows(LABYRINTH_ROWS),
     m_labyrinthCols(LABYRINTH_COLS),
-    m_labyrinthTileSize(TILE_SIZE)
+    m_labyrinthTileSize(TILE_SIZE),
+    m_wallTile(sf::RectangleShape(sf::Vector2f(TILE_SIZE, TILE_SIZE))),
+    m_pellet(sf::CircleShape(3.f))
+
 {
-  m_wallTile = sf::RectangleShape(sf::Vector2f(TILE_SIZE, TILE_SIZE));
   m_wallTile.setFillColor(sf::Color::Blue);
+  m_pellet.setFillColor(sf::Color(255, 255, 191)); // "faint yellow, #FFFFBF"
 }
 
 Labyrinth::Tile Labyrinth::at(int x, int y) const
@@ -67,9 +70,21 @@ void Labyrinth::draw(std::shared_ptr<sf::RenderWindow> pGameWindow)
         case Labyrinth::WALL:
           m_wallTile.setPosition(sf::Vector2f(TILE_SIZE * col, TILE_SIZE * row));
           pGameWindow->draw(m_wallTile);
-        case Labyrinth::GATE:
+          break;
         case Labyrinth::PELLET:
+        { // EXPLAIN: new scope is needed for declaring a variable in
+          //          a case that might not be invoked at runtime, causing
+          //          why,
+          // float x = ((TILE_SIZE * col) / 2.f) - m_pellet.getRadius();
+          // float y = ((TILE_SIZE * row) / 2.f) - m_pellet.getRadius();
+          auto x = TILE_SIZE * col + TILE_SIZE / 2.f - m_pellet.getRadius();
+          auto y = TILE_SIZE * row + TILE_SIZE / 2.f - m_pellet.getRadius();
+          m_pellet.setPosition(sf::Vector2f(x, y));
+          pGameWindow->draw(m_pellet);
+        }
+          break;
         case Labyrinth::POWERUP:
+        case Labyrinth::GATE:
           break;
         default:
           break;

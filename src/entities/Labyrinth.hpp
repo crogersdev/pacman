@@ -31,6 +31,7 @@ public:
   int m_labyrinthCols;
   float m_labyrinthTileSize;
   sf::RectangleShape m_wallTile;
+  sf::CircleShape m_pellet;
 
   Tile at(int, int) const;
   Tile at(std::pair<int, int>) const;
