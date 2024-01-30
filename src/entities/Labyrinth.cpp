@@ -111,7 +111,7 @@ void Labyrinth::set(sf::Vector2f pos, Tile entity)
   m_labyrinth[coords.first][coords.second] = entity;
 }
 
-void Labyrinth::set(int row, int col, Tile entity)
+void Labyrinth::set(int x, int y, Tile entity)
 {
-  m_labyrinth[row][col] = entity;
+  m_labyrinth[y][x] = entity;
 }

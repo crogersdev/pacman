@@ -70,9 +70,9 @@ void GameManager::updateEntities()
   
   auto row = floor(static_cast<int>(m_pacman.getPosition().y + (TILE_SIZE / 2.f)) / m_tileSizeY);
   auto col = floor(static_cast<int>(m_pacman.getPosition().x + (TILE_SIZE / 2.f)) / m_tileSizeX);
-  auto whatDidPacmanEat = m_labyrinth.at(row, col);
+  auto whatDidPacmanEat = m_labyrinth.at(col, row);
   if (whatDidPacmanEat == Labyrinth::PELLET)
-    m_labyrinth.set(row, col, Labyrinth::EMPTY);
+    m_labyrinth.set(col, row, Labyrinth::EMPTY);
 }
 
 void GameManager::updateWindow()
@@ -86,7 +86,9 @@ void GameManager::updateWindow()
   auto row = floor(static_cast<int>(m_pacman.getPosition().y) / m_tileSizeY);
   auto col = floor(static_cast<int>(m_pacman.getPosition().x) / m_tileSizeX);
   oss << "Row: " << row << "  Col: " << col << "\n";
-  oss << "Map LUT at " << row << ", " << col << ": " << m_labyrinth.at(row, col) << "\n";
+  auto bar = m_labyrinth.at(col, row);
+  auto foo = m_labyrinth.m_tileLabelLut.at(bar);
+  oss << "Map LUT at " << col << ", " << row << ": " << foo << "\n";
   m_debugText.setString(oss.str());
 
   m_pGameWindow->clear();
