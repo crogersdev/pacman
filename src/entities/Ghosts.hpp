@@ -11,7 +11,8 @@
 class Ghost
 {
 public:
-  Ghost(float);
+  // NOTE: apparently single arg ctors _should_ be explicit.
+  explicit Ghost(float);
   ~Ghost();
 
   float m_meanderOdds;

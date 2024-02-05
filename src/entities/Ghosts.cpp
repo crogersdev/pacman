@@ -94,15 +94,14 @@ void Ghost::meander(const Labyrinth &rLabyrinth)
     static_cast<float>(y2 - y1)
   );
 
-  auto currentDirection = directionVecToDirection(calculatedDirection);
   auto turns = availableTurns(m_ghostShape.getPosition(), calculatedDirection, rLabyrinth);
 
   if (ghostOccupiesSingleTile && turns.size() > 2)
    {
-    unsigned int newDirection;
     bool doesGhostTurn = (m_randGenerator() % 100) <= m_meanderOdds;
     if (doesGhostTurn)
     {
+      unsigned int newDirection;
       newDirection = m_randGenerator() % turns.size();
       changeDirection(turns.at(newDirection));
       m_ghostShape.setPosition(newPosition);
@@ -120,8 +119,8 @@ void Ghost::meander(const Labyrinth &rLabyrinth)
   {
     auto newDirection = static_cast<Direction>(m_randGenerator() % 4);
     changeDirection(newDirection);
-    auto newPosition = m_ghostShape.getPosition() + m_movement;
-    bool wallCollision = wallCollides(
+    newPosition = m_ghostShape.getPosition() + m_movement;
+    wallCollision = wallCollides(
       newPosition,
       sf::Vector2f(24.f, 24.f),
       rLabyrinth
