@@ -111,12 +111,14 @@ void Labyrinth::set(sf::Vector2f pos, Tile entity)
   m_labyrinth[coords.first][coords.second] = entity;
 }
 
-void Labyrinth::set(int x, int y, Tile entity)
+void Labyrinth::set(int row, int col, Tile entity)
 {
   // EXPLAIN: when pacman goes through his tunnel we have a possible
-  //          scenario where the y coord is 0 and then -1, and we
+  //          scenario where the x coord is 0 and then -1, or 29 and we
   //          don't ever want to set the labyrinth tile at that
   //          position to anything at all
-  if (x == 14 && y == 28) std::cout << "ALERT ALERT ALERT\n";
-  m_labyrinth[y][x] = entity;
+  if (col == 29)
+    return;
+
+  m_labyrinth[row][col] = entity;
 }

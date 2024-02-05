@@ -73,7 +73,7 @@ void GameManager::updateEntities()
   auto whatDidPacmanEat = m_labyrinth.at(col, row);
   if (whatDidPacmanEat == Labyrinth::PELLET)
   {
-    m_labyrinth.set(col, row, Labyrinth::EMPTY);
+    m_labyrinth.set(row, col, Labyrinth::EMPTY);
   }
 }
 

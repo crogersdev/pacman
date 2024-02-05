@@ -84,10 +84,8 @@ void Ghost::meander(const Labyrinth &rLabyrinth)
   // we pop on the other side of the labyrinth, we do it by wrapping the
   // coordinates.  this messes up the direction vector, so 
   // our availableTurns and directionVecToDirection get messed up as well
-  //auto x2 = fmod(newPosition.x + maxLabyrinthWidth, maxLabyrinthWidth);
-  //auto y2 = fmod(newPosition.y + maxLabyrinthHeight, maxLabyrinthHeight);
-  auto x2 = newPosition.x;
-  auto y2 = newPosition.y;
+  auto x2 = fmod(newPosition.x + maxLabyrinthWidth, maxLabyrinthWidth);
+  auto y2 = fmod(newPosition.y + maxLabyrinthHeight, maxLabyrinthHeight);
   auto x1 = m_ghostShape.getPosition().x;
   auto y1 = m_ghostShape.getPosition().y;
 
