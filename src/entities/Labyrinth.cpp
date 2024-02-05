@@ -117,7 +117,7 @@ void Labyrinth::set(int row, int col, Tile entity)
   //          scenario where the x coord is 0 and then -1, or 29 and we
   //          don't ever want to set the labyrinth tile at that
   //          position to anything at all
-  if (col == 29)
+  if (col == 29 || col <= -1)
     return;
 
   m_labyrinth[row][col] = entity;
