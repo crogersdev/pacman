@@ -11,7 +11,7 @@ Ghost::Ghost(float speed)
     m_speed(speed),
     m_ghostShape(sf::Vector2f(25.f, 25.f)),
     m_movement(sf::Vector2f(1.f, 0.f)),
-    m_position(sf::Vector2f(650.f, 350.f)),
+    m_position(sf::Vector2f(2.f * TILE_SIZE, TILE_SIZE)),
     m_direction(RIGHT),
     m_state(MEANDER)
 {
@@ -106,19 +106,6 @@ void Ghost::meander(const Labyrinth &rLabyrinth)
     if (doesGhostTurn)
     {
       newDirection = m_randGenerator() % turns.size();
-
-      /*
-      // EXPLAIN:
-      // this is how we make sure we're going in an opposite direction
-      auto foo = turns.at(newDirection);
-      if (foo == 0 && currentDirection == 1 ||
-          foo == 1 && currentDirection == 0 ||
-          foo == 2 && currentDirection == 3 ||
-          foo == 3 && currentDirection == 2) {
-        std::cout << "opposite direction, baby!\n";
-      }
-      */
-
       changeDirection(turns.at(newDirection));
       m_ghostShape.setPosition(newPosition);
       return;
@@ -134,17 +121,6 @@ void Ghost::meander(const Labyrinth &rLabyrinth)
   while (wallCollision)
   {
     auto newDirection = static_cast<Direction>(m_randGenerator() % 4);
-    
-    /*
-    // EXPLAIN:
-    // this is how we make sure we're going in an opposite direction
-    auto foo = newDirection;
-    if (foo == 0 && currentDirection == 1 ||
-        foo == 1 && currentDirection == 0 ||
-        foo == 2 && currentDirection == 3 ||
-        foo == 3 && currentDirection == 2) { }
-    */
-
     changeDirection(newDirection);
     auto newPosition = m_ghostShape.getPosition() + m_movement;
     bool wallCollision = wallCollides(
