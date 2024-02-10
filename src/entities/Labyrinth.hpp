@@ -14,7 +14,7 @@ class Labyrinth
 public:
   enum Tile {
     EMPTY   = ' ',
-    GATE    = '-',
+    GATE    = '-', 
     WALL    = '#',
     PELLET  = '.',
     POWERUP = '@',
