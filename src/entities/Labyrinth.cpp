@@ -16,15 +16,30 @@ Labyrinth::Labyrinth()
       {'C', Labyrinth::CLYDE},
       {'-', Labyrinth::GATE}
     }),
+    m_tileLabelLut({
+      {Labyrinth::EMPTY, "Empty"},
+      {Labyrinth::WALL, "Wall"},
+      {Labyrinth::PELLET, "Pellet"},
+      {Labyrinth::POWERUP, "Powerup"},
+      {Labyrinth::PACMAN, "Pacman"},
+      {Labyrinth::BLINKY, "Blinky"},
+      {Labyrinth::PINKY, "Pinky"},
+      {Labyrinth::INKY, "Inky"},
+      {Labyrinth::CLYDE, "Clyde"},
+      {Labyrinth::GATE, "Gate"}
+    }),
     m_labyrinthRows(LABYRINTH_ROWS),
     m_labyrinthCols(LABYRINTH_COLS),
-    m_labyrinthTileSize(TILE_SIZE)
-{}
+    m_labyrinthTileSize(TILE_SIZE),
+    m_wallTile(sf::RectangleShape(sf::Vector2f(TILE_SIZE, TILE_SIZE))),
+    m_pellet(sf::CircleShape(3.f))
+{
+  m_wallTile.setFillColor(sf::Color::Blue);
+  m_pellet.setFillColor(sf::Color(255, 255, 191)); // "faint yellow, #FFFFBF"
+}
 
 Labyrinth::Tile Labyrinth::at(int x, int y) const
 {
-  // NOTE: x is a column
-  //       y is a row
   if (x <= 0)
     x = 0;
   if (y <= 0)
@@ -35,22 +50,58 @@ Labyrinth::Tile Labyrinth::at(int x, int y) const
     y = LABYRINTH_ROWS - 1;
 
   char tile = static_cast<char>(m_labyrinth[y][x]);
-  Tile foo;
+  Tile t;
   try
   {
-    foo = m_tileLut.at(tile);
+    t = m_tileLut.at(tile);
   }
   catch (std::out_of_range& exc)
   {
     std::cout << "oh no!  failed to access m_labyrinth[" << y << "][" << x << "]\n";
   }
-  return foo;
+  return t;
 }
 
 Labyrinth::Tile Labyrinth::at(std::pair<int, int> coords) const
 {
   // TODO: do i need "this", e.g. this.at() ?
   return at(coords.first, coords.second);
+}
+
+void Labyrinth::draw(std::shared_ptr<sf::RenderWindow> pGameWindow)
+{
+  for (int row = 0; row < m_labyrinthRows; ++row)
+  {
+    for (int col = 0; col < m_labyrinthCols; ++col)
+    {
+      auto tile = at(col, row);
+      switch(tile) {
+        case Labyrinth::WALL:
+          m_wallTile.setPosition(sf::Vector2f(TILE_SIZE * col, TILE_SIZE * row));
+          pGameWindow->draw(m_wallTile);
+          break;
+        case Labyrinth::PELLET:
+        { // EXPLAIN: new scope is needed for declaring a variable in
+          //          a case that might not be invoked at runtime, causing
+          //          some weird memory errors because we'd be avoiding 
+          //          an outcome of executing this program
+          //          where the variables were not initialized - and
+          //          in C++ you must initialize variables that are used
+          //          in switch statements
+          auto x = TILE_SIZE * col + TILE_SIZE / 2.f - m_pellet.getRadius();
+          auto y = TILE_SIZE * row + TILE_SIZE / 2.f - m_pellet.getRadius();
+          m_pellet.setPosition(sf::Vector2f(x, y));
+          pGameWindow->draw(m_pellet);
+        }
+          break;
+        case Labyrinth::POWERUP:
+        case Labyrinth::GATE:
+          break;
+        default:
+          break;
+      }
+    }
+  }
 }
 
 void Labyrinth::set(sf::Vector2f pos, Tile entity)
@@ -62,5 +113,12 @@ void Labyrinth::set(sf::Vector2f pos, Tile entity)
 
 void Labyrinth::set(int row, int col, Tile entity)
 {
-  m_labyrinth[col][row] = entity;
+  // EXPLAIN: when pacman goes through his tunnel we have a possible
+  //          scenario where the x coord is 0 and then -1, or 29 and we
+  //          don't ever want to set the labyrinth tile at that
+  //          position to anything at all
+  if (col == 29 || col <= -1)
+    return;
+
+  m_labyrinth[row][col] = entity;
 }

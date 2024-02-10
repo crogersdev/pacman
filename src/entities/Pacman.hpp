@@ -10,11 +10,10 @@
 class Pacman
 {
 public:
-  Pacman(std::shared_ptr<sf::RenderWindow>, float, float, sf::Vector2f);
+  Pacman(float, float, sf::Vector2f);
   ~Pacman();
 
-  void draw();
-  //void move(sf::Vector2f, sf::Clock &, const Labyrinth &);
+  void draw(std::shared_ptr<sf::RenderWindow>);
   void move(sf::Vector2f, sf::Time, const Labyrinth &);
   sf::Vector2f getPosition();
 
@@ -25,6 +24,7 @@ public:
   operator const sf::Shape&() const { return m_pacman; }
 
 private:
+  int m_guys;
   float m_speed;
   float m_radius;
   sf::CircleShape m_pacman;

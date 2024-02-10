@@ -14,7 +14,7 @@ class Labyrinth
 public:
   enum Tile {
     EMPTY   = ' ',
-    GATE    = '-',
+    GATE    = '-', 
     WALL    = '#',
     PELLET  = '.',
     POWERUP = '@',
@@ -26,25 +26,28 @@ public:
   };
 
   std::map<char, Tile> m_tileLut;
+  std::map<Tile, std::string> m_tileLabelLut;
 
   int m_labyrinthRows;
   int m_labyrinthCols;
   float m_labyrinthTileSize;
+  sf::RectangleShape m_wallTile;
+  sf::CircleShape m_pellet;
 
   Tile at(int, int) const;
   Tile at(std::pair<int, int>) const;
+  void draw(std::shared_ptr<sf::RenderWindow>);
   void set(sf::Vector2f, Tile);
   void set(int, int, Tile);
-  void draw(); // todo: implement me, i'm currently in game manager
 
   Labyrinth();
 
 private:
 
   std::array<std::array<char, LABYRINTH_COLS>, LABYRINTH_ROWS> m_labyrinth = {
-    "############################",   // this is row 0
-    "#............##............#",   // this is row 1
-    "#.####.#####.##.#####.####.#",   // this is row 2
+    "############################",
+    "#............##............#",
+    "#.####.#####.##.#####.####@#",
     "#@#  #.#   #.##.#   #.#  #@#",
     "#.####.#####.##.#####.####.#",
     "#..........................#",

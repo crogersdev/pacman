@@ -9,7 +9,6 @@ std::vector<Direction> availableTurns(
   const Labyrinth &rLabyrinth)
 {
   auto coords = tileCoordsAtPosition(currentPosition);
-  auto dir = directionVecToDirection(currentDirection);
 
   std::vector<Direction> turns;
 
