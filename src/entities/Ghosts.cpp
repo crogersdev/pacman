@@ -139,5 +139,5 @@ void Ghost::meander(const Labyrinth &rLabyrinth)
   m_ghostShape.setPosition(newPosition);
 }
 
-//void Ghost::scatter() {}
+void Ghost::scatter() {}
 

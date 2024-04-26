@@ -22,7 +22,7 @@ public:
   void draw(std::shared_ptr<sf::RenderWindow>);
   sf::Vector2f getPosition();
   void meander(const Labyrinth &);
-  //void scatter();
+  void scatter();
 
   // conversion methods so we don't have to write a getter for
   // the ghost shape when we use the collides(sf::Shape, sf::Shape)
