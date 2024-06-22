@@ -52,7 +52,7 @@ private:
       score.setFillColor(sf::Color::White);
       score.setPosition(10.f, TILE_SIZE * LABYRINTH_ROWS + 10.f);
 
-      for (unsigned int g; g < numGuys; ++g)
+      for (unsigned int g = 0; g < numGuys; ++g)
       {
         guys[g].setRadius(12.f);
         guys[g].setFillColor(sf::Color::Yellow);

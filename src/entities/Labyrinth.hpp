@@ -1,20 +1,22 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
-
 #include <array>
+#include <map>
 #include <memory>
+#include <string>
+#include <utility>
+
+#include <SFML/Graphics.hpp>
 
 const int   LABYRINTH_ROWS = 31;
 const int   LABYRINTH_COLS = 29;
 const float TILE_SIZE = 25.f;
 
-class Labyrinth
-{
+class Labyrinth {
 public:
   enum Tile {
     EMPTY   = ' ',
-    GATE    = '-', 
+    GATE    = '-',
     WALL    = '#',
     PELLET  = '.',
     POWERUP = '@',
@@ -34,6 +36,10 @@ public:
   sf::RectangleShape m_wallTile;
   sf::CircleShape m_pellet;
 
+  int getOffset(std::pair<int, int>) const;
+  int getOffset(int, int) const;
+  int getOffset(sf::Vector2f) const;
+  std::pair<int, int> at(sf::Vector2f) const;
   Tile at(int, int) const;
   Tile at(std::pair<int, int>) const;
   void draw(std::shared_ptr<sf::RenderWindow>);
@@ -43,7 +49,6 @@ public:
   Labyrinth();
 
 private:
-
   std::array<std::array<char, LABYRINTH_COLS>, LABYRINTH_ROWS> m_labyrinth = {
     "############################",
     "#............##............#",

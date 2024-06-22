@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "Labyrinth.hpp"
+#include "./Labyrinth.hpp"
 #include "../helpers/TileCoordConversion.hpp"
 
 Labyrinth::Labyrinth()
@@ -32,14 +32,32 @@ Labyrinth::Labyrinth()
     m_labyrinthCols(LABYRINTH_COLS),
     m_labyrinthTileSize(TILE_SIZE),
     m_wallTile(sf::RectangleShape(sf::Vector2f(TILE_SIZE, TILE_SIZE))),
-    m_pellet(sf::CircleShape(3.f))
-{
+    m_pellet(sf::CircleShape(3.f)) {
   m_wallTile.setFillColor(sf::Color::Blue);
-  m_pellet.setFillColor(sf::Color(255, 255, 191)); // "faint yellow, #FFFFBF"
+  m_pellet.setFillColor(sf::Color(255, 255, 191));  // "faint yellow, #FFFFBF"
 }
 
-Labyrinth::Tile Labyrinth::at(int x, int y) const
-{
+int Labyrinth::getOffset(std::pair<int, int> position) const {
+  return (position.first * m_labyrinthRows) + position.second;
+}
+
+int Labyrinth::getOffset(int row, int col) const {
+  return getOffset(std::pair<int, int>(row, col));
+}
+
+int Labyrinth::getOffset(sf::Vector2f position) const {
+  std::pair<int, int> coords = at(position);
+  return getOffset(coords);
+}
+
+std::pair<int, int> Labyrinth::at(sf::Vector2f position) const {
+  int row = std::floor(position.y / static_cast<float>(m_labyrinthRows));
+  int col = std::floor(position.x / static_cast<float>(m_labyrinthCols));
+
+  return std::pair<int, int>(row, col);
+}
+
+Labyrinth::Tile Labyrinth::at(int x, int y) const {
   if (x <= 0)
     x = 0;
   if (y <= 0)
@@ -51,31 +69,25 @@ Labyrinth::Tile Labyrinth::at(int x, int y) const
 
   char tile = static_cast<char>(m_labyrinth[y][x]);
   Tile t;
-  try
-  {
+  try {
     t = m_tileLut.at(tile);
   }
-  catch (std::out_of_range& exc)
-  {
+  catch (std::out_of_range& exc) {
     std::cout << "oh no!  failed to access m_labyrinth[" << y << "][" << x << "]\n";
   }
   return t;
 }
 
-Labyrinth::Tile Labyrinth::at(std::pair<int, int> coords) const
-{
-  // TODO: do i need "this", e.g. this.at() ?
+Labyrinth::Tile Labyrinth::at(std::pair<int, int> coords) const {
+  // TODO(crogers): do i need "this", e.g. this.at() ?
   return at(coords.first, coords.second);
 }
 
-void Labyrinth::draw(std::shared_ptr<sf::RenderWindow> pGameWindow)
-{
-  for (int row = 0; row < m_labyrinthRows; ++row)
-  {
-    for (int col = 0; col < m_labyrinthCols; ++col)
-    {
+void Labyrinth::draw(std::shared_ptr<sf::RenderWindow> pGameWindow) {
+  for (int row = 0; row < m_labyrinthRows; ++row) {
+    for (int col = 0; col < m_labyrinthCols; ++col) {
       auto tile = at(col, row);
-      switch(tile) {
+      switch (tile) {
         case Labyrinth::WALL:
           m_wallTile.setPosition(sf::Vector2f(TILE_SIZE * col, TILE_SIZE * row));
           pGameWindow->draw(m_wallTile);
@@ -83,7 +95,7 @@ void Labyrinth::draw(std::shared_ptr<sf::RenderWindow> pGameWindow)
         case Labyrinth::PELLET:
         { // EXPLAIN: new scope is needed for declaring a variable in
           //          a case that might not be invoked at runtime, causing
-          //          some weird memory errors because we'd be avoiding 
+          //          some weird memory errors because we'd be avoiding
           //          an outcome of executing this program
           //          where the variables were not initialized - and
           //          in C++ you must initialize variables that are used
@@ -104,15 +116,13 @@ void Labyrinth::draw(std::shared_ptr<sf::RenderWindow> pGameWindow)
   }
 }
 
-void Labyrinth::set(sf::Vector2f pos, Tile entity)
-{
+void Labyrinth::set(sf::Vector2f pos, Tile entity) {
   auto coords = tileCoordsAtPosition(pos);
 
   m_labyrinth[coords.first][coords.second] = entity;
 }
 
-void Labyrinth::set(int row, int col, Tile entity)
-{
+void Labyrinth::set(int row, int col, Tile entity) {
   // EXPLAIN: when pacman goes through his tunnel we have a possible
   //          scenario where the x coord is 0 and then -1, or 29 and we
   //          don't ever want to set the labyrinth tile at that

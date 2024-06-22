@@ -1,74 +1,101 @@
 #include <chrono>
 #include <iostream>
-#include <vector>
+#include <map>
+#include <optional>
+#include <queue>
 #include <unordered_set>
+#include <utility>
+#include <vector>
 
-#include "Ghosts.hpp"
+#include "./Ghosts.hpp"
 #include "../helpers/Collisions.hpp"
 
-Ghost::Ghost(float speed)
-  : m_meanderOdds(66.6),
-    m_speed(speed),
-    m_ghostShape(sf::Vector2f(25.f, 25.f)),
-    m_movement(sf::Vector2f(1.f, 0.f)),
-    m_position(sf::Vector2f(2.f * TILE_SIZE, TILE_SIZE)),
-    m_direction(RIGHT),
-    m_state(MEANDER)
-{
-  m_seed = std::chrono::system_clock::now().time_since_epoch().count(),
-  m_randGenerator = std::mt19937(m_seed);
-  m_ghostShape.setFillColor(sf::Color(219, 48, 130));
-  m_ghostShape.setPosition(m_position);
+Ghost::Ghost(float speed, bool debugMode)
+  : mDebugMode(debugMode),
+    mMeanderOdds(66.6),
+    mSpeed(speed),
+    mGhostShape(sf::Vector2f(25.f, 25.f)),
+    mMovement(sf::Vector2f(1.f, 0.f)),
+    mPosition(sf::Vector2f(2.f * TILE_SIZE, TILE_SIZE)),
+    mDirection(RIGHT),
+    mState(MEANDER) {
+  mSeed = std::chrono::system_clock::now().time_since_epoch().count();
+  mRandGenerator = std::mt19937(mSeed);
+  mGhostShape.setFillColor(sf::Color(219, 48, 130));
+  mGhostShape.setPosition(mPosition);
+
+  #ifndef NDEBUG
+    mDebugMode = true;
+  #endif
 }
 
 Ghost::~Ghost() {}
 
-void Ghost::chase() {}
+void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
+  if (mDebugMode) {
+    std::cout << "chasing!\n";
+  }
 
-void Ghost::changeDirection(Direction newDirection)
-{
-  switch(newDirection)
-  {
+  std::priority_queue<TileScore, std::vector<TileScore>, OrderByScore> frontier;
+  int offset = rLabyrinth.getOffset(mPosition);
+  frontier.push(TileScore(offset, 0));
+
+  std::map<int, std::optional<int>> cameFrom;
+  std::map<int, int> costSoFar;
+
+  cameFrom[offset] = NULL;
+  costSoFar[offset] = 0;
+
+  while (!frontier.empty()) {
+    TileScore current = frontier.top();
+    if (current.positionOffset == rLabyrinth.getOffset(target)) {
+      break;
+    }
+
+    frontier.pop();
+  }
+}
+
+
+void Ghost::changeDirection(Direction newDirection) {
+  switch (newDirection) {
     case DOWN:
-      m_movement = sf::Vector2f(0.f,  1.f);
+      mMovement = sf::Vector2f(0.f,  1.f);
       break;
     case UP:
-      m_movement = sf::Vector2f(0.f, -1.f);
+      mMovement = sf::Vector2f(0.f, -1.f);
       break;
     case RIGHT:
-      m_movement = sf::Vector2f(1.f,  0.f);
+      mMovement = sf::Vector2f(1.f,  0.f);
       break;
     case LEFT:
-      m_movement = sf::Vector2f(-1.f, 0.f); 
+      mMovement = sf::Vector2f(-1.f, 0.f);
       break;
   }
 }
 
-void Ghost::draw(std::shared_ptr<sf::RenderWindow> pGameWindow)
-{
-  pGameWindow->draw(m_ghostShape);
+void Ghost::draw(std::shared_ptr<sf::RenderWindow> pGameWindow) {
+  pGameWindow->draw(mGhostShape);
 }
 
-sf::Vector2f Ghost::getPosition()
-{ 
-  return m_ghostShape.getPosition();
+sf::Vector2f Ghost::getPosition() {
+  return mGhostShape.getPosition();
 }
 
-void Ghost::meander(const Labyrinth &rLabyrinth)
-{
+void Ghost::meander(const Labyrinth &rLabyrinth) {
   // EXPLAIN:
   // let's check for a collision
-  auto newPosition = m_ghostShape.getPosition() + m_movement;
+  auto newPosition = mGhostShape.getPosition() + mMovement;
 
   // EXPLAIN:
   // first check to see if we have any available turns, before we start moving
   // let's do this by assuring ourselves that the ghost is in a single tile
   // and that it has turns available
-  auto ghostSizeX = m_ghostShape.getGlobalBounds().width;
-  auto ghostSizeY = m_ghostShape.getGlobalBounds().height;
+  auto ghostSizeX = mGhostShape.getGlobalBounds().width;
+  auto ghostSizeY = mGhostShape.getGlobalBounds().height;
 
-  auto isTileX = m_ghostShape.getPosition().x / TILE_SIZE;
-  auto isTileY = m_ghostShape.getPosition().y / TILE_SIZE; 
+  auto isTileX = mGhostShape.getPosition().x / TILE_SIZE;
+  auto isTileY = mGhostShape.getPosition().y / TILE_SIZE;
   bool ghostOccupiesSingleTile = (floor(isTileX) == isTileX && floor(isTileY) == isTileY);
 
   // EXPLAIN:
@@ -82,29 +109,26 @@ void Ghost::meander(const Labyrinth &rLabyrinth)
   // EXPLAIN:
   // when we calculate the direction across the open 'tunnel' where
   // we pop on the other side of the labyrinth, we do it by wrapping the
-  // coordinates.  this messes up the direction vector, so 
+  // coordinates.  this messes up the direction vector, so
   // our availableTurns and directionVecToDirection get messed up as well
   auto x2 = fmod(newPosition.x + maxLabyrinthWidth, maxLabyrinthWidth);
   auto y2 = fmod(newPosition.y + maxLabyrinthHeight, maxLabyrinthHeight);
-  auto x1 = m_ghostShape.getPosition().x;
-  auto y1 = m_ghostShape.getPosition().y;
+  auto x1 = mGhostShape.getPosition().x;
+  auto y1 = mGhostShape.getPosition().y;
 
   auto calculatedDirection = sf::Vector2f(
     static_cast<float>(x2 - x1),
-    static_cast<float>(y2 - y1)
-  );
+    static_cast<float>(y2 - y1));
 
-  auto turns = availableTurns(m_ghostShape.getPosition(), calculatedDirection, rLabyrinth);
+  auto turns = availableTurns(mGhostShape.getPosition(), calculatedDirection, rLabyrinth);
 
-  if (ghostOccupiesSingleTile && turns.size() > 2)
-   {
-    bool doesGhostTurn = (m_randGenerator() % 100) <= m_meanderOdds;
-    if (doesGhostTurn)
-    {
+  if (ghostOccupiesSingleTile && turns.size() > 2) {
+    bool doesGhostTurn = (mRandGenerator() % 100) <= mMeanderOdds;
+    if (doesGhostTurn) {
       unsigned int newDirection;
-      newDirection = m_randGenerator() % turns.size();
+      newDirection = mRandGenerator() % turns.size();
       changeDirection(turns.at(newDirection));
-      m_ghostShape.setPosition(newPosition);
+      mGhostShape.setPosition(newPosition);
       return;
     }
   }
@@ -112,31 +136,27 @@ void Ghost::meander(const Labyrinth &rLabyrinth)
   bool wallCollision = wallCollides(
     newPosition,
     sf::Vector2f(24.f, 24.f),
-    rLabyrinth
-  );
+    rLabyrinth);
 
-  while (wallCollision)
-  {
-    auto newDirection = static_cast<Direction>(m_randGenerator() % 4);
+  while (wallCollision) {
+    auto newDirection = static_cast<Direction>(mRandGenerator() % 4);
     changeDirection(newDirection);
-    newPosition = m_ghostShape.getPosition() + m_movement;
+    newPosition = mGhostShape.getPosition() + mMovement;
     wallCollision = wallCollides(
       newPosition,
       sf::Vector2f(24.f, 24.f),
-      rLabyrinth
-    );
+      rLabyrinth);
 
-    if (!wallCollision)
-    {
-      m_ghostShape.setPosition(newPosition);
+    if (!wallCollision) {
+      mGhostShape.setPosition(newPosition);
       return;
     }
   }
 
   // EXPLAIN:
-  // if we've gotten here, we didn't take a turn nor did we collide with a wall.  
+  // if we've gotten here, we didn't take a turn nor did we collide with a wall.
   // if we didn't take a turn, it's because we rolled the dice and kept going
-  m_ghostShape.setPosition(newPosition);
+  mGhostShape.setPosition(newPosition);
 }
 
 void Ghost::scatter() {}

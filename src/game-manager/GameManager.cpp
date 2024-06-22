@@ -69,7 +69,8 @@ void GameManager::handleInputs()
 
 void GameManager::updateEntities()
 {
-  m_pinky.meander(m_labyrinth);
+  //m_pinky.meander(m_labyrinth);
+  m_pinky.chase(m_labyrinth, m_pacman.getPosition());
 
   if (entityCollides(m_pinky, m_pacman))
     std::cout << "YOU AND I COLLIDE\n";
