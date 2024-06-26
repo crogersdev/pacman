@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <list>
 #include <map>
 #include <memory>
 #include <string>
@@ -39,6 +40,11 @@ public:
   int getOffset(std::pair<int, int>) const;
   int getOffset(int, int) const;
   int getOffset(sf::Vector2f) const;
+  std::list<int> getNeighbors(int) const;
+
+  std::pair<int, int> getPairFromOffset(int) const;
+  sf::Vector2f getSfVecFromOFfset(int) const;
+
   std::pair<int, int> at(sf::Vector2f) const;
   Tile at(int, int) const;
   Tile at(std::pair<int, int>) const;

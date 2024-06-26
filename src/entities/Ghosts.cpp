@@ -48,11 +48,16 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
 
   while (!frontier.empty()) {
     TileScore current = frontier.top();
-    if (current.positionOffset == rLabyrinth.getOffset(target)) {
-      break;
-    }
-
     frontier.pop();
+
+    if (current.positionOffset == rLabyrinth.getOffset(target))
+      break;
+
+    for (auto neighbor : rLabyrinth.getNeighbors(current.positionOffset)) {
+      auto foo = rLabyrinth.getPairFromOffset(current.positionOffset);
+      std::cout << "neighbors: (" << foo.first << "), (" << foo.second << "), ";
+    }
+    std::cout << "\n";
   }
 }
 

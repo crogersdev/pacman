@@ -50,6 +50,38 @@ int Labyrinth::getOffset(sf::Vector2f position) const {
   return getOffset(coords);
 }
 
+std::list<int> Labyrinth::getNeighbors(int offset) const {
+  std::pair<int, int> coords = getPairFromOffset(offset);
+  auto c = coords.first;
+  auto r = coords.second;
+  std::list<int> neighbors;
+
+  for (int col = -1; col < 2; ++col) {
+    for (int row = -1; row < 2; ++row) {
+      if ((c + col < 0 || c + col > m_labyrinthCols) ||
+          (r + row < 0 || r + row > m_labyrinthRows)) {
+        continue;
+      }
+      auto n = m_labyrinth[c+col][r+row];
+      if ((n != Tile::GATE) || (n != Tile::WALL))
+        neighbors.push_back(getOffset(r+row, c+col));
+    }
+  }
+  return neighbors;
+}
+
+std::pair<int, int> Labyrinth::getPairFromOffset(int offset) const {
+  int col = offset % m_labyrinthCols;
+  int row = std::floor(offset / m_labyrinthRows);
+  return std::pair<int, int>(col, row);
+}
+
+sf::Vector2f Labyrinth::getSfVecFromOFfset(int offset) const {
+  int col = offset % m_labyrinthCols;
+  int row = std::floor(offset / m_labyrinthRows);
+  return sf::Vector2f(col, row);
+}
+
 std::pair<int, int> Labyrinth::at(sf::Vector2f position) const {
   int row = std::floor(position.y / static_cast<float>(m_labyrinthRows));
   int col = std::floor(position.x / static_cast<float>(m_labyrinthCols));
