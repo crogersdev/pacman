@@ -56,10 +56,8 @@ void GameManager::handleInputs()
 
   m_deltaTime = m_clock.restart();
 
-  for (const auto& pair : m_keyActions)
-  {
-    if (sf::Keyboard::isKeyPressed(pair.first))
-    {
+  for (const auto& pair : m_keyActions) {
+    if (sf::Keyboard::isKeyPressed(pair.first)) {
       // note: this invokes the lambdas defined in
       //       the ctor that move pacman
       pair.second(m_deltaTime);
@@ -67,25 +65,23 @@ void GameManager::handleInputs()
   }
 }
 
-void GameManager::updateEntities()
-{
-  m_pinky.meander(m_labyrinth);
+void GameManager::updateEntities() {
+  //  m_pinky.meander(m_labyrinth);
+  m_pinky.chase(m_labyrinth, m_pacman.getPosition());
 
   if (entityCollides(m_pinky, m_pacman))
     std::cout << "YOU AND I COLLIDE\n";
-  
+
   auto row = floor(static_cast<int>(m_pacman.getPosition().y + (TILE_SIZE / 2.f)) / m_tileSizeY);
   auto col = floor(static_cast<int>(m_pacman.getPosition().x + (TILE_SIZE / 2.f)) / m_tileSizeX);
   auto whatDidPacmanEat = m_labyrinth.at(col, row);
-  if (whatDidPacmanEat == Labyrinth::PELLET)
-  {
+  if (whatDidPacmanEat == Labyrinth::PELLET) {
     m_score += m_pelletValue;
     m_labyrinth.set(row, col, Labyrinth::EMPTY);
   }
 }
 
-void GameManager::updateWindow()
-{
+void GameManager::updateWindow() {
   sf::Time elapsed = m_clock.restart();
   m_fps = 1.f / elapsed.asSeconds();
 
