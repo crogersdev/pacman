@@ -83,8 +83,8 @@ sf::Vector2f Labyrinth::getSfVecFromOFfset(int offset) const {
 }
 
 std::pair<int, int> Labyrinth::at(sf::Vector2f position) const {
-  int row = std::floor(position.y / static_cast<float>(m_labyrinthRows));
-  int col = std::floor(position.x / static_cast<float>(m_labyrinthCols));
+  int row = std::floor(static_cast<int>(position.y) / TILE_SIZE);
+  int col = std::floor(static_cast<int>(position.x) / TILE_SIZE);
 
   return std::pair<int, int>(row, col);
 }

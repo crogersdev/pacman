@@ -45,7 +45,7 @@ private:
       debugText.setFont(font);
       debugText.setCharacterSize(18);
       debugText.setFillColor(sf::Color::White);
-      debugText.setPosition(10.f, TILE_SIZE * LABYRINTH_ROWS + 35.f);
+      debugText.setPosition(10.f, TILE_SIZE * LABYRINTH_ROWS + 36.f);
 
       score.setFont(font);
       score.setCharacterSize(22);
@@ -80,7 +80,4 @@ private:
   int m_pelletValue;
 
   bool m_debugMode;
-
-  const float m_tileSizeX = TILE_SIZE;
-  const float m_tileSizeY = TILE_SIZE;
 };
