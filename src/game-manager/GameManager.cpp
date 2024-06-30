@@ -29,7 +29,7 @@ GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
   m_pGameWindow->setFramerateLimit(m_fps);
   m_windowBounds = sf::FloatRect(0, 0, m_pGameWindow->getSize().x, m_pGameWindow->getSize().y);
 
-  auto pacmanPosition = sf::Vector2f(m_tileSizeX + 1, m_tileSizeY + 1);
+  auto pacmanPosition = sf::Vector2f(TILE_SIZE + 1, TILE_SIZE + 1);
 
   m_labyrinth.set(pacmanPosition, Labyrinth::PACMAN);
 
@@ -72,8 +72,8 @@ void GameManager::updateEntities() {
   if (entityCollides(m_pinky, m_pacman))
     std::cout << "YOU AND I COLLIDE\n";
 
-  auto row = floor(static_cast<int>(m_pacman.getPosition().y + (TILE_SIZE / 2.f)) / m_tileSizeY);
-  auto col = floor(static_cast<int>(m_pacman.getPosition().x + (TILE_SIZE / 2.f)) / m_tileSizeX);
+  auto row = floor(static_cast<int>(m_pacman.getPosition().y + (TILE_SIZE / 2.f)) / TILE_SIZE);
+  auto col = floor(static_cast<int>(m_pacman.getPosition().x + (TILE_SIZE / 2.f)) / TILE_SIZE);
   auto whatDidPacmanEat = m_labyrinth.at(col, row);
   if (whatDidPacmanEat == Labyrinth::PELLET) {
     m_score += m_pelletValue;
@@ -94,11 +94,10 @@ void GameManager::updateWindow() {
   oss.clear();
 
   // Update debug information
-  if (m_debugMode)
-  {
+  if (m_debugMode) {
     oss << "FPS: " << m_fps << "\n";
-    auto row = floor(static_cast<int>(m_pacman.getPosition().y) / m_tileSizeY);
-    auto col = floor(static_cast<int>(m_pacman.getPosition().x) / m_tileSizeX);
+    auto row = std::floor(static_cast<int>(m_pacman.getPosition().y) / TILE_SIZE);
+    auto col = std::floor(static_cast<int>(m_pacman.getPosition().x) / TILE_SIZE);
     oss << "Row: " << row << "  Col: " << col << "\n";
     auto bar = m_labyrinth.at(col, row);
     auto foo = m_labyrinth.m_tileLabelLut.at(bar);
