@@ -38,6 +38,9 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
 
   std::priority_queue<TileScore, std::vector<TileScore>, OrderByScore> frontier;
   int offset = rLabyrinth.getOffset(mPosition);
+  auto backwards = rLabyrinth.getPairFromOffset(offset);
+  auto backwards2 = rLabyrinth.getSfVecFromOFfset(offset);
+
   frontier.push(TileScore(offset, 0));
 
   std::map<int, std::optional<int>> cameFrom;

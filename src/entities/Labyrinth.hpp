@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <iostream>
 #include <list>
 #include <map>
 #include <memory>
@@ -27,6 +28,45 @@ public:
     INKY    = 'I',
     CLYDE   = 'C'
   };
+
+  // NOTE: It's gotta be a 'friend' if it's in a class.  idk why.
+  // NOTE: use a switch statement so you can make your enums any number value
+  friend std::ostream &operator<<(std::ostream& os, Tile t) {
+    switch (t) {
+    case Tile::EMPTY:
+      os << "EMPTY";
+      break;
+    case Tile::GATE:
+      os << "GATE";
+      break;
+    case Tile::WALL:
+      os << "WALL";
+      break;
+    case Tile::PELLET:
+      os << "PELLET";
+      break;
+    case Tile::POWERUP:
+      os << "POWERUP";
+      break;
+    case Tile::PACMAN:
+      os << "PACMAN";
+      break;
+    case Tile::BLINKY:
+      os << "BLINKY";
+      break;
+    case Tile::PINKY:
+      os << "PINKY";
+      break;
+    case Tile::INKY:
+      os << "INKY";
+      break;
+    case Tile::CLYDE:
+      os << "CLYDE";
+    default:
+      os << "DUH";
+    }
+    return os;
+  }
 
   std::map<char, Tile> m_tileLut;
   std::map<Tile, std::string> m_tileLabelLut;

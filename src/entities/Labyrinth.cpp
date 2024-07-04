@@ -38,11 +38,18 @@ Labyrinth::Labyrinth()
 }
 
 int Labyrinth::getOffset(std::pair<int, int> position) const {
-  return (position.first * m_labyrinthRows) + position.second;
+  // EXPLAIN
+  // i never did figure out why the # of cols was 2 larger than what appeared
+  // on the screen.  maybe two null terminating characters because of the doubly
+  // nested std::array?  idk.  it really gets to me to have to do this wonky
+  // arithmetic but what can i do
+  // also we prefix ++ on position.second because we need to count the 0th
+  // position as a position
+  return (position.second * (m_labyrinthCols - 2)) + ++position.first;
 }
 
-int Labyrinth::getOffset(int row, int col) const {
-  return getOffset(std::pair<int, int>(row, col));
+int Labyrinth::getOffset(int col, int row) const {
+  return getOffset(std::pair<int, int>(col, row));
 }
 
 int Labyrinth::getOffset(sf::Vector2f position) const {
@@ -56,56 +63,58 @@ std::list<int> Labyrinth::getNeighbors(int offset) const {
   auto r = coords.second;
   std::list<int> neighbors;
 
-  for (int col = -1; col < 2; ++col) {
-    for (int row = -1; row < 2; ++row) {
+  for (int row = -1; row < 2; ++row) {
+    for (int col = -1; col < 2; ++col) {
+      if (getOffset(c+col, r+row) == offset) continue;
+
       if ((c + col < 0 || c + col > m_labyrinthCols) ||
           (r + row < 0 || r + row > m_labyrinthRows)) {
         continue;
       }
-      auto n = m_labyrinth[c+col][r+row];
-      if ((n != Tile::GATE) || (n != Tile::WALL))
-        neighbors.push_back(getOffset(r+row, c+col));
+
+      auto n = at(c+col, r+row);
+      if ((n != Tile::GATE) && (n != Tile::WALL)) neighbors.push_back(getOffset(c+col, r+row));
     }
   }
   return neighbors;
 }
 
 std::pair<int, int> Labyrinth::getPairFromOffset(int offset) const {
-  int col = offset % m_labyrinthCols;
-  int row = std::floor(offset / m_labyrinthRows);
+  int col = offset % (m_labyrinthCols - 1);
+  int row = std::floor(offset / (m_labyrinthRows - 1));
   return std::pair<int, int>(col, row);
 }
 
 sf::Vector2f Labyrinth::getSfVecFromOFfset(int offset) const {
-  int col = offset % m_labyrinthCols;
-  int row = std::floor(offset / m_labyrinthRows);
-  return sf::Vector2f(col, row);
+  int col = offset % (m_labyrinthCols - 1);
+  int row = std::floor(offset / (m_labyrinthRows - 1));
+  return sf::Vector2f(col * TILE_SIZE, row * TILE_SIZE);
 }
 
 std::pair<int, int> Labyrinth::at(sf::Vector2f position) const {
   int row = std::floor(static_cast<int>(position.y) / TILE_SIZE);
   int col = std::floor(static_cast<int>(position.x) / TILE_SIZE);
 
-  return std::pair<int, int>(row, col);
+  return std::pair<int, int>(col, row);
 }
 
-Labyrinth::Tile Labyrinth::at(int x, int y) const {
-  if (x <= 0)
-    x = 0;
-  if (y <= 0)
-    y = 0;
-  if (x >= LABYRINTH_COLS - 1)
-    x = LABYRINTH_COLS - 2;
-  if (y >= LABYRINTH_ROWS)
-    y = LABYRINTH_ROWS - 1;
+Labyrinth::Tile Labyrinth::at(int col, int row) const {
+  if (col <= 0)
+    col = 0;
+  if (row <= 0)
+    row = 0;
+  if (col >= LABYRINTH_COLS - 1)
+    col = LABYRINTH_COLS - 2;
+  if (row >= LABYRINTH_ROWS)
+    row = LABYRINTH_ROWS - 1;
 
-  char tile = static_cast<char>(m_labyrinth[y][x]);
+  char tile = static_cast<char>(m_labyrinth[row][col]);
   Tile t;
   try {
     t = m_tileLut.at(tile);
   }
   catch (std::out_of_range& exc) {
-    std::cout << "oh no!  failed to access m_labyrinth[" << y << "][" << x << "]\n";
+    std::cout << "oh no!  failed to access m_labyrinth[" << row << "][" << col << "]\n";
   }
   return t;
 }
