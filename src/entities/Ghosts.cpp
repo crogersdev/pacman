@@ -1,6 +1,7 @@
 #include <chrono>
 #include <iostream>
 #include <map>
+#include <cmath>
 #include <optional>
 #include <queue>
 #include <unordered_set>
@@ -16,13 +17,14 @@ Ghost::Ghost(float speed, bool debugMode)
     mSpeed(speed),
     mGhostShape(sf::Vector2f(25.f, 25.f)),
     mMovement(sf::Vector2f(1.f, 0.f)),
-    mPosition(sf::Vector2f(2.f * TILE_SIZE, TILE_SIZE)),
+    mInitialPosition(sf::Vector2f(12.f * TILE_SIZE, 8.f * TILE_SIZE)),
+    // mInitialPosition(sf::Vector2f(3.f * TILE_SIZE, 1.f * TILE_SIZE)),
     mDirection(RIGHT),
     mState(MEANDER) {
   mSeed = std::chrono::system_clock::now().time_since_epoch().count();
   mRandGenerator = std::mt19937(mSeed);
   mGhostShape.setFillColor(sf::Color(219, 48, 130));
-  mGhostShape.setPosition(mPosition);
+  mGhostShape.setPosition(mInitialPosition);
 
   #ifndef NDEBUG
     mDebugMode = true;
@@ -37,9 +39,7 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
   }
 
   std::priority_queue<TileScore, std::vector<TileScore>, OrderByScore> frontier;
-  int offset = rLabyrinth.getOffset(mPosition);
-  auto backwards = rLabyrinth.getPairFromOffset(offset);
-  auto backwards2 = rLabyrinth.getSfVecFromOFfset(offset);
+  const int offset = rLabyrinth.getOffset(mGhostShape.getPosition());
 
   frontier.push(TileScore(offset, 0));
 
@@ -49,6 +49,7 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
   cameFrom[offset] = NULL;
   costSoFar[offset] = 0;
 
+  // find path by defining cameFrom
   while (!frontier.empty()) {
     TileScore current = frontier.top();
     frontier.pop();
@@ -56,14 +57,58 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
     if (current.positionOffset == rLabyrinth.getOffset(target))
       break;
 
-    for (auto neighbor : rLabyrinth.getNeighbors(current.positionOffset)) {
-      auto foo = rLabyrinth.getPairFromOffset(current.positionOffset);
-      std::cout << "neighbors: (" << foo.first << "), (" << foo.second << "), ";
-    }
-    std::cout << "\n";
-  }
-}
+    auto neighbors = rLabyrinth.getNeighbors(current.positionOffset);
+    for (auto next : neighbors) {
+      int newCost = costSoFar[current.positionOffset] + rLabyrinth.heuristic(current.positionOffset, next);
 
+      if (costSoFar.find(next) != costSoFar.end())
+        std::cout << "costSoFar[ " << next << "]:\t" << costSoFar[next] << "\n";
+      else
+        std::cout << "wasnt' there homey\n";
+
+      if (costSoFar.find(next) == costSoFar.end() || newCost < costSoFar[next]) {
+        costSoFar[next] = newCost;
+        int priority = newCost + rLabyrinth.heuristic(next, rLabyrinth.getOffset(target));
+        frontier.push(TileScore(next, priority));
+        cameFrom[next] = current.positionOffset;
+      }
+    }
+  }
+
+  // reconstruct path from cameFrom
+  std::list<sf::Vector2f> path;
+  int current = rLabyrinth.getOffset(target);
+  while (current != offset) {
+    path.emplace_front(rLabyrinth.getSfVecFromOffset(current));
+    auto iterator = cameFrom.find(current);
+    if (iterator == cameFrom.end() || !iterator->second.has_value()) {
+      break;
+    }
+    current = *iterator->second;
+  }
+  path.emplace_front(rLabyrinth.getSfVecFromOffset(current));
+
+  while (!path.empty()) {
+    sf::Vector2f nextPosition = path.front();
+    sf::Vector2f direction = nextPosition - mGhostShape.getPosition();
+    float length = std::sqrt(direction.x * direction.x - direction.y * direction.y);
+    if (length > 0) {
+      direction /= length;
+    }
+    if (direction == sf::Vector2f(0.f, 0.f)) {
+      path.pop_front();
+      continue;
+    }
+
+    while (mGhostShape.getPosition() != nextPosition) {
+      auto newPosition = mGhostShape.getPosition() + direction;
+      mGhostShape.setPosition(newPosition);
+    }
+
+    path.pop_front();
+  }
+
+}
 
 void Ghost::changeDirection(Direction newDirection) {
   switch (newDirection) {

@@ -80,10 +80,13 @@ public:
   int getOffset(std::pair<int, int>) const;
   int getOffset(int, int) const;
   int getOffset(sf::Vector2f) const;
+  int heuristic(sf::Vector2f, sf::Vector2f) const;
+  int heuristic(std::pair<int, int>, std::pair<int, int>) const;
+  int heuristic(int, int) const;
   std::list<int> getNeighbors(int) const;
 
   std::pair<int, int> getPairFromOffset(int) const;
-  sf::Vector2f getSfVecFromOFfset(int) const;
+  sf::Vector2f getSfVecFromOffset(int) const;
 
   std::pair<int, int> at(sf::Vector2f) const;
   Tile at(int, int) const;
