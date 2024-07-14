@@ -14,7 +14,8 @@ Labyrinth::Labyrinth()
       {'P', Labyrinth::PINKY},
       {'I', Labyrinth::INKY},
       {'C', Labyrinth::CLYDE},
-      {'-', Labyrinth::GATE}
+      {'-', Labyrinth::GATE},
+      {'X', Labyrinth::PATH}
     }),
     m_tileLabelLut({
       {Labyrinth::EMPTY, "Empty"},
@@ -26,7 +27,8 @@ Labyrinth::Labyrinth()
       {Labyrinth::PINKY, "Pinky"},
       {Labyrinth::INKY, "Inky"},
       {Labyrinth::CLYDE, "Clyde"},
-      {Labyrinth::GATE, "Gate"}
+      {Labyrinth::GATE, "Gate"},
+      {Labyrinth::PATH, "Path"}
     }),
     m_labyrinthRows(LABYRINTH_ROWS),
     m_labyrinthCols(LABYRINTH_COLS),
@@ -184,6 +186,15 @@ void Labyrinth::draw(std::shared_ptr<sf::RenderWindow> pGameWindow) {
           pGameWindow->draw(m_pellet);
         }
           break;
+        case Labyrinth::PATH:
+        {
+          sf::RectangleShape rectangle(sf::Vector2f(25.f, 25.f));
+          rectangle.setFillColor(sf::Color(139, 0, 0));  // Dark red
+          auto x = TILE_SIZE * col;
+          auto y = TILE_SIZE * row;
+          rectangle.setPosition(sf::Vector2f(x, y));
+          pGameWindow->draw(rectangle);
+        }
         case Labyrinth::POWERUP:
         case Labyrinth::GATE:
           break;
@@ -197,10 +208,10 @@ void Labyrinth::draw(std::shared_ptr<sf::RenderWindow> pGameWindow) {
 void Labyrinth::set(sf::Vector2f pos, Tile entity) {
   auto coords = tileCoordsAtPosition(pos);
 
-  m_labyrinth[coords.first][coords.second] = entity;
+  m_labyrinth[coords.second][coords.first] = entity;
 }
 
-void Labyrinth::set(int row, int col, Tile entity) {
+void Labyrinth::set(int col, int row, Tile entity) {
   // EXPLAIN: when pacman goes through his tunnel we have a possible
   //          scenario where the x coord is 0 and then -1, or 29 and we
   //          don't ever want to set the labyrinth tile at that

@@ -66,19 +66,27 @@ void GameManager::handleInputs()
 }
 
 void GameManager::updateEntities() {
-  //  m_pinky.meander(m_labyrinth);
-  m_pinky.chase(m_labyrinth, m_pacman.getPosition());
+  // m_pinky.meander(m_labyrinth);
+  sf::Vector2f pacmanPosition = m_pacman.getPosition();
+  sf::Vector2f pacmanCenter = sf::Vector2f(
+    pacmanPosition.x + (TILE_SIZE / 2), pacmanPosition.y + (TILE_SIZE / 2));
+  m_pinky.chase(m_labyrinth, pacmanCenter);
+  if (m_debugMode) {
+    m_pinky.drawPath(m_labyrinth);
+  }
 
-  if (entityCollides(m_pinky, m_pacman))
+  if (entityCollides(m_pinky, m_pacman)) {
+    m_pinky.resetPath(m_labyrinth);
     std::cout << "YOU AND I COLLIDE\n";
-  
-  auto row = floor(static_cast<int>(m_pacman.getPosition().y + (TILE_SIZE / 2.f)) / TILE_SIZE);
-  auto col = floor(static_cast<int>(m_pacman.getPosition().x + (TILE_SIZE / 2.f)) / TILE_SIZE);
-  
-  auto whatDidPacmanEat = m_labyrinth.at(col, row);
+  }
+
+  auto whatDidPacmanEat = m_labyrinth.at(
+    m_pacman.getPosition().x / TILE_SIZE,
+    m_pacman.getPosition().y / TILE_SIZE);
+
   if (whatDidPacmanEat == Labyrinth::PELLET) {
     m_score += m_pelletValue;
-    m_labyrinth.set(row, col, Labyrinth::EMPTY);
+    m_labyrinth.set(m_pacman.getPosition(), Labyrinth::EMPTY);
   }
 }
 
@@ -102,7 +110,9 @@ void GameManager::updateWindow() {
     oss << "Row: " << row << "  Col: " << col << "\n";
     auto bar = m_labyrinth.at(col, row);
     auto foo = m_labyrinth.m_tileLabelLut.at(bar);
+    auto ghostPosition = m_pinky.getPosition();
     oss << "Map LUT at " << row << ", " << col << ": " << foo << "\n";
+    oss << "pinky position row: " << ghostPosition.y << ", col: " << ghostPosition.x << "\n";
     m_pGameWindow->draw(m_hud.debugText);
     m_hud.debugText.setString(oss.str());
   }

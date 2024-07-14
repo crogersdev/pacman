@@ -26,7 +26,8 @@ public:
     BLINKY  = 'B',
     PINKY   = 'P',
     INKY    = 'I',
-    CLYDE   = 'C'
+    CLYDE   = 'C',
+    PATH    = 'X'
   };
 
   // NOTE: It's gotta be a 'friend' if it's in a class.  idk why.
@@ -62,6 +63,8 @@ public:
       break;
     case Tile::CLYDE:
       os << "CLYDE";
+    case Tile::PATH:
+      os << "PATH";
     default:
       os << "DUH";
     }
@@ -89,8 +92,8 @@ public:
   sf::Vector2f getSfVecFromOffset(int) const;
 
   std::pair<int, int> at(sf::Vector2f) const;
-  Tile at(int, int) const;
-  Tile at(std::pair<int, int>) const;
+  Labyrinth::Tile at(int, int) const;
+  Labyrinth::Tile at(std::pair<int, int>) const;
   void draw(std::shared_ptr<sf::RenderWindow>);
   void set(sf::Vector2f, Tile);
   void set(int, int, Tile);

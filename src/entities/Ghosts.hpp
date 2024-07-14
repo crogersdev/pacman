@@ -1,5 +1,6 @@
 #pragma once
 
+#include <list>
 #include <memory>
 #include <random>
 
@@ -22,6 +23,8 @@ public:
   sf::Vector2f getPosition();
   void meander(const Labyrinth &);
   void scatter();
+  void drawPath(Labyrinth &);
+  void resetPath(Labyrinth &);
 
   // conversion methods so we don't have to write a getter for
   // the ghost shape when we use the collides(sf::Shape, sf::Shape)
@@ -46,6 +49,7 @@ private:
   sf::RectangleShape mGhostShape;
   sf::Vector2f mMovement;
   sf::Vector2f mInitialPosition;
+  std::list<sf::Vector2f> mPath;
   Direction mDirection;
   std::shared_ptr<sf::RenderWindow> mPGameWindow;
   State mState;
@@ -64,5 +68,4 @@ private:
       return a.score > b.score;
     }
   };
-
 };

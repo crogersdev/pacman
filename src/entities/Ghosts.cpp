@@ -1,7 +1,6 @@
 #include <chrono>
 #include <iostream>
 #include <map>
-#include <cmath>
 #include <optional>
 #include <queue>
 #include <unordered_set>
@@ -19,6 +18,7 @@ Ghost::Ghost(float speed, bool debugMode)
     mMovement(sf::Vector2f(1.f, 0.f)),
     mInitialPosition(sf::Vector2f(12.f * TILE_SIZE, 8.f * TILE_SIZE)),
     // mInitialPosition(sf::Vector2f(3.f * TILE_SIZE, 1.f * TILE_SIZE)),
+    mPath(),
     mDirection(RIGHT),
     mState(MEANDER) {
   mSeed = std::chrono::system_clock::now().time_since_epoch().count();
@@ -61,11 +61,6 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
     for (auto next : neighbors) {
       int newCost = costSoFar[current.positionOffset] + rLabyrinth.heuristic(current.positionOffset, next);
 
-      if (costSoFar.find(next) != costSoFar.end())
-        std::cout << "costSoFar[ " << next << "]:\t" << costSoFar[next] << "\n";
-      else
-        std::cout << "wasnt' there homey\n";
-
       if (costSoFar.find(next) == costSoFar.end() || newCost < costSoFar[next]) {
         costSoFar[next] = newCost;
         int priority = newCost + rLabyrinth.heuristic(next, rLabyrinth.getOffset(target));
@@ -76,38 +71,33 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
   }
 
   // reconstruct path from cameFrom
-  std::list<sf::Vector2f> path;
   int current = rLabyrinth.getOffset(target);
   while (current != offset) {
-    path.emplace_front(rLabyrinth.getSfVecFromOffset(current));
+    mPath.emplace_front(rLabyrinth.getSfVecFromOffset(current));
     auto iterator = cameFrom.find(current);
     if (iterator == cameFrom.end() || !iterator->second.has_value()) {
       break;
     }
     current = *iterator->second;
   }
-  path.emplace_front(rLabyrinth.getSfVecFromOffset(current));
+  // mPath.emplace_front(rLabyrinth.getSfVecFromOffset(current));
 
-  while (!path.empty()) {
-    sf::Vector2f nextPosition = path.front();
+  if (!mPath.empty()) {
+    sf::Vector2f nextPosition = mPath.front();
+    auto ghostPosition = mGhostShape.getPosition();
     sf::Vector2f direction = nextPosition - mGhostShape.getPosition();
+
     float length = std::sqrt(direction.x * direction.x - direction.y * direction.y);
     if (length > 0) {
       direction /= length;
     }
-    if (direction == sf::Vector2f(0.f, 0.f)) {
-      path.pop_front();
-      continue;
-    }
 
-    while (mGhostShape.getPosition() != nextPosition) {
-      auto newPosition = mGhostShape.getPosition() + direction;
-      mGhostShape.setPosition(newPosition);
-    }
+    auto newPosition = mGhostShape.getPosition() + direction;
+    std::cout << "pinky's new position row: " << newPosition.y << ", col: " << newPosition.x << "\n";
+    mGhostShape.setPosition(newPosition);
 
-    path.pop_front();
+    mPath.pop_front();
   }
-
 }
 
 void Ghost::changeDirection(Direction newDirection) {
@@ -136,8 +126,6 @@ sf::Vector2f Ghost::getPosition() {
 }
 
 void Ghost::meander(const Labyrinth &rLabyrinth) {
-  // EXPLAIN:
-  // let's check for a collision
   auto newPosition = mGhostShape.getPosition() + mMovement;
 
   // EXPLAIN:
@@ -214,3 +202,19 @@ void Ghost::meander(const Labyrinth &rLabyrinth) {
 
 void Ghost::scatter() {}
 
+void Ghost::drawPath(Labyrinth& rLabyrinth) {
+  if (mDebugMode) {
+    for (const auto &p : mPath) {
+      rLabyrinth.set(p, Labyrinth::Tile::PATH);
+    }
+  }
+}
+
+void Ghost::resetPath(Labyrinth &rLabyrinth) {
+  if (mDebugMode) {
+    for (const auto &p : mPath) {
+      rLabyrinth.set(p, Labyrinth::Tile::EMPTY);
+    }
+  }
+  mPath.clear();
+}
