@@ -100,7 +100,7 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
     mDirection.x = (mDirection.x != 0) ? std::copysign(1.f, mDirection.x) : 0.f;
     mDirection.y = (mDirection.y != 0) ? std::copysign(1.f, mDirection.y) : 0.f;
 
-    mGhostShape.setPosition(mGhostShape.getPosition() + mDirection);
+    mGhostShape.setPosition(mGhostShape.getPosition() + mDirection * mSpeed);
   }
 }
 
