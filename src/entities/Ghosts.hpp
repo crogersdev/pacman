@@ -17,6 +17,7 @@ public:
 
   float mMeanderOdds;
 
+  bool occupiesSingleTile();
   void chase(const Labyrinth &, sf::Vector2f);
   void changeDirection(Direction);
   void draw(std::shared_ptr<sf::RenderWindow>);
@@ -49,8 +50,8 @@ private:
   sf::RectangleShape mGhostShape;
   sf::Vector2f mMovement;
   sf::Vector2f mInitialPosition;
+  sf::Vector2f mDirection;
   std::list<sf::Vector2f> mPath;
-  Direction mDirection;
   std::shared_ptr<sf::RenderWindow> mPGameWindow;
   State mState;
 

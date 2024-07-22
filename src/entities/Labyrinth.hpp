@@ -27,7 +27,8 @@ public:
     PINKY   = 'P',
     INKY    = 'I',
     CLYDE   = 'C',
-    PATH    = 'X'
+    PATH    = 'X',
+    ERROR   = 'E'
   };
 
   // NOTE: It's gotta be a 'friend' if it's in a class.  idk why.
@@ -65,6 +66,8 @@ public:
       os << "CLYDE";
     case Tile::PATH:
       os << "PATH";
+    case Tile::ERROR:
+      os << "ERROR";
     default:
       os << "DUH";
     }

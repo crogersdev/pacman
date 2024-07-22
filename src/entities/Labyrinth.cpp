@@ -15,7 +15,8 @@ Labyrinth::Labyrinth()
       {'I', Labyrinth::INKY},
       {'C', Labyrinth::CLYDE},
       {'-', Labyrinth::GATE},
-      {'X', Labyrinth::PATH}
+      {'X', Labyrinth::PATH},
+      {'E', Labyrinth::ERROR}
     }),
     m_tileLabelLut({
       {Labyrinth::EMPTY, "Empty"},
@@ -28,7 +29,8 @@ Labyrinth::Labyrinth()
       {Labyrinth::INKY, "Inky"},
       {Labyrinth::CLYDE, "Clyde"},
       {Labyrinth::GATE, "Gate"},
-      {Labyrinth::PATH, "Path"}
+      {Labyrinth::PATH, "Path"},
+      {Labyrinth::ERROR, "Error"}
     }),
     m_labyrinthRows(LABYRINTH_ROWS),
     m_labyrinthCols(LABYRINTH_COLS),
@@ -97,24 +99,26 @@ int Labyrinth::heuristic(int startOffset, int endOffset) const {
 
 std::list<int> Labyrinth::getNeighbors(int offset) const {
   std::pair<int, int> coords = getPairFromOffset(offset);
-  auto c = coords.first;
-  auto r = coords.second;
+
+  std::vector<std::pair<int, int>> dirs = {
+    std::pair<int, int>(0, 1),
+    std::pair<int, int>(1, 0),
+    std::pair<int, int>(0, -1),
+    std::pair<int, int>(-1, 0),
+  };
+
   std::list<int> neighbors;
+  for (const auto& dirPair : dirs) {
+    auto potentialNeighborPair = std::pair<int, int>(
+      coords.first + dirPair.first, coords.second + dirPair.second);
+    auto potentialNeighbor = at(potentialNeighborPair);
 
-  for (int row = -1; row < 2; ++row) {
-    for (int col = -1; col < 2; ++col) {
-      if ((c + col < 0 || c + col > m_labyrinthCols) ||
-          (r + row < 0 || r + row > m_labyrinthRows)) {
-        continue;
-      }
-      if (getOffset(c+col, r+row) == offset) continue;
-
-      auto n = at(c+col, r+row);
-      if ((n != Tile::GATE) && (n != Tile::WALL)) {
-        neighbors.push_back(getOffset(c+col, r+row));
-      }
-    }
+    if (potentialNeighbor != Tile::ERROR &&
+        potentialNeighbor != Tile::GATE &&
+        potentialNeighbor != Tile::WALL)
+        neighbors.push_back(getOffset(potentialNeighborPair));
   }
+
   return neighbors;
 }
 
@@ -148,7 +152,7 @@ Labyrinth::Tile Labyrinth::at(int col, int row) const {
     row = LABYRINTH_ROWS - 1;
 
   char tile = static_cast<char>(m_labyrinth[row][col]);
-  Tile t;
+  Tile t = Tile::ERROR;
   try {
     t = m_tileLut.at(tile);
   }

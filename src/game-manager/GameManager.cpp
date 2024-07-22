@@ -77,7 +77,7 @@ void GameManager::updateEntities() {
 
   if (entityCollides(m_pinky, m_pacman)) {
     m_pinky.resetPath(m_labyrinth);
-    std::cout << "YOU AND I COLLIDE\n";
+    //std::cout << "YOU AND I COLLIDE\n";
   }
 
   auto whatDidPacmanEat = m_labyrinth.at(
@@ -110,9 +110,7 @@ void GameManager::updateWindow() {
     oss << "Row: " << row << "  Col: " << col << "\n";
     auto bar = m_labyrinth.at(col, row);
     auto foo = m_labyrinth.m_tileLabelLut.at(bar);
-    auto ghostPosition = m_pinky.getPosition();
     oss << "Map LUT at " << row << ", " << col << ": " << foo << "\n";
-    oss << "pinky position row: " << ghostPosition.y << ", col: " << ghostPosition.x << "\n";
     m_pGameWindow->draw(m_hud.debugText);
     m_hud.debugText.setString(oss.str());
   }
