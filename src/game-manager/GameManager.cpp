@@ -7,7 +7,7 @@
 
 GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
   : m_pacman((TILE_SIZE / 2) - 1, 200.f, sf::Vector2f(TILE_SIZE + 1.f, TILE_SIZE + 1.f)),
-    m_pinky(400.f),
+    m_pinky(2.f),
     m_clock(),
     m_windowBounds(),
     m_hud(),
