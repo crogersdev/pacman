@@ -71,9 +71,6 @@ void GameManager::updateEntities() {
   sf::Vector2f pacmanCenter = sf::Vector2f(
     pacmanPosition.x + (TILE_SIZE / 2), pacmanPosition.y + (TILE_SIZE / 2));
   m_pinky.chase(m_labyrinth, pacmanCenter);
-  if (m_debugMode) {
-    m_pinky.drawPath(m_labyrinth);
-  }
 
   if (entityCollides(m_pinky, m_pacman)) {
     m_pinky.resetPath(m_labyrinth);

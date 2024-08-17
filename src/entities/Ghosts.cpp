@@ -15,11 +15,10 @@ Ghost::Ghost(float speed, bool debugMode)
       mMeanderOdds(66.6),
       mSpeed(speed),
       mGhostShape(sf::Vector2f(25.f, 25.f)),
-      mMovement(sf::Vector2f(1.f, 0.f)),
+      mDirection(sf::Vector2f(1.f, 0.f)),
       // mInitialPosition(sf::Vector2f(12.f * TILE_SIZE, 8.f * TILE_SIZE)),
       mInitialPosition(sf::Vector2f(9.f * TILE_SIZE, 6.f * TILE_SIZE)),
       mPath(),
-      mDirection(),
       mState(MEANDER) {
   mSeed = std::chrono::system_clock::now().time_since_epoch().count();
   mRandGenerator = std::mt19937(mSeed);
@@ -107,16 +106,16 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
 void Ghost::changeDirection(Direction newDirection) {
   switch (newDirection) {
   case DOWN:
-    mMovement = sf::Vector2f(0.f, 1.f);
+    mDirection = sf::Vector2f(0.f, 1.f);
     break;
   case UP:
-    mMovement = sf::Vector2f(0.f, -1.f);
+    mDirection = sf::Vector2f(0.f, -1.f);
     break;
   case RIGHT:
-    mMovement = sf::Vector2f(1.f, 0.f);
+    mDirection = sf::Vector2f(1.f, 0.f);
     break;
   case LEFT:
-    mMovement = sf::Vector2f(-1.f, 0.f);
+    mDirection = sf::Vector2f(-1.f, 0.f);
     break;
   }
 }
@@ -130,7 +129,7 @@ sf::Vector2f Ghost::getPosition() {
 }
 
 void Ghost::meander(const Labyrinth &rLabyrinth) {
-  auto newPosition = mGhostShape.getPosition() + mMovement;
+  auto newPosition = mGhostShape.getPosition() + mDirection;
 
   // EXPLAIN:
   // first check to see if we have any available turns, before we start moving
