@@ -181,7 +181,7 @@ void Ghost::meander(const Labyrinth &rLabyrinth) {
   while (wallCollision) {
     auto newDirection = static_cast<Direction>(mRandGenerator() % 4);
     changeDirection(newDirection);
-    newPosition = mGhostShape.getPosition() + mMovement;
+    newPosition = mGhostShape.getPosition() + mDirection;
     wallCollision = wallCollides(
         newPosition,
         sf::Vector2f(24.f, 24.f),

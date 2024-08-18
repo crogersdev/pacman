@@ -66,15 +66,14 @@ void GameManager::handleInputs()
 }
 
 void GameManager::updateEntities() {
-  // m_pinky.meander(m_labyrinth);
+  m_pinky.meander(m_labyrinth);
   sf::Vector2f pacmanPosition = m_pacman.getPosition();
   sf::Vector2f pacmanCenter = sf::Vector2f(
     pacmanPosition.x + (TILE_SIZE / 2), pacmanPosition.y + (TILE_SIZE / 2));
-  m_pinky.chase(m_labyrinth, pacmanCenter);
+  // m_pinky.chase(m_labyrinth, pacmanCenter);
 
   if (entityCollides(m_pinky, m_pacman)) {
     m_pinky.resetPath(m_labyrinth);
-    //std::cout << "YOU AND I COLLIDE\n";
   }
 
   auto whatDidPacmanEat = m_labyrinth.at(
