@@ -7,7 +7,7 @@
 
 GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
   : m_pacman((TILE_SIZE / 2) - 1, 200.f, sf::Vector2f(TILE_SIZE + 1.f, TILE_SIZE + 1.f)),
-    m_pinky(400.f),
+    m_pinky(100.f),
     m_clock(),
     m_windowBounds(),
     m_hud(),
@@ -66,11 +66,11 @@ void GameManager::handleInputs()
 }
 
 void GameManager::updateEntities() {
-  m_pinky.meander(m_labyrinth);
+  // m_pinky.meander(m_labyrinth, m_clock.restart());
   sf::Vector2f pacmanPosition = m_pacman.getPosition();
   sf::Vector2f pacmanCenter = sf::Vector2f(
     pacmanPosition.x + (TILE_SIZE / 2), pacmanPosition.y + (TILE_SIZE / 2));
-  // m_pinky.chase(m_labyrinth, pacmanCenter);
+  m_pinky.chase(m_labyrinth, pacmanCenter, m_deltaTime);
 
   if (entityCollides(m_pinky, m_pacman)) {
     m_pinky.resetPath(m_labyrinth);

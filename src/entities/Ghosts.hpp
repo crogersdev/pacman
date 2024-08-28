@@ -18,11 +18,11 @@ public:
   float mMeanderOdds;
 
   bool occupiesSingleTile();
-  void chase(const Labyrinth &, sf::Vector2f);
+  void chase(const Labyrinth &, sf::Vector2f, sf::Time);
   void changeDirection(Direction);
   void draw(std::shared_ptr<sf::RenderWindow>);
   sf::Vector2f getPosition();
-  void meander(const Labyrinth &);
+  void meander(const Labyrinth &, sf::Time);
   void scatter();
   void drawPath(Labyrinth &);
   void resetPath(Labyrinth &);
