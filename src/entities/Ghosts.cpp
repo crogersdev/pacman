@@ -10,17 +10,12 @@
 #include "./Ghosts.hpp"
 #include "../helpers/Collisions.hpp"
 
-//float testSpeed = (25.f / 16.f);
-float testSpeed = 1.0416666666667;
-
-
 Ghost::Ghost(float speed, bool debugMode)
     : mDebugMode(debugMode),
       mMeanderOdds(66.6),
-      mSpeed(speed),
+      mSpeedMultiplier(speed),
       mGhostShape(sf::Vector2f(25.f, 25.f)),
       mDirection(sf::Vector2f(1.f, 0.f)),
-      // mInitialPosition(sf::Vector2f(12.f * TILE_SIZE, 8.f * TILE_SIZE)),
       mInitialPosition(sf::Vector2f(9.f * TILE_SIZE, 6.f * TILE_SIZE)),
       mPath(),
       mState(MEANDER) {
@@ -37,13 +32,8 @@ Ghost::Ghost(float speed, bool debugMode)
 Ghost::~Ghost() {}
 
 bool Ghost::occupiesSingleTile() {
-  auto deltaX = mGhostShape.getPosition().x / static_cast<float>(TILE_SIZE);
-  auto deltaY = mGhostShape.getPosition().y / static_cast<float>(TILE_SIZE);
-
-  if (offsetX <= 1 && offsetY <= 1) {
-    mGhostShape.setPosition()
-  }
-
+  auto isTileX = mGhostShape.getPosition().x / TILE_SIZE;
+  auto isTileY = mGhostShape.getPosition().y / TILE_SIZE;
   // i just like parentheses
   return (floor(isTileX) == isTileX && floor(isTileY) == isTileY);
 }
@@ -83,8 +73,7 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target, sf::Time dt)
 
   if (!occupiesSingleTile()) {
     // Ghost doesn't change direction unless Ghost occupies a single tile
-    // auto movement = mDirection * (mSpeed * dt.asSeconds());
-    auto movement = mDirection * testSpeed;
+    auto movement = mDirection * mSpeedMultiplier;
     mGhostShape.setPosition(mGhostShape.getPosition() + movement);
     return;
   }
@@ -110,8 +99,7 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target, sf::Time dt)
     mDirection.x = (mDirection.x != 0) ? std::copysign(1.f, mDirection.x) : 0.f;
     mDirection.y = (mDirection.y != 0) ? std::copysign(1.f, mDirection.y) : 0.f;
 
-    // auto movement = mDirection * (mSpeed * dt.asSeconds());
-    auto movement = mDirection * testSpeed;
+    auto movement = mDirection * mSpeedMultiplier;
     mGhostShape.setPosition(mGhostShape.getPosition() + movement);
   }
 }
@@ -146,7 +134,7 @@ sf::Vector2f Ghost::getPosition() {
 }
 
 void Ghost::meander(const Labyrinth &rLabyrinth, sf::Time dt) {
-  auto movement = mDirection * (mSpeed * dt.asSeconds() * 10);
+  auto movement = mDirection * mSpeedMultiplier;
   std::cout << "movement: " << movement.x << ", " << movement.y << "\n";
   auto newPosition = mGhostShape.getPosition() + movement;
 
@@ -200,7 +188,7 @@ void Ghost::meander(const Labyrinth &rLabyrinth, sf::Time dt) {
   while (wallCollision) {
     auto newDirection = static_cast<Direction>(mRandGenerator() % 4);
     changeDirection(newDirection);
-    movement = mDirection * (mSpeed * dt.asSeconds() * 10);
+    movement = mDirection * mSpeedMultiplier;
     std::cout << "movement: " << movement.x << ", " << movement.y << "\n";
     newPosition = mGhostShape.getPosition() + movement;
 

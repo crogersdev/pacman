@@ -46,7 +46,7 @@ private:
   std::mt19937 mRandGenerator;
 
   bool mDebugMode;
-  float mSpeed;
+  float mSpeedMultiplier;
   sf::RectangleShape mGhostShape;
   sf::Vector2f mMovement;
   sf::Vector2f mInitialPosition;
