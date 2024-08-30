@@ -20,7 +20,10 @@ public:
   
   // TODO: should these guys be private?
   Pacman m_pacman;
+  Ghost m_inky;
+  Ghost m_blinky;
   Ghost m_pinky;
+  Ghost m_clyde;
 
   void drawLabyrinth();
   void handleInputs();

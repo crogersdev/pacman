@@ -12,13 +12,13 @@
 class Ghost {
 public:
   // ctors with one callable arg should be marked explicit
-  explicit Ghost(float, bool = false);
+  explicit Ghost(float, sf::Vector2f, sf::Color, bool = false);
   ~Ghost();
 
   float mMeanderOdds;
 
   bool occupiesSingleTile();
-  void chase(const Labyrinth &, sf::Vector2f, sf::Time);
+  void chase(const Labyrinth &, sf::Vector2f);
   void changeDirection(Direction);
   void draw(std::shared_ptr<sf::RenderWindow>);
   sf::Vector2f getPosition();
@@ -45,12 +45,13 @@ private:
   unsigned mSeed;
   std::mt19937 mRandGenerator;
 
+  sf::Color mColor;
+  sf::Vector2f mDirection;
   bool mDebugMode;
   float mSpeedMultiplier;
   sf::RectangleShape mGhostShape;
   sf::Vector2f mMovement;
   sf::Vector2f mInitialPosition;
-  sf::Vector2f mDirection;
   std::list<sf::Vector2f> mPath;
   std::shared_ptr<sf::RenderWindow> mPGameWindow;
   State mState;

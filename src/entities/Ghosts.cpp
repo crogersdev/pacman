@@ -10,18 +10,19 @@
 #include "./Ghosts.hpp"
 #include "../helpers/Collisions.hpp"
 
-Ghost::Ghost(float speed, bool debugMode)
-    : mDebugMode(debugMode),
+Ghost::Ghost(float speed, sf::Vector2f pos, sf::Color c, bool debugMode)
+    : mColor(c),
+      mDebugMode(debugMode),
       mMeanderOdds(66.6),
       mSpeedMultiplier(speed),
-      mGhostShape(sf::Vector2f(25.f, 25.f)),
+      mGhostShape(sf::Vector2f(TILE_SIZE, TILE_SIZE)),
       mDirection(sf::Vector2f(1.f, 0.f)),
-      mInitialPosition(sf::Vector2f(9.f * TILE_SIZE, 6.f * TILE_SIZE)),
+      mInitialPosition(pos),
       mPath(),
       mState(MEANDER) {
   mSeed = std::chrono::system_clock::now().time_since_epoch().count();
   mRandGenerator = std::mt19937(mSeed);
-  mGhostShape.setFillColor(sf::Color(219, 48, 130));
+  mGhostShape.setFillColor(mColor);
   mGhostShape.setPosition(mInitialPosition);
 
 #ifndef NDEBUG
@@ -38,7 +39,7 @@ bool Ghost::occupiesSingleTile() {
   return (floor(isTileX) == isTileX && floor(isTileY) == isTileY);
 }
 
-void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target, sf::Time dt) {
+void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
   std::priority_queue<TileScore, std::vector<TileScore>, OrderByScore> frontier;
   const int offset = rLabyrinth.getOffset(mGhostShape.getPosition());
 
@@ -133,7 +134,7 @@ sf::Vector2f Ghost::getPosition() {
   return pos;
 }
 
-void Ghost::meander(const Labyrinth &rLabyrinth, sf::Time dt) {
+void Ghost::meander(const Labyrinth &rLabyrinth) {
   auto movement = mDirection * mSpeedMultiplier;
   std::cout << "movement: " << movement.x << ", " << movement.y << "\n";
   auto newPosition = mGhostShape.getPosition() + movement;

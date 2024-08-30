@@ -31,7 +31,7 @@ public:
     ERROR   = 'E'
   };
 
-  // NOTE: It's gotta be a 'friend' if it's in a class.  idk why.
+  // NOTE: overloaded ostream opers gotta be a 'friend' if it's in a class.  idk why.
   // NOTE: use a switch statement so you can make your enums any number value
   friend std::ostream &operator<<(std::ostream& os, Tile t) {
     switch (t) {
