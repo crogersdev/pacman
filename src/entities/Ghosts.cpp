@@ -51,6 +51,20 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
   cameFrom[offset] = NULL;
   costSoFar[offset] = 0;
 
+  // EXPLAIN: This is a hack to get past the position Pacman
+  //          will be in as he wraps his coordinates as
+  //          he goes across that open chasm thing from one
+  //          side of the labyrinth to the other.  his x
+  //          position could be more or less than the bounds
+  //          of the labyrinth so we just tie them to the max/
+  //          min of the labyrinth
+  if (floor(target.x / TILE_SIZE) <= 0) {
+    target.x = rLabyrinth.m_labyrinthCols - 1;
+  }
+  if (floor(target.x / TILE_SIZE) >= rLabyrinth.m_labyrinthCols - 1) {
+    target.x = 0;
+  }
+
   // find path by defining cameFrom
   while (!frontier.empty()) {
     TileScore current = frontier.top();
@@ -100,6 +114,11 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
     mDirection.x = (mDirection.x != 0) ? std::copysign(1.f, mDirection.x) : 0.f;
     mDirection.y = (mDirection.y != 0) ? std::copysign(1.f, mDirection.y) : 0.f;
 
+    if (std::abs(mDirection.x) == 1.f && std::abs(mDirection.y) == 1.f) {
+      mDirection.y = 0.f;
+      std::cout << "caution rogue robots\n";
+    }
+
     auto movement = mDirection * mSpeedMultiplier;
     mGhostShape.setPosition(mGhostShape.getPosition() + movement);
   }
@@ -136,19 +155,11 @@ sf::Vector2f Ghost::getPosition() {
 
 void Ghost::meander(const Labyrinth &rLabyrinth) {
   auto movement = mDirection * mSpeedMultiplier;
-  std::cout << "movement: " << movement.x << ", " << movement.y << "\n";
   auto newPosition = mGhostShape.getPosition() + movement;
 
-  // EXPLAIN:
-  // first check to see if we have any available turns, before we start moving
-  // let's do this by assuring ourselves that the ghost is in a single tile
-  // and that it has turns available
   auto ghostSizeX = mGhostShape.getGlobalBounds().width;
   auto ghostSizeY = mGhostShape.getGlobalBounds().height;
 
-  // EXPLAIN:
-  // now let's calculate some helpful values like our direction as a sf::Vector2f,
-  // our direction as a Direction enum, and our available turns at the current position.
   auto maxLabyrinthWidth = rLabyrinth.m_labyrinthCols * rLabyrinth.m_labyrinthTileSize;
   auto maxLabyrinthHeight = rLabyrinth.m_labyrinthRows * rLabyrinth.m_labyrinthTileSize;
   wrapCoordinate(newPosition.x, -ghostSizeX, maxLabyrinthWidth);
@@ -182,21 +193,20 @@ void Ghost::meander(const Labyrinth &rLabyrinth) {
   }
 
   bool wallCollision = wallCollides(
-      newPosition,
-      sf::Vector2f(24.f, 24.f),
-      rLabyrinth);
+    newPosition,
+    sf::Vector2f(TILE_SIZE - 1.f, TILE_SIZE - 1.f),
+    rLabyrinth);
 
   while (wallCollision) {
     auto newDirection = static_cast<Direction>(mRandGenerator() % 4);
     changeDirection(newDirection);
     movement = mDirection * mSpeedMultiplier;
-    std::cout << "movement: " << movement.x << ", " << movement.y << "\n";
     newPosition = mGhostShape.getPosition() + movement;
 
     wallCollision = wallCollides(
-        newPosition,
-        sf::Vector2f(24.f, 24.f),
-        rLabyrinth);
+      newPosition,
+      sf::Vector2f(TILE_SIZE - 1.f, TILE_SIZE - 1.f),
+      rLabyrinth);
 
     if (!wallCollision) {
       mGhostShape.setPosition(newPosition);

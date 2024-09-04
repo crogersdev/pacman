@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "Collisions.hpp"
+#include "./Collisions.hpp"
 #include "../entities/Labyrinth.hpp"
 
 std::vector<Direction> availableTurns(
@@ -12,15 +12,19 @@ std::vector<Direction> availableTurns(
 
   std::vector<Direction> turns;
 
-  if (rLabyrinth.at(coords.first, coords.second - 1) != Labyrinth::WALL)
+  if (rLabyrinth.at(coords.first, coords.second - 1) != Labyrinth::WALL &&
+      rLabyrinth.at(coords.first, coords.second - 1) != Labyrinth::GATE)
     turns.push_back(Direction::UP);
-  if (rLabyrinth.at(coords.first, coords.second + 1) != Labyrinth::WALL)
+  if (rLabyrinth.at(coords.first, coords.second + 1) != Labyrinth::WALL &&
+      rLabyrinth.at(coords.first, coords.second + 1) != Labyrinth::GATE)
     turns.push_back(Direction::DOWN);
-  if (rLabyrinth.at(coords.first + 1, coords.second) != Labyrinth::WALL)
+  if (rLabyrinth.at(coords.first + 1, coords.second) != Labyrinth::WALL &&
+      rLabyrinth.at(coords.first + 1, coords.second) != Labyrinth::GATE)
     turns.push_back(Direction::RIGHT);
-  if (rLabyrinth.at(coords.first - 1, coords.second) != Labyrinth::WALL)
+  if (rLabyrinth.at(coords.first - 1, coords.second) != Labyrinth::WALL &&
+      rLabyrinth.at(coords.first - 1, coords.second) != Labyrinth::GATE)
     turns.push_back(Direction::LEFT);
-  
+
   return turns;
 }
 

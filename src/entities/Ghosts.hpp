@@ -22,7 +22,7 @@ public:
   void changeDirection(Direction);
   void draw(std::shared_ptr<sf::RenderWindow>);
   sf::Vector2f getPosition();
-  void meander(const Labyrinth &, sf::Time);
+  void meander(const Labyrinth &);
   void scatter();
   void drawPath(Labyrinth &);
   void resetPath(Labyrinth &);

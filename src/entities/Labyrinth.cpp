@@ -59,7 +59,7 @@ int Labyrinth::getOffset(int col, int row) const {
 }
 
 int Labyrinth::getOffset(sf::Vector2f position) const {
-  std::pair<int, int> coords = at(position);
+  std::pair<int, int> coords = getPairFromSfVec(position);
   return getOffset(coords);
 }
 
@@ -134,7 +134,7 @@ sf::Vector2f Labyrinth::getSfVecFromOffset(int offset) const {
   return sf::Vector2f(col * TILE_SIZE, row * TILE_SIZE);
 }
 
-std::pair<int, int> Labyrinth::at(sf::Vector2f position) const {
+std::pair<int, int> Labyrinth::getPairFromSfVec(sf::Vector2f position) const {
   int row = std::floor(static_cast<int>(position.y) / TILE_SIZE);
   int col = std::floor(static_cast<int>(position.x) / TILE_SIZE);
 
@@ -142,6 +142,11 @@ std::pair<int, int> Labyrinth::at(sf::Vector2f position) const {
 }
 
 Labyrinth::Tile Labyrinth::at(int col, int row) const {
+  if (col <= 0 && row == 14)
+    col = LABYRINTH_COLS - 1;
+  if (col >= LABYRINTH_COLS - 3 && row == 14)
+    col = 0;
+
   if (col <= 0)
     col = 0;
   if (row <= 0)

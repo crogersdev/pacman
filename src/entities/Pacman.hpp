@@ -1,11 +1,11 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
+#include "./Labyrinth.hpp"
+#include "../helpers/TileCoordConversion.hpp"
 
 #include <memory>
 
-#include "Labyrinth.hpp"
-#include "../helpers/TileCoordConversion.hpp"
+#include <SFML/Graphics.hpp>
 
 class Pacman
 {
@@ -20,16 +20,16 @@ public:
   // conversion methods so we don't have to write a getter for
   // the pacman shape when we use the collides(sf::Shape, sf::Shape)
   // method
-  operator sf::Shape&() { return m_pacman; }
-  operator const sf::Shape&() const { return m_pacman; }
+  operator sf::Shape&() { return mPacman; }
+  operator const sf::Shape&() const { return mPacman; }
 
 private:
-  int m_guys;
-  float m_speed;
-  float m_radius;
-  sf::CircleShape m_pacman;
-  sf::Time m_deltaTime;
-  sf::Vector2f m_position;
-  Direction m_direction;
-  std::shared_ptr<sf::RenderWindow> m_pGameWindow;
+  int mGuys;
+  float mSpeed;
+  float mRadius;
+  sf::CircleShape mPacman;
+  sf::Time mDeltaTime;
+  sf::Vector2f mPosition;
+  Direction mDirection;
+  std::shared_ptr<sf::RenderWindow> mPGameWindow;
 };

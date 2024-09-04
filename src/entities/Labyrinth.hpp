@@ -12,7 +12,7 @@
 
 const int   LABYRINTH_ROWS = 31;
 const int   LABYRINTH_COLS = 29;
-const float TILE_SIZE = 30.f;
+const float TILE_SIZE = 25.f;
 
 class Labyrinth {
 public:
@@ -92,6 +92,7 @@ public:
   std::list<int> getNeighbors(int) const;
 
   std::pair<int, int> getPairFromOffset(int) const;
+  std::pair<int, int> getPairFromSfVec(sf::Vector2f) const;
   sf::Vector2f getSfVecFromOffset(int) const;
 
   std::pair<int, int> at(sf::Vector2f) const;
