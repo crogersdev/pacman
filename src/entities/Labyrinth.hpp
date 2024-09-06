@@ -12,7 +12,8 @@
 
 const int   LABYRINTH_ROWS = 31;
 const int   LABYRINTH_COLS = 29;
-const float TILE_SIZE = 25.f;
+const int   TUNNEL_ROW     = 14;
+const float TILE_SIZE      = 25.f;
 
 class Labyrinth {
 public:
@@ -86,9 +87,15 @@ public:
   int getOffset(std::pair<int, int>) const;
   int getOffset(int, int) const;
   int getOffset(sf::Vector2f) const;
+
+  int heuristic(int, int) const;
   int heuristic(sf::Vector2f, sf::Vector2f) const;
   int heuristic(std::pair<int, int>, std::pair<int, int>) const;
-  int heuristic(int, int) const;
+
+  int heuristicThroughTunnel(int, int) const;
+  int heuristicThroughTunnel(sf::Vector2f, sf::Vector2f) const;
+  int heuristicThroughTunnel(std::pair<int, int>, std::pair<int, int>) const;
+
   std::list<int> getNeighbors(int) const;
 
   std::pair<int, int> getPairFromOffset(int) const;

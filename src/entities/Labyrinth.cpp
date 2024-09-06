@@ -63,10 +63,12 @@ int Labyrinth::getOffset(sf::Vector2f position) const {
   return getOffset(coords);
 }
 
+int Labyrinth::heuristic(int startOffset, int endOffset) const {
+  return heuristic(getPairFromOffset(startOffset), getPairFromOffset(endOffset));
+}
+
 int Labyrinth::heuristic(sf::Vector2f start, sf::Vector2f end) const {
-  return heuristic(
-    std::pair<int, int>(static_cast<int>(start.x), static_cast<int>(start.y)),
-    std::pair<int, int>(static_cast<int>(end.x),   static_cast<int>(end.y)));
+  return heuristic(getPairFromSfVec(start), getPairFromSfVec(end));
 }
 
 int Labyrinth::heuristic(std::pair<int, int> start, std::pair<int, int> end) const {
@@ -93,8 +95,29 @@ int Labyrinth::heuristic(std::pair<int, int> start, std::pair<int, int> end) con
   return heuristicCost;
 }
 
-int Labyrinth::heuristic(int startOffset, int endOffset) const {
-  return heuristic(getPairFromOffset(startOffset), getPairFromOffset(endOffset));
+int Labyrinth::heuristicThroughTunnel(int startOffset, int endOffset) const {
+  return heuristicThroughTunnel(
+    getPairFromOffset(startOffset),
+    getPairFromOffset(endOffset));
+}
+
+int Labyrinth::heuristicThroughTunnel(sf::Vector2f start, sf::Vector2f end) const {
+  return heuristicThroughTunnel(
+    getPairFromSfVec(start),
+    getPairFromSfVec(end));
+}
+
+int Labyrinth::heuristicThroughTunnel(std::pair<int, int> start, std::pair<int, int> end) const {
+  auto leftTunnelEntrance  = std::pair<int, int>(0, TUNNEL_ROW);
+  auto rightTunnelEntrance = std::pair<int, int>(LABYRINTH_COLS - 2, TUNNEL_ROW);
+
+  auto leftTunnelHcost = heuristic(start, leftTunnelEntrance);
+  leftTunnelHcost += heuristic(rightTunnelEntrance, end);
+
+  auto rightTunnelHcost = heuristic(start, rightTunnelEntrance);;
+  rightTunnelHcost += heuristic(leftTunnelEntrance, end);
+
+  return std::min(rightTunnelHcost, leftTunnelHcost);
 }
 
 std::list<int> Labyrinth::getNeighbors(int offset) const {
@@ -110,7 +133,15 @@ std::list<int> Labyrinth::getNeighbors(int offset) const {
   std::list<int> neighbors;
   for (const auto& dirPair : dirs) {
     auto potentialNeighborPair = std::pair<int, int>(
-      coords.first + dirPair.first, coords.second + dirPair.second);
+        coords.first + dirPair.first, coords.second + dirPair.second);
+
+    if (coords.first == TUNNEL_ROW && coords.second == 0) {
+      potentialNeighborPair = std::pair<int, int>(
+        coords.first + dirPair.first, LABYRINTH_COLS - 1);
+      )
+    }
+    }
+    
     auto potentialNeighbor = at(potentialNeighborPair);
 
     if (potentialNeighbor != Tile::ERROR &&
