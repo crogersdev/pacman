@@ -120,7 +120,19 @@ int Labyrinth::heuristicThroughTunnel(std::pair<int, int> start, std::pair<int, 
   return std::min(rightTunnelHcost, leftTunnelHcost);
 }
 
+int Labyrinth::movementCost(int startOffset, int endOffset) const {
+  return movementCost(
+    getPairFromOffset(startOffset),
+    getPairFromOffset(endOffset));
+}
+
+int Labyrinth::movementCost(std::pair<int, int> start, std::pair<int, int> end) const {
+  int cost = 0;
+}
+
 std::list<int> Labyrinth::getNeighbors(int offset) const {
+  // NOTE: coords.first == col
+  //       coords.first == row
   std::pair<int, int> coords = getPairFromOffset(offset);
 
   std::vector<std::pair<int, int>> dirs = {
@@ -132,16 +144,22 @@ std::list<int> Labyrinth::getNeighbors(int offset) const {
 
   std::list<int> neighbors;
   for (const auto& dirPair : dirs) {
-    auto potentialNeighborPair = std::pair<int, int>(
-        coords.first + dirPair.first, coords.second + dirPair.second);
+    auto potentialNeighborPair = std::pair<int, int>();
 
-    if (coords.first == TUNNEL_ROW && coords.second == 0) {
+    // goes left across to the right side
+    if (coords.first  + dirPair.first  == 0 &&
+        coords.second + dirPair.second == TUNNEL_ROW) {
       potentialNeighborPair = std::pair<int, int>(
         coords.first + dirPair.first, LABYRINTH_COLS - 1);
-      )
+    } else if (coords.first  + dirPair.first == LABYRINTH_COLS - 1 &&
+               coords.second + dirPair.second == TUNNEL_ROW) {
+      potentialNeighborPair = std::pair<int, int>(
+        coords.first + dirPair.first, 0);
+    } else {
+      potentialNeighborPair = std::pair<int, int>(
+        coords.first + dirPair.first, coords.second + dirPair.second);
     }
-    }
-    
+
     auto potentialNeighbor = at(potentialNeighborPair);
 
     if (potentialNeighbor != Tile::ERROR &&

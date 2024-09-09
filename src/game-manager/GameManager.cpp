@@ -75,9 +75,9 @@ void GameManager::updateEntities() {
     pacmanPosition.x + (TILE_SIZE / 2), pacmanPosition.y + (TILE_SIZE / 2));
 
   m_pinky.chase(m_labyrinth, pacmanCenter);
-  m_blinky.chase(m_labyrinth, pacmanCenter);
-  m_inky.chase(m_labyrinth, pacmanCenter);
-  m_clyde.meander(m_labyrinth);
+  //m_blinky.chase(m_labyrinth, pacmanCenter);
+  //m_inky.chase(m_labyrinth, pacmanCenter);
+  //m_clyde.meander(m_labyrinth);
 
   if (entityCollides(m_pinky, m_pacman)) {
     m_pinky.resetPath(m_labyrinth);

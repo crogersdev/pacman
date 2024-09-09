@@ -96,6 +96,10 @@ public:
   int heuristicThroughTunnel(sf::Vector2f, sf::Vector2f) const;
   int heuristicThroughTunnel(std::pair<int, int>, std::pair<int, int>) const;
 
+  int movementCost(int, int) const;
+  int movementCost(sf::Vector2f, sf::Vector2f) const;
+  int movementCost(std::pair<int, int>, std::pair<int, int>) const;
+
   std::list<int> getNeighbors(int) const;
 
   std::pair<int, int> getPairFromOffset(int) const;

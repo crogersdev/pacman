@@ -75,11 +75,19 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
 
     auto neighbors = rLabyrinth.getNeighbors(current.positionOffset);
     for (auto next : neighbors) {
-      int newCost = costSoFar[current.positionOffset] + rLabyrinth.heuristic(current.positionOffset, next);
+      auto lowerHeuristic = std::min(
+        rLabyrinth.heuristic(current.positionOffset, next),
+        rLabyrinth.heuristicThroughTunnel(current.positionOffset, next));
+      int newCost = costSoFar[current.positionOffset] + lowerHeuristic;
 
       if (costSoFar.find(next) == costSoFar.end() || newCost < costSoFar[next]) {
         costSoFar[next] = newCost;
-        int priority = newCost + rLabyrinth.heuristic(next, rLabyrinth.getOffset(target));
+
+        lowerHeuristic = std::min(
+          rLabyrinth.heuristic(next, rLabyrinth.getOffset(target)),
+          rLabyrinth.heuristicThroughTunnel(next, rLabyrinth.getOffset(target)));
+
+        int priority = newCost + lowerHeuristic;
         frontier.push(TileScore(next, priority));
         cameFrom[next] = current.positionOffset;
       }
