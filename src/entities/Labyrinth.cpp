@@ -126,8 +126,17 @@ int Labyrinth::movementCost(int startOffset, int endOffset) const {
     getPairFromOffset(endOffset));
 }
 
+int Labyrinth::movementCost(sf::Vector2f start, sf::Vector2f end) const {
+  return movementCost(
+    getPairFromSfVec(start),
+    getPairFromSfVec(end));
+}
+
 int Labyrinth::movementCost(std::pair<int, int> start, std::pair<int, int> end) const {
   int cost = 0;
+
+
+  return cost;
 }
 
 std::list<int> Labyrinth::getNeighbors(int offset) const {
@@ -135,15 +144,8 @@ std::list<int> Labyrinth::getNeighbors(int offset) const {
   //       coords.first == row
   std::pair<int, int> coords = getPairFromOffset(offset);
 
-  std::vector<std::pair<int, int>> dirs = {
-    std::pair<int, int>(0, 1),
-    std::pair<int, int>(1, 0),
-    std::pair<int, int>(0, -1),
-    std::pair<int, int>(-1, 0),
-  };
-
   std::list<int> neighbors;
-  for (const auto& dirPair : dirs) {
+  for (const auto& dirPair : mDirs) {
     auto potentialNeighborPair = std::pair<int, int>();
 
     // goes left across to the right side

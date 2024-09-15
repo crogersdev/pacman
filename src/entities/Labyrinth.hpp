@@ -77,6 +77,12 @@ public:
 
   std::map<char, Tile> m_tileLut;
   std::map<Tile, std::string> m_tileLabelLut;
+  std::vector<std::pair<int, int>> mDirs = {
+    std::pair<int, int>(0, 1),     // UP
+    std::pair<int, int>(1, 0),     // RIGHT
+    std::pair<int, int>(0, -1),    // DOWN
+    std::pair<int, int>(-1, 0),    // LEFT    <--- all these are assuming that it goes col, row
+  };
 
   int m_labyrinthRows;
   int m_labyrinthCols;
