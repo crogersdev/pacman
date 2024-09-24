@@ -41,15 +41,15 @@ bool Ghost::occupiesSingleTile() {
 
 void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
   std::priority_queue<TileScore, std::vector<TileScore>, OrderByScore> frontier;
-  const int offset = rLabyrinth.getOffset(mGhostShape.getPosition());
+  const int ghostOffset = rLabyrinth.getOffset(mGhostShape.getPosition());
 
-  frontier.push(TileScore(offset, 0));
+  frontier.push(TileScore(ghostOffset, 0));
 
   std::map<int, std::optional<int>> cameFrom;
   std::map<int, int> costSoFar;
 
-  cameFrom[offset] = NULL;
-  costSoFar[offset] = 0;
+  cameFrom[ghostOffset] = NULL;
+  costSoFar[ghostOffset] = 0;
 
   // EXPLAIN: This is a hack to get past the position Pacman
   //          will be in as he wraps his coordinates as
@@ -64,6 +64,17 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
   if (floor(target.x / TILE_SIZE) >= rLabyrinth.m_labyrinthCols - 1) {
     target.x = 0;
   }
+
+  /* 
+  // following debug info verifies that the target is correct
+  // and that hcost through tunnel and hcost itself work
+  // just fine
+  std::cout << "my target is at: " << floor(target.y / TILE_SIZE) << ", " << floor(target.x / TILE_SIZE) << "\n";
+  auto t  = rLabyrinth.getOffset(target);
+  auto h  = rLabyrinth.heuristic(ghostOffset, t);
+  auto ht = rLabyrinth.heuristicThroughTunnel(ghostOffset, t);
+  std::cout << "hcost: " << h << ",\thcost tunnel: " << ht << "\n";
+  */
 
   // find path by defining cameFrom
   while (!frontier.empty()) {
@@ -81,9 +92,12 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
       if (costSoFar.find(next) == costSoFar.end() || newCost < costSoFar[next]) {
         costSoFar[next] = newCost;
 
-        int lowerHeuristic = std::min(
-          rLabyrinth.heuristic(next, rLabyrinth.getOffset(target)),
-          rLabyrinth.heuristicThroughTunnel(next, rLabyrinth.getOffset(target)));
+        auto h = rLabyrinth.heuristic(next, rLabyrinth.getOffset(target));
+        auto ht = rLabyrinth.heuristicThroughTunnel(next, rLabyrinth.getOffset(target));
+        if (ht < h) {
+          std::cout << "let's use the tunnel\n";
+        }
+        auto lowerHeuristic = std::min(h, ht);
 
         int priority = newCost + lowerHeuristic;
         frontier.push(TileScore(next, priority));
@@ -102,7 +116,7 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
   // reconstruct path from cameFrom
   mPath.clear();  // we don't have to do this if we made it a map or something
   int current = rLabyrinth.getOffset(target);
-  while (current != offset) {
+  while (current != ghostOffset) {
     mPath.emplace_front(rLabyrinth.getSfVecFromOffset(current));
     auto iterator = cameFrom.find(current);
     if (iterator == cameFrom.end() || !iterator->second.has_value()) {

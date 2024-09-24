@@ -42,16 +42,9 @@ Labyrinth::Labyrinth()
 }
 
 int Labyrinth::getOffset(std::pair<int, int> position) const {
-  // EXPLAIN
-  // i never did figure out why the # of cols was 2 larger than what appeared
-  // on the screen.  maybe two null terminating characters because of the doubly
-  // nested std::array?  idk.  it really gets to me to have to do this wonky
-  // arithmetic but what can i do
-  // also we prefix ++ on position.second because we need to count the 0th
-  // position as a position
-  auto col = position.first;
-  auto row = position.second;
-  return (col + row * (m_labyrinthCols - 1));
+  auto col = position.first % static_cast<int>(TILE_SIZE);
+  auto row = position.second % static_cast<int>(TILE_SIZE);
+  return col + row * (m_labyrinthCols - 1);
 }
 
 int Labyrinth::getOffset(int col, int row) const {
@@ -111,13 +104,13 @@ int Labyrinth::heuristicThroughTunnel(std::pair<int, int> start, std::pair<int, 
   auto leftTunnelEntrance  = std::pair<int, int>(0, TUNNEL_ROW);
   auto rightTunnelEntrance = std::pair<int, int>(LABYRINTH_COLS - 2, TUNNEL_ROW);
 
-  auto leftTunnelHcost = heuristic(start, leftTunnelEntrance);
-  leftTunnelHcost += heuristic(rightTunnelEntrance, end);
+  auto leftTunnelHCost = heuristic(start, leftTunnelEntrance);
+  leftTunnelHCost += 10 + heuristic(rightTunnelEntrance, end);
 
-  auto rightTunnelHcost = heuristic(start, rightTunnelEntrance);;
-  rightTunnelHcost += heuristic(leftTunnelEntrance, end);
+  auto rightTunnelHCost = heuristic(start, rightTunnelEntrance);;
+  rightTunnelHCost += 10 + heuristic(leftTunnelEntrance, end);
 
-  return std::min(rightTunnelHcost, leftTunnelHcost);
+  return std::min(rightTunnelHCost, leftTunnelHCost);
 }
 
 int Labyrinth::movementCost(int startOffset, int endOffset) const {
@@ -126,37 +119,41 @@ int Labyrinth::movementCost(int startOffset, int endOffset) const {
     getPairFromOffset(endOffset));
 }
 
-int Labyrinth::movementCost(sf::Vector2f start, sf::Vector2f end) const {
+int Labyrinth::movementCost(sf::Vector2f startVec, sf::Vector2f endVec) const {
   return movementCost(
-    getPairFromSfVec(start),
-    getPairFromSfVec(end));
+    getPairFromSfVec(startVec),
+    getPairFromSfVec(endVec));
 }
 
 int Labyrinth::movementCost(std::pair<int, int> start, std::pair<int, int> end) const {
-  int cost = 0;
-
-
-  return cost;
+  return 10;
 }
 
 std::list<int> Labyrinth::getNeighbors(int offset) const {
-  // NOTE: coords.first == col
-  //       coords.first == row
+  // NOTE: coords.first  == col
+  //       coords.second == row
   std::pair<int, int> coords = getPairFromOffset(offset);
 
+  std::vector<std::pair<int, int>> dirs = {
+    std::pair<int, int>(0, 1),
+    std::pair<int, int>(1, 0),
+    std::pair<int, int>(0, -1),
+    std::pair<int, int>(-1, 0),
+  };
+
   std::list<int> neighbors;
-  for (const auto& dirPair : mDirs) {
+  for (const auto& dirPair : dirs) {
     auto potentialNeighborPair = std::pair<int, int>();
 
     // goes left across to the right side
-    if (coords.first  + dirPair.first  == 0 &&
+    if (coords.first  + dirPair.first  == -1 &&
         coords.second + dirPair.second == TUNNEL_ROW) {
-      potentialNeighborPair = std::pair<int, int>(
-        coords.first + dirPair.first, LABYRINTH_COLS - 1);
-    } else if (coords.first  + dirPair.first == LABYRINTH_COLS - 1 &&
+      potentialNeighborPair = std::pair<int, int>(LABYRINTH_COLS - 1, TUNNEL_ROW);
+
+    } else if (coords.first  + dirPair.first == LABYRINTH_COLS &&
                coords.second + dirPair.second == TUNNEL_ROW) {
-      potentialNeighborPair = std::pair<int, int>(
-        coords.first + dirPair.first, 0);
+      potentialNeighborPair = std::pair<int, int>(0, TUNNEL_ROW);
+
     } else {
       potentialNeighborPair = std::pair<int, int>(
         coords.first + dirPair.first, coords.second + dirPair.second);

@@ -110,7 +110,7 @@ void GameManager::updateWindow() {
     oss << "FPS: " << m_fps << "\n";
     auto row = std::floor(static_cast<int>(m_pacman.getPosition().y) / TILE_SIZE);
     auto col = std::floor(static_cast<int>(m_pacman.getPosition().x) / TILE_SIZE);
-    oss << "Row: " << row << "  Col: " << col << "\n";
+    oss << "Pacman currently at row: " << row << "  col: " << col << "\n";
     auto bar = m_labyrinth.at(col, row);
     auto foo = m_labyrinth.m_tileLabelLut.at(bar);
     oss << "Map LUT at " << row << ", " << col << ": " << foo << "\n";

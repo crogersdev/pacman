@@ -29,8 +29,8 @@ void Pacman::move(sf::Vector2f direction, sf::Time t, const Labyrinth &rLabyrint
 
   sf::Vector2f newPosition = mPacman.getPosition() + movement;
 
-  auto maxLabyrinthWidth = rLabyrinth.m_labyrinthCols * rLabyrinth.m_labyrinthTileSize;
-  auto maxLabyrinthHeight = rLabyrinth.m_labyrinthRows * rLabyrinth.m_labyrinthTileSize;
+  auto maxLabyrinthWidth = rLabyrinth.m_labyrinthCols * (rLabyrinth.m_labyrinthTileSize - 1);
+  auto maxLabyrinthHeight = rLabyrinth.m_labyrinthRows * (rLabyrinth.m_labyrinthTileSize - 1);
 
   // EXPLAIN: the min is the negative value of pacman's size so that
   //          you can see him disappear as he goes left without having him
@@ -51,6 +51,10 @@ void Pacman::move(sf::Vector2f direction, sf::Time t, const Labyrinth &rLabyrint
   }
 }
 
-sf::Vector2f Pacman::getPosition() {
+sf::Vector2f Pacman::getPosition() const {
   return mPacman.getPosition();
+}
+
+float Pacman::getRadius() const {
+  return mRadius;
 }

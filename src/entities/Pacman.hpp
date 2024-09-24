@@ -15,7 +15,8 @@ public:
 
   void draw(std::shared_ptr<sf::RenderWindow>);
   void move(sf::Vector2f, sf::Time, const Labyrinth &);
-  sf::Vector2f getPosition();
+  sf::Vector2f getPosition() const;
+  float getRadius() const;
 
   // conversion methods so we don't have to write a getter for
   // the pacman shape when we use the collides(sf::Shape, sf::Shape)
