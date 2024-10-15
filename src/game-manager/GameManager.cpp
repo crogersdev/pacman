@@ -7,10 +7,15 @@
 
 GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
   : m_pacman((TILE_SIZE / 2) - 1, 200.f, sf::Vector2f(TILE_SIZE + 1.f, TILE_SIZE + 1.f)),
-    m_pinky(400.f),
+    // speeds: 1, 1.25, 1.5, 1.875, 2, 2.5, 3, 3.75, 5, 6, 7.5, 10, 15
+    m_pinky(1.f, sf::Vector2f(9.f * TILE_SIZE,  6.f * TILE_SIZE),  sf::Color(219, 48, 130)),
+    m_inky(1.f, sf::Vector2f(12.f * TILE_SIZE, 13.f * TILE_SIZE), sf::Color(255, 89, 143)),
+    m_blinky(1.f, sf::Vector2f(16.f * TILE_SIZE, 13.f * TILE_SIZE), sf::Color(117, 254, 255)),
+    m_clyde(1.f, sf::Vector2f(11.f * TILE_SIZE, 15.f * TILE_SIZE), sf::Color(255, 179, 71)),
     m_clock(),
     m_windowBounds(),
-    m_hud(),
+    m_gameHud(),
+    m_debugHud(),
     m_deltaTime(),
     m_pGameWindow(pWindow),
     m_labyrinth(),
@@ -66,19 +71,26 @@ void GameManager::handleInputs()
 }
 
 void GameManager::updateEntities() {
-  //  m_pinky.meander(m_labyrinth);
-  m_pinky.chase(m_labyrinth, m_pacman.getPosition());
+  sf::Vector2f pacmanPosition = m_pacman.getPosition();
+  sf::Vector2f pacmanCenter = sf::Vector2f(
+    pacmanPosition.x + (TILE_SIZE / 2), pacmanPosition.y + (TILE_SIZE / 2));
 
-  if (entityCollides(m_pinky, m_pacman))
-    std::cout << "YOU AND I COLLIDE\n";
-  
-  auto row = floor(static_cast<int>(m_pacman.getPosition().y + (TILE_SIZE / 2.f)) / TILE_SIZE);
-  auto col = floor(static_cast<int>(m_pacman.getPosition().x + (TILE_SIZE / 2.f)) / TILE_SIZE);
-  
-  auto whatDidPacmanEat = m_labyrinth.at(col, row);
+  m_pinky.chase(m_labyrinth, pacmanCenter);
+  //m_blinky.chase(m_labyrinth, pacmanCenter);
+  //m_inky.chase(m_labyrinth, pacmanCenter);
+  //m_clyde.meander(m_labyrinth);
+
+  if (entityCollides(m_pinky, m_pacman)) {
+    m_pinky.resetPath(m_labyrinth);
+  }
+
+  auto whatDidPacmanEat = m_labyrinth.at(
+    m_pacman.getPosition().x / TILE_SIZE,
+    m_pacman.getPosition().y / TILE_SIZE);
+
   if (whatDidPacmanEat == Labyrinth::PELLET) {
     m_score += m_pelletValue;
-    m_labyrinth.set(row, col, Labyrinth::EMPTY);
+    m_labyrinth.set(m_pacman.getPosition(), Labyrinth::EMPTY);
   }
 }
 
@@ -89,26 +101,46 @@ void GameManager::updateWindow() {
   m_pGameWindow->clear();
   std::ostringstream oss;
   oss << "Score: " << m_score << "\n";
-  m_hud.score.setString(oss.str());
-  m_pGameWindow->draw(m_hud.score);
-  m_hud.drawGuys(m_pGameWindow);
+  m_gameHud.score.setString(oss.str());
+  m_pGameWindow->draw(m_gameHud.score);
+  m_gameHud.drawGuys(m_pGameWindow);
   oss.clear();
 
   // Update debug information
   if (m_debugMode) {
-    oss << "FPS: " << m_fps << "\n";
-    auto row = std::floor(static_cast<int>(m_pacman.getPosition().y) / TILE_SIZE);
-    auto col = std::floor(static_cast<int>(m_pacman.getPosition().x) / TILE_SIZE);
-    oss << "Row: " << row << "  Col: " << col << "\n";
+    std::ostringstream debugOss;
+    auto row = floor(m_pacman.getPosition().y / TILE_SIZE);
+    auto col = floor(m_pacman.getPosition().x / TILE_SIZE);
     auto bar = m_labyrinth.at(col, row);
     auto foo = m_labyrinth.m_tileLabelLut.at(bar);
-    oss << "Map LUT at " << row << ", " << col << ": " << foo << "\n";
-    m_pGameWindow->draw(m_hud.debugText);
-    m_hud.debugText.setString(oss.str());
+    debugOss << "Pacman pos r,c: " << row << ", " << col << "; " << foo << "\n";
+
+    auto pinkyRow = floor(m_pinky.getPosition().y / TILE_SIZE);
+    auto pinkyCol = floor(m_pinky.getPosition().x / TILE_SIZE);
+    auto pinkyOffset = m_labyrinth.getOffset(pinkyCol, pinkyRow);
+    debugOss << "ghost pos r,c: " << pinkyRow << ", " << pinkyCol << "\n";
+    debugOss << "ghost offset: " << pinkyOffset << "\n";
+    debugOss << "ghost neighbors: ";
+    for (auto n : m_labyrinth.getNeighbors(pinkyOffset)) {
+      debugOss << n << ", ";
+    }
+    debugOss << "\n";
+
+    auto trRow = floor(m_pinky.getTarget().y / TILE_SIZE);
+    auto trCol = floor(m_pinky.getTarget().x / TILE_SIZE);
+    debugOss << "chasing r, c: " << trRow << ", " << trCol << "\n";
+
+    m_debugHud.debugText.setString(debugOss.str());
+    m_pGameWindow->draw(m_debugHud.debugText);
   }
 
   m_labyrinth.draw(m_pGameWindow);
   m_pacman.draw(m_pGameWindow);
   m_pinky.draw(m_pGameWindow);
+
+
+  m_inky.draw(m_pGameWindow);
+  m_blinky.draw(m_pGameWindow);
+  m_clyde.draw(m_pGameWindow);
   m_pGameWindow->display();
 }

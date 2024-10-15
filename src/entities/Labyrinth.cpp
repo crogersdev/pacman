@@ -14,7 +14,9 @@ Labyrinth::Labyrinth()
       {'P', Labyrinth::PINKY},
       {'I', Labyrinth::INKY},
       {'C', Labyrinth::CLYDE},
-      {'-', Labyrinth::GATE}
+      {'-', Labyrinth::GATE},
+      {'X', Labyrinth::PATH},
+      {'E', Labyrinth::ERROR}
     }),
     m_tileLabelLut({
       {Labyrinth::EMPTY, "Empty"},
@@ -26,11 +28,10 @@ Labyrinth::Labyrinth()
       {Labyrinth::PINKY, "Pinky"},
       {Labyrinth::INKY, "Inky"},
       {Labyrinth::CLYDE, "Clyde"},
-      {Labyrinth::GATE, "Gate"}
+      {Labyrinth::GATE, "Gate"},
+      {Labyrinth::PATH, "Path"},
+      {Labyrinth::ERROR, "Error"}
     }),
-    m_labyrinthRows(LABYRINTH_ROWS),
-    m_labyrinthCols(LABYRINTH_COLS),
-    m_labyrinthTileSize(TILE_SIZE),
     m_wallTile(sf::RectangleShape(sf::Vector2f(TILE_SIZE, TILE_SIZE))),
     m_pellet(sf::CircleShape(3.f)) {
   m_wallTile.setFillColor(sf::Color::Blue);
@@ -38,14 +39,9 @@ Labyrinth::Labyrinth()
 }
 
 int Labyrinth::getOffset(std::pair<int, int> position) const {
-  // EXPLAIN
-  // i never did figure out why the # of cols was 2 larger than what appeared
-  // on the screen.  maybe two null terminating characters because of the doubly
-  // nested std::array?  idk.  it really gets to me to have to do this wonky
-  // arithmetic but what can i do
-  // also we prefix ++ on position.second because we need to count the 0th
-  // position as a position
-  auto col = position.first;
+  auto col = position.first % static_cast<int>(TILE_SIZE);
+  auto row = position.second % static_cast<int>(TILE_SIZE);
+  return col + row * (LABYRINTH_COLS - 1);
   auto row = position.second;
   return (col + row * (m_labyrinthCols - 1));
 }
@@ -55,14 +51,16 @@ int Labyrinth::getOffset(int col, int row) const {
 }
 
 int Labyrinth::getOffset(sf::Vector2f position) const {
-  std::pair<int, int> coords = at(position);
+  std::pair<int, int> coords = getPairFromSfVec(position);
   return getOffset(coords);
 }
 
+int Labyrinth::heuristic(int startOffset, int endOffset) const {
+  return heuristic(getPairFromOffset(startOffset), getPairFromOffset(endOffset));
+}
+
 int Labyrinth::heuristic(sf::Vector2f start, sf::Vector2f end) const {
-  return heuristic(
-    std::pair<int, int>(static_cast<int>(start.x), static_cast<int>(start.y)),
-    std::pair<int, int>(static_cast<int>(end.x),   static_cast<int>(end.y)));
+  return heuristic(getPairFromSfVec(start), getPairFromSfVec(end));
 }
 
 int Labyrinth::heuristic(std::pair<int, int> start, std::pair<int, int> end) const {
@@ -89,46 +87,102 @@ int Labyrinth::heuristic(std::pair<int, int> start, std::pair<int, int> end) con
   return heuristicCost;
 }
 
-int Labyrinth::heuristic(int startOffset, int endOffset) const {
-  return heuristic(getPairFromOffset(startOffset), getPairFromOffset(endOffset));
+int Labyrinth::heuristicThroughTunnel(int startOffset, int endOffset) const {
+  return heuristicThroughTunnel(
+    getPairFromOffset(startOffset),
+    getPairFromOffset(endOffset));
+}
+
+int Labyrinth::heuristicThroughTunnel(sf::Vector2f start, sf::Vector2f end) const {
+  return heuristicThroughTunnel(
+    getPairFromSfVec(start),
+    getPairFromSfVec(end));
+}
+
+int Labyrinth::heuristicThroughTunnel(std::pair<int, int> start, std::pair<int, int> end) const {
+  auto leftTunnelEntrance  = std::pair<int, int>(0, TUNNEL_ROW);
+  auto rightTunnelEntrance = std::pair<int, int>(LABYRINTH_COLS - 2, TUNNEL_ROW);
+
+  auto leftTunnelHCost = heuristic(start, leftTunnelEntrance);
+  leftTunnelHCost += 10 + heuristic(rightTunnelEntrance, end);
+
+  auto rightTunnelHCost = heuristic(start, rightTunnelEntrance);;
+  rightTunnelHCost += 10 + heuristic(leftTunnelEntrance, end);
+
+  return std::min(rightTunnelHCost, leftTunnelHCost);
+}
+
+int Labyrinth::movementCost(int startOffset, int endOffset) const {
+  return movementCost(
+    getPairFromOffset(startOffset),
+    getPairFromOffset(endOffset));
+}
+
+int Labyrinth::movementCost(sf::Vector2f startVec, sf::Vector2f endVec) const {
+  return movementCost(
+    getPairFromSfVec(startVec),
+    getPairFromSfVec(endVec));
+}
+
+int Labyrinth::movementCost(std::pair<int, int> start, std::pair<int, int> end) const {
+  return 10;
 }
 
 std::list<int> Labyrinth::getNeighbors(int offset) const {
+  // NOTE: coords.first  == col
+  //       coords.second == row
   std::pair<int, int> coords = getPairFromOffset(offset);
-  auto c = coords.first;
-  auto r = coords.second;
-  std::list<int> neighbors;
 
-  for (int row = -1; row < 2; ++row) {
-    for (int col = -1; col < 2; ++col) {
-      if ((c + col < 0 || c + col > m_labyrinthCols) ||
-          (r + row < 0 || r + row > m_labyrinthRows)) {
-        continue;
-      }
+  std::vector<std::pair<int, int>> dirs = {
+    std::pair<int, int>(0, 1),
+    std::pair<int, int>(1, 0),
+    std::pair<int, int>(0, -1),
+    std::pair<int, int>(-1, 0),
+  };
+
+  std::list<int> neighbors;
+  for (const auto& dirPair : dirs) {
+    auto potentialNeighborPair = std::pair<int, int>();
+
+    // goes left across to the right side
+    if (coords.first  + dirPair.first  == -1 &&
+        coords.second + dirPair.second == TUNNEL_ROW) {
+      potentialNeighborPair = std::pair<int, int>(LABYRINTH_COLS - 1, TUNNEL_ROW);
+    } else if (coords.first  + dirPair.first == LABYRINTH_COLS &&
+               coords.second + dirPair.second == TUNNEL_ROW) {
+      potentialNeighborPair = std::pair<int, int>(0, TUNNEL_ROW);
       if (getOffset(c+col, r+row) == offset) continue;
 
-      auto n = at(c+col, r+row);
-      if ((n != Tile::GATE) && (n != Tile::WALL)) {
-        neighbors.push_back(getOffset(c+col, r+row));
+    } else {
+      potentialNeighborPair = std::pair<int, int>(
+        coords.first + dirPair.first, coords.second + dirPair.second);
       }
     }
+
+    auto potentialNeighbor = at(potentialNeighborPair);
+
+    if (potentialNeighbor != Tile::ERROR &&
+        potentialNeighbor != Tile::GATE &&
+        potentialNeighbor != Tile::WALL)
+        neighbors.push_back(getOffset(potentialNeighborPair));
   }
+
   return neighbors;
 }
 
 std::pair<int, int> Labyrinth::getPairFromOffset(int offset) const {
-  int col = offset % (m_labyrinthCols - 1);
-  int row = offset / (m_labyrinthCols - 1);
+  int col = offset % (LABYRINTH_COLS - 1);
+  int row = offset / (LABYRINTH_COLS - 1);
   return std::pair<int, int>(col, row);
 }
 
 sf::Vector2f Labyrinth::getSfVecFromOffset(int offset) const {
-  int col = offset % (m_labyrinthCols - 1);
-  int row = offset / (m_labyrinthCols - 1);
+  int col = offset % (LABYRINTH_COLS - 1);
+  int row = offset / (LABYRINTH_COLS - 1);
   return sf::Vector2f(col * TILE_SIZE, row * TILE_SIZE);
 }
 
-std::pair<int, int> Labyrinth::at(sf::Vector2f position) const {
+std::pair<int, int> Labyrinth::getPairFromSfVec(sf::Vector2f position) const {
   int row = std::floor(static_cast<int>(position.y) / TILE_SIZE);
   int col = std::floor(static_cast<int>(position.x) / TILE_SIZE);
 
@@ -136,6 +190,11 @@ std::pair<int, int> Labyrinth::at(sf::Vector2f position) const {
 }
 
 Labyrinth::Tile Labyrinth::at(int col, int row) const {
+  if (col <= 0 && row == 14)
+    col = LABYRINTH_COLS - 1;
+  if (col >= LABYRINTH_COLS - 3 && row == 14)
+    col = 0;
+
   if (col <= 0)
     col = 0;
   if (row <= 0)
@@ -146,7 +205,7 @@ Labyrinth::Tile Labyrinth::at(int col, int row) const {
     row = LABYRINTH_ROWS - 1;
 
   char tile = static_cast<char>(m_labyrinth[row][col]);
-  Tile t;
+  Tile t = Tile::ERROR;
   try {
     t = m_tileLut.at(tile);
   }
@@ -162,8 +221,8 @@ Labyrinth::Tile Labyrinth::at(std::pair<int, int> coords) const {
 }
 
 void Labyrinth::draw(std::shared_ptr<sf::RenderWindow> pGameWindow) {
-  for (int row = 0; row < m_labyrinthRows; ++row) {
-    for (int col = 0; col < m_labyrinthCols; ++col) {
+  for (int row = 0; row < LABYRINTH_ROWS; ++row) {
+    for (int col = 0; col < LABYRINTH_COLS; ++col) {
       auto tile = at(col, row);
       switch (tile) {
         case Labyrinth::WALL:
@@ -184,6 +243,15 @@ void Labyrinth::draw(std::shared_ptr<sf::RenderWindow> pGameWindow) {
           pGameWindow->draw(m_pellet);
         }
           break;
+        case Labyrinth::PATH:
+        {
+          sf::RectangleShape rectangle(sf::Vector2f(25.f, 25.f));
+          rectangle.setFillColor(sf::Color(139, 0, 0));  // Dark red
+          auto x = TILE_SIZE * col;
+          auto y = TILE_SIZE * row;
+          rectangle.setPosition(sf::Vector2f(x, y));
+          pGameWindow->draw(rectangle);
+        }
         case Labyrinth::POWERUP:
         case Labyrinth::GATE:
           break;
@@ -197,10 +265,10 @@ void Labyrinth::draw(std::shared_ptr<sf::RenderWindow> pGameWindow) {
 void Labyrinth::set(sf::Vector2f pos, Tile entity) {
   auto coords = tileCoordsAtPosition(pos);
 
-  m_labyrinth[coords.first][coords.second] = entity;
+  m_labyrinth[coords.second][coords.first] = entity;
 }
 
-void Labyrinth::set(int row, int col, Tile entity) {
+void Labyrinth::set(int col, int row, Tile entity) {
   // EXPLAIN: when pacman goes through his tunnel we have a possible
   //          scenario where the x coord is 0 and then -1, or 29 and we
   //          don't ever want to set the labyrinth tile at that

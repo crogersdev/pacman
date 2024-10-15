@@ -7,12 +7,14 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include <SFML/Graphics.hpp>
 
 const int   LABYRINTH_ROWS = 31;
 const int   LABYRINTH_COLS = 29;
-const float TILE_SIZE = 25.f;
+const int   TUNNEL_ROW     = 14;
+const float TILE_SIZE      = 25.f;
 
 class Labyrinth {
 public:
@@ -26,10 +28,12 @@ public:
     BLINKY  = 'B',
     PINKY   = 'P',
     INKY    = 'I',
-    CLYDE   = 'C'
+    CLYDE   = 'C',
+    PATH    = 'X',
+    ERROR   = 'E'
   };
 
-  // NOTE: It's gotta be a 'friend' if it's in a class.  idk why.
+  // NOTE: overloaded ostream opers gotta be a 'friend' if it's in a class.  idk why.
   // NOTE: use a switch statement so you can make your enums any number value
   friend std::ostream &operator<<(std::ostream& os, Tile t) {
     switch (t) {
@@ -62,6 +66,10 @@ public:
       break;
     case Tile::CLYDE:
       os << "CLYDE";
+    case Tile::PATH:
+      os << "PATH";
+    case Tile::ERROR:
+      os << "ERROR";
     default:
       os << "DUH";
     }
@@ -70,27 +78,44 @@ public:
 
   std::map<char, Tile> m_tileLut;
   std::map<Tile, std::string> m_tileLabelLut;
+  std::vector<std::pair<int, int>> mDirs = {
+    std::pair<int, int>(0, 1),     // UP
+    std::pair<int, int>(1, 0),     // RIGHT
+    std::pair<int, int>(0, -1),    // DOWN
+    std::pair<int, int>(-1, 0),    // LEFT    <--- all these are assuming that it goes col, row
+  };
 
-  int m_labyrinthRows;
-  int m_labyrinthCols;
-  float m_labyrinthTileSize;
+  float mMaxLabyrinthWidth = LABYRINTH_COLS * (TILE_SIZE - 1);
+  float mMaxLabyrinthHeight = LABYRINTH_ROWS * (TILE_SIZE - 1);
+
   sf::RectangleShape m_wallTile;
   sf::CircleShape m_pellet;
 
   int getOffset(std::pair<int, int>) const;
   int getOffset(int, int) const;
   int getOffset(sf::Vector2f) const;
+
+  int heuristic(int, int) const;
   int heuristic(sf::Vector2f, sf::Vector2f) const;
   int heuristic(std::pair<int, int>, std::pair<int, int>) const;
-  int heuristic(int, int) const;
+
+  int heuristicThroughTunnel(int, int) const;
+  int heuristicThroughTunnel(sf::Vector2f, sf::Vector2f) const;
+  int heuristicThroughTunnel(std::pair<int, int>, std::pair<int, int>) const;
+
+  int movementCost(int, int) const;
+  int movementCost(sf::Vector2f, sf::Vector2f) const;
+  int movementCost(std::pair<int, int>, std::pair<int, int>) const;
+
   std::list<int> getNeighbors(int) const;
 
   std::pair<int, int> getPairFromOffset(int) const;
+  std::pair<int, int> getPairFromSfVec(sf::Vector2f) const;
   sf::Vector2f getSfVecFromOffset(int) const;
 
   std::pair<int, int> at(sf::Vector2f) const;
-  Tile at(int, int) const;
-  Tile at(std::pair<int, int>) const;
+  Labyrinth::Tile at(int, int) const;
+  Labyrinth::Tile at(std::pair<int, int>) const;
   void draw(std::shared_ptr<sf::RenderWindow>);
   void set(sf::Vector2f, Tile);
   void set(int, int, Tile);
