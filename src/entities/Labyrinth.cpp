@@ -32,9 +32,6 @@ Labyrinth::Labyrinth()
       {Labyrinth::PATH, "Path"},
       {Labyrinth::ERROR, "Error"}
     }),
-    m_labyrinthRows(LABYRINTH_ROWS),
-    m_labyrinthCols(LABYRINTH_COLS),
-    m_labyrinthTileSize(TILE_SIZE),
     m_wallTile(sf::RectangleShape(sf::Vector2f(TILE_SIZE, TILE_SIZE))),
     m_pellet(sf::CircleShape(3.f)) {
   m_wallTile.setFillColor(sf::Color::Blue);
@@ -44,7 +41,7 @@ Labyrinth::Labyrinth()
 int Labyrinth::getOffset(std::pair<int, int> position) const {
   auto col = position.first % static_cast<int>(TILE_SIZE);
   auto row = position.second % static_cast<int>(TILE_SIZE);
-  return col + row * (m_labyrinthCols - 1);
+  return col + row * (LABYRINTH_COLS - 1);
 }
 
 int Labyrinth::getOffset(int col, int row) const {
@@ -171,14 +168,14 @@ std::list<int> Labyrinth::getNeighbors(int offset) const {
 }
 
 std::pair<int, int> Labyrinth::getPairFromOffset(int offset) const {
-  int col = offset % (m_labyrinthCols - 1);
-  int row = offset / (m_labyrinthCols - 1);
+  int col = offset % (LABYRINTH_COLS - 1);
+  int row = offset / (LABYRINTH_COLS - 1);
   return std::pair<int, int>(col, row);
 }
 
 sf::Vector2f Labyrinth::getSfVecFromOffset(int offset) const {
-  int col = offset % (m_labyrinthCols - 1);
-  int row = offset / (m_labyrinthCols - 1);
+  int col = offset % (LABYRINTH_COLS - 1);
+  int row = offset / (LABYRINTH_COLS - 1);
   return sf::Vector2f(col * TILE_SIZE, row * TILE_SIZE);
 }
 
@@ -221,8 +218,8 @@ Labyrinth::Tile Labyrinth::at(std::pair<int, int> coords) const {
 }
 
 void Labyrinth::draw(std::shared_ptr<sf::RenderWindow> pGameWindow) {
-  for (int row = 0; row < m_labyrinthRows; ++row) {
-    for (int col = 0; col < m_labyrinthCols; ++col) {
+  for (int row = 0; row < LABYRINTH_ROWS; ++row) {
+    for (int col = 0; col < LABYRINTH_COLS; ++col) {
       auto tile = at(col, row);
       switch (tile) {
         case Labyrinth::WALL:

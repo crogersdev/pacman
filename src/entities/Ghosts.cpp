@@ -18,6 +18,7 @@ Ghost::Ghost(float speed, sf::Vector2f pos, sf::Color c, bool debugMode)
       mGhostShape(sf::Vector2f(TILE_SIZE, TILE_SIZE)),
       mDirection(sf::Vector2f(1.f, 0.f)),
       mInitialPosition(pos),
+      mTarget(),
       mPath(),
       mState(MEANDER) {
   mSeed = std::chrono::system_clock::now().time_since_epoch().count();
@@ -40,6 +41,7 @@ bool Ghost::occupiesSingleTile() {
 }
 
 void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
+  mTarget = target;
   std::priority_queue<TileScore, std::vector<TileScore>, OrderByScore> frontier;
   const int ghostOffset = rLabyrinth.getOffset(mGhostShape.getPosition());
 
@@ -59,9 +61,9 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
   //          of the labyrinth so we just tie them to the max/
   //          min of the labyrinth
   if (floor(target.x / TILE_SIZE) <= 0) {
-    target.x = rLabyrinth.m_labyrinthCols - 1;
+    target.x = LABYRINTH_COLS - 1;
   }
-  if (floor(target.x / TILE_SIZE) >= rLabyrinth.m_labyrinthCols - 1) {
+  if (floor(target.x / TILE_SIZE) >= LABYRINTH_COLS - 1) {
     target.x = 0;
   }
 
@@ -94,9 +96,6 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
 
         auto h = rLabyrinth.heuristic(next, rLabyrinth.getOffset(target));
         auto ht = rLabyrinth.heuristicThroughTunnel(next, rLabyrinth.getOffset(target));
-        if (ht < h) {
-          std::cout << "let's use the tunnel\n";
-        }
         auto lowerHeuristic = std::min(h, ht);
 
         int priority = newCost + lowerHeuristic;
@@ -109,7 +108,10 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
   if (!occupiesSingleTile()) {
     // Ghost doesn't change direction unless Ghost occupies a single tile
     auto movement = mDirection * mSpeedMultiplier;
-    mGhostShape.setPosition(mGhostShape.getPosition() + movement);
+    auto newPosition = mGhostShape.getPosition() + movement;
+    wrapCoordinate(newPosition.x, mGhostShape.getOrigin().x, rLabyrinth.mMaxLabyrinthWidth);
+    wrapCoordinate(newPosition.y, mGhostShape.getOrigin().y, rLabyrinth.mMaxLabyrinthHeight);
+    mGhostShape.setPosition(newPosition);
     return;
   }
 
@@ -140,7 +142,10 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
     }
 
     auto movement = mDirection * mSpeedMultiplier;
-    mGhostShape.setPosition(mGhostShape.getPosition() + movement);
+    auto newPosition = mGhostShape.getPosition() + movement;
+    wrapCoordinate(newPosition.x, mGhostShape.getOrigin().x, rLabyrinth.mMaxLabyrinthWidth);
+    wrapCoordinate(newPosition.y, mGhostShape.getOrigin().y, rLabyrinth.mMaxLabyrinthHeight);
+    mGhostShape.setPosition(newPosition);
   }
 }
 
@@ -180,18 +185,16 @@ void Ghost::meander(const Labyrinth &rLabyrinth) {
   auto ghostSizeX = mGhostShape.getGlobalBounds().width;
   auto ghostSizeY = mGhostShape.getGlobalBounds().height;
 
-  auto maxLabyrinthWidth = rLabyrinth.m_labyrinthCols * rLabyrinth.m_labyrinthTileSize;
-  auto maxLabyrinthHeight = rLabyrinth.m_labyrinthRows * rLabyrinth.m_labyrinthTileSize;
-  wrapCoordinate(newPosition.x, -ghostSizeX, maxLabyrinthWidth);
-  wrapCoordinate(newPosition.y, -ghostSizeY, maxLabyrinthHeight);
+  wrapCoordinate(newPosition.x, -ghostSizeX, rLabyrinth.mMaxLabyrinthWidth);
+  wrapCoordinate(newPosition.y, -ghostSizeY, rLabyrinth.mMaxLabyrinthHeight);
 
   // EXPLAIN:
   // when we calculate the direction across the open 'tunnel' where
   // we pop on the other side of the labyrinth, we do it by wrapping the
   // coordinates.  this messes up the direction vector, so
   // our availableTurns and directionVecToDirection get messed up as well
-  auto x2 = fmod(newPosition.x + maxLabyrinthWidth, maxLabyrinthWidth);
-  auto y2 = fmod(newPosition.y + maxLabyrinthHeight, maxLabyrinthHeight);
+  auto x2 = fmod(newPosition.x + rLabyrinth.mMaxLabyrinthWidth, rLabyrinth.mMaxLabyrinthWidth);
+  auto y2 = fmod(newPosition.y + rLabyrinth.mMaxLabyrinthHeight, rLabyrinth.mMaxLabyrinthHeight);
   auto x1 = mGhostShape.getPosition().x;
   auto y1 = mGhostShape.getPosition().y;
 

@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include <SFML/Graphics.hpp>
 
@@ -84,9 +85,9 @@ public:
     std::pair<int, int>(-1, 0),    // LEFT    <--- all these are assuming that it goes col, row
   };
 
-  int m_labyrinthRows;
-  int m_labyrinthCols;
-  float m_labyrinthTileSize;
+  float mMaxLabyrinthWidth = LABYRINTH_COLS * (TILE_SIZE - 1);
+  float mMaxLabyrinthHeight = LABYRINTH_ROWS * (TILE_SIZE - 1);
+
   sf::RectangleShape m_wallTile;
   sf::CircleShape m_pellet;
 

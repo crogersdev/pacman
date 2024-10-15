@@ -22,6 +22,7 @@ public:
   void changeDirection(Direction);
   void draw(std::shared_ptr<sf::RenderWindow>);
   sf::Vector2f getPosition();
+  sf::Vector2f getTarget() const { return mTarget; }
   void meander(const Labyrinth &);
   void scatter();
   void drawPath(Labyrinth &);
@@ -52,6 +53,7 @@ private:
   sf::RectangleShape mGhostShape;
   sf::Vector2f mMovement;
   sf::Vector2f mInitialPosition;
+  sf::Vector2f mTarget;
   std::list<sf::Vector2f> mPath;
   std::shared_ptr<sf::RenderWindow> mPGameWindow;
   State mState;

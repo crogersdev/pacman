@@ -29,14 +29,11 @@ void Pacman::move(sf::Vector2f direction, sf::Time t, const Labyrinth &rLabyrint
 
   sf::Vector2f newPosition = mPacman.getPosition() + movement;
 
-  auto maxLabyrinthWidth = rLabyrinth.m_labyrinthCols * (rLabyrinth.m_labyrinthTileSize - 1);
-  auto maxLabyrinthHeight = rLabyrinth.m_labyrinthRows * (rLabyrinth.m_labyrinthTileSize - 1);
-
   // EXPLAIN: the min is the negative value of pacman's size so that
   //          you can see him disappear as he goes left without having him
   //          blink out the second his top left corner hits the border
-  wrapCoordinate(newPosition.x, -mRadius * 2, maxLabyrinthWidth);
-  wrapCoordinate(newPosition.y, -mRadius * 2, maxLabyrinthHeight);
+  wrapCoordinate(newPosition.x, -mRadius * 2, rLabyrinth.mMaxLabyrinthWidth);
+  wrapCoordinate(newPosition.y, -mRadius * 2, rLabyrinth.mMaxLabyrinthHeight);
 
   auto pacmanWidth = (mRadius * 2.f) - 1.f;
   bool wallCollision = wallCollides(

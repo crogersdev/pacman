@@ -14,7 +14,8 @@ GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
     m_clyde(1.f, sf::Vector2f(11.f * TILE_SIZE, 15.f * TILE_SIZE), sf::Color(255, 179, 71)),
     m_clock(),
     m_windowBounds(),
-    m_hud(),
+    m_gameHud(),
+    m_debugHud(),
     m_deltaTime(),
     m_pGameWindow(pWindow),
     m_labyrinth(),
@@ -100,27 +101,44 @@ void GameManager::updateWindow() {
   m_pGameWindow->clear();
   std::ostringstream oss;
   oss << "Score: " << m_score << "\n";
-  m_hud.score.setString(oss.str());
-  m_pGameWindow->draw(m_hud.score);
-  m_hud.drawGuys(m_pGameWindow);
+  m_gameHud.score.setString(oss.str());
+  m_pGameWindow->draw(m_gameHud.score);
+  m_gameHud.drawGuys(m_pGameWindow);
   oss.clear();
 
   // Update debug information
   if (m_debugMode) {
-    oss << "FPS: " << m_fps << "\n";
-    auto row = std::floor(static_cast<int>(m_pacman.getPosition().y) / TILE_SIZE);
-    auto col = std::floor(static_cast<int>(m_pacman.getPosition().x) / TILE_SIZE);
-    oss << "Pacman currently at row: " << row << "  col: " << col << "\n";
+    std::ostringstream debugOss;
+    auto row = floor(m_pacman.getPosition().y / TILE_SIZE);
+    auto col = floor(m_pacman.getPosition().x / TILE_SIZE);
     auto bar = m_labyrinth.at(col, row);
     auto foo = m_labyrinth.m_tileLabelLut.at(bar);
-    oss << "Map LUT at " << row << ", " << col << ": " << foo << "\n";
-    m_pGameWindow->draw(m_hud.debugText);
-    m_hud.debugText.setString(oss.str());
+    debugOss << "Pacman pos r,c: " << row << ", " << col << "; " << foo << "\n";
+
+    auto pinkyRow = floor(m_pinky.getPosition().y / TILE_SIZE);
+    auto pinkyCol = floor(m_pinky.getPosition().x / TILE_SIZE);
+    auto pinkyOffset = m_labyrinth.getOffset(pinkyCol, pinkyRow);
+    debugOss << "ghost pos r,c: " << pinkyRow << ", " << pinkyCol << "\n";
+    debugOss << "ghost offset: " << pinkyOffset << "\n";
+    debugOss << "ghost neighbors: ";
+    for (auto n : m_labyrinth.getNeighbors(pinkyOffset)) {
+      debugOss << n << ", ";
+    }
+    debugOss << "\n";
+
+    auto trRow = floor(m_pinky.getTarget().y / TILE_SIZE);
+    auto trCol = floor(m_pinky.getTarget().x / TILE_SIZE);
+    debugOss << "chasing r, c: " << trRow << ", " << trCol << "\n";
+
+    m_debugHud.debugText.setString(debugOss.str());
+    m_pGameWindow->draw(m_debugHud.debugText);
   }
 
   m_labyrinth.draw(m_pGameWindow);
   m_pacman.draw(m_pGameWindow);
   m_pinky.draw(m_pGameWindow);
+
+
   m_inky.draw(m_pGameWindow);
   m_blinky.draw(m_pGameWindow);
   m_clyde.draw(m_pGameWindow);
