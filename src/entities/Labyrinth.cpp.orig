@@ -39,9 +39,22 @@ Labyrinth::Labyrinth()
 }
 
 int Labyrinth::getOffset(std::pair<int, int> position) const {
+<<<<<<< HEAD
+  // EXPLAIN
+  // i never did figure out why the # of cols was 2 larger than what appeared
+  // on the screen.  maybe two null terminating characters because of the doubly
+  // nested std::array?  idk.  it really gets to me to have to do this wonky
+  // arithmetic but what can i do
+  // also we prefix ++ on position.second because we need to count the 0th
+  // position as a position
+  auto col = position.first;
+  auto row = position.second;
+  return (col + row * (m_labyrinthCols - 1));
+=======
   auto col = position.first % static_cast<int>(TILE_SIZE);
   auto row = position.second % static_cast<int>(TILE_SIZE);
   return col + row * (LABYRINTH_COLS - 1);
+>>>>>>> 08-ghost-chase
 }
 
 int Labyrinth::getOffset(int col, int row) const {
@@ -53,6 +66,61 @@ int Labyrinth::getOffset(sf::Vector2f position) const {
   return getOffset(coords);
 }
 
+<<<<<<< HEAD
+int Labyrinth::heuristic(sf::Vector2f start, sf::Vector2f end) const {
+  return heuristic(
+    std::pair<int, int>(static_cast<int>(start.x), static_cast<int>(start.y)),
+    std::pair<int, int>(static_cast<int>(end.x),   static_cast<int>(end.y)));
+}
+
+int Labyrinth::heuristic(std::pair<int, int> start, std::pair<int, int> end) const {
+  int heuristicCost = 0;
+
+  while ((std::abs(start.first  - end.first))  > 0 &&
+         (std::abs(start.second - end.second)) > 0) {
+    heuristicCost += 14;
+
+    if (start.first > end.first)
+      start.first--;
+    else
+      start.first++;
+
+    if (start.second > end.second)
+      start.second--;
+    else
+      start.second++;
+  }
+
+  heuristicCost += 10 * std::abs(start.first  - end.first);
+  heuristicCost += 10 * std::abs(start.second - end.second);
+
+  return heuristicCost;
+}
+
+int Labyrinth::heuristic(int startOffset, int endOffset) const {
+  return heuristic(getPairFromOffset(startOffset), getPairFromOffset(endOffset));
+}
+
+std::list<int> Labyrinth::getNeighbors(int offset) const {
+  std::pair<int, int> coords = getPairFromOffset(offset);
+  auto c = coords.first;
+  auto r = coords.second;
+  std::list<int> neighbors;
+
+  for (int row = -1; row < 2; ++row) {
+    for (int col = -1; col < 2; ++col) {
+      if ((c + col < 0 || c + col > m_labyrinthCols) ||
+          (r + row < 0 || r + row > m_labyrinthRows)) {
+        continue;
+      }
+      if (getOffset(c+col, r+row) == offset) continue;
+
+      auto n = at(c+col, r+row);
+      if ((n != Tile::GATE) && (n != Tile::WALL)) {
+        neighbors.push_back(getOffset(c+col, r+row));
+      }
+    }
+=======
 int Labyrinth::heuristic(int startOffset, int endOffset) const {
   return heuristic(getPairFromOffset(startOffset), getPairFromOffset(endOffset));
 }
@@ -77,6 +145,7 @@ int Labyrinth::heuristic(std::pair<int, int> start, std::pair<int, int> end) con
       start.second--;
     else
       start.second++;
+>>>>>>> 08-ghost-chase
   }
 
   heuristicCost += 10 * std::abs(start.first  - end.first);
@@ -143,23 +212,18 @@ std::list<int> Labyrinth::getNeighbors(int offset) const {
     auto potentialNeighborPair = std::pair<int, int>();
 
     // goes left across to the right side
-    /*
     if (coords.first  + dirPair.first  == -1 &&
         coords.second + dirPair.second == TUNNEL_ROW) {
       potentialNeighborPair = std::pair<int, int>(LABYRINTH_COLS - 1, TUNNEL_ROW);
 
     } else if (coords.first  + dirPair.first == LABYRINTH_COLS &&
                coords.second + dirPair.second == TUNNEL_ROW) {
-      std::cout << "you should see me now\n";
       potentialNeighborPair = std::pair<int, int>(0, TUNNEL_ROW);
 
     } else {
       potentialNeighborPair = std::pair<int, int>(
         coords.first + dirPair.first, coords.second + dirPair.second);
     }
-    */
-    potentialNeighborPair = std::pair<int, int>(
-      coords.first + dirPair.first, coords.second + dirPair.second);
 
     auto potentialNeighbor = at(potentialNeighborPair);
 
@@ -173,14 +237,24 @@ std::list<int> Labyrinth::getNeighbors(int offset) const {
 }
 
 std::pair<int, int> Labyrinth::getPairFromOffset(int offset) const {
+<<<<<<< HEAD
+  int col = offset % (m_labyrinthCols - 1);
+  int row = offset / (m_labyrinthCols - 1);
+=======
   int col = offset % (LABYRINTH_COLS - 1);
   int row = offset / (LABYRINTH_COLS - 1);
+>>>>>>> 08-ghost-chase
   return std::pair<int, int>(col, row);
 }
 
 sf::Vector2f Labyrinth::getSfVecFromOffset(int offset) const {
+<<<<<<< HEAD
+  int col = offset % (m_labyrinthCols - 1);
+  int row = offset / (m_labyrinthCols - 1);
+=======
   int col = offset % (LABYRINTH_COLS - 1);
   int row = offset / (LABYRINTH_COLS - 1);
+>>>>>>> 08-ghost-chase
   return sf::Vector2f(col * TILE_SIZE, row * TILE_SIZE);
 }
 
