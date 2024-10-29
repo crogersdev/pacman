@@ -39,13 +39,11 @@ Labyrinth::Labyrinth()
 }
 
 int Labyrinth::getOffset(std::pair<int, int> position) const {
-  auto col = position.first % static_cast<int>(TILE_SIZE);
-  auto row = position.second % static_cast<int>(TILE_SIZE);
-  return col + row * (LABYRINTH_COLS - 1);
+  return getOffset(position.second, position.first);
 }
 
 int Labyrinth::getOffset(int col, int row) const {
-  return getOffset(std::pair<int, int>(col, row));
+  return col + row * (LABYRINTH_COLS - 1);
 }
 
 int Labyrinth::getOffset(sf::Vector2f position) const {
@@ -224,7 +222,7 @@ Labyrinth::Tile Labyrinth::at(std::pair<int, int> coords) const {
 
 void Labyrinth::draw(std::shared_ptr<sf::RenderWindow> pGameWindow) {
   for (int row = 0; row < LABYRINTH_ROWS; ++row) {
-    for (int col = 0; col < LABYRINTH_COLS; ++col) {
+    for (int col = 0; col < LABYRINTH_COLS - 1; ++col) {
       auto tile = at(col, row);
       switch (tile) {
         case Labyrinth::WALL:

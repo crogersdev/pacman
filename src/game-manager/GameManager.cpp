@@ -79,7 +79,8 @@ void GameManager::updateEntities() {
   sf::Vector2f pacmanCenter = sf::Vector2f(
     pacmanPosition.x + (TILE_SIZE / 2), pacmanPosition.y + (TILE_SIZE / 2));
 
-  m_pinky.chase(m_labyrinth, pacmanCenter);
+  // m_pinky.chase(m_labyrinth, pacmanCenter);
+  m_pinky.meander(m_labyrinth);
   //m_blinky.chase(m_labyrinth, pacmanCenter);
   //m_inky.chase(m_labyrinth, pacmanCenter);
   //m_clyde.meander(m_labyrinth);
@@ -117,15 +118,18 @@ void GameManager::updateWindow() {
     auto pacmanCol = floor(m_pacman.getPosition().x / TILE_SIZE);
     auto tileInfoEnum = m_labyrinth.at(pacmanCol, pacmanRow);
     auto tileInfo = m_labyrinth.m_tileLabelLut.at(tileInfoEnum);
-    debugOss << "Pacman pos r,c: " << pacmanRow << ", " << pacmanCol << "; " << tileInfo << "\n";
-    debugOss << "\t\toffset: " << m_labyrinth.getOffset(pacmanCol, pacmanRow);
+    debugOss << "Pacman\n";
+    debugOss << "    pos r,c: " << pacmanRow << ", " << pacmanCol << "\n";
+    debugOss << "    offset:  " << m_labyrinth.getOffset(pacmanCol, pacmanRow) << "\n";
+    debugOss << "    tile:    " << tileInfo << "\n";
 
     auto pinkyRow = floor(m_pinky.getPosition().y / TILE_SIZE);
     auto pinkyCol = floor(m_pinky.getPosition().x / TILE_SIZE);
     auto pinkyOffset = m_labyrinth.getOffset(pinkyCol, pinkyRow);
-    debugOss << "ghost pos r,c: " << pinkyRow << ", " << pinkyCol << "\n";
-    debugOss << "ghost offset: " << pinkyOffset << "\n";
-    debugOss << "ghost neighbors: ";
+    debugOss << "Pinky\n";
+    debugOss << "    pos r,c: " << pinkyRow << ", " << pinkyCol << "\n";
+    debugOss << "    offset : " << pinkyOffset << "\n";
+    debugOss << "\nghost neighbors: ";
     for (auto n : m_labyrinth.getNeighbors(pinkyOffset)) {
       debugOss << n << ", ";
     }
@@ -133,8 +137,8 @@ void GameManager::updateWindow() {
 
     auto trRow = floor(m_pinky.getTarget().y / TILE_SIZE);
     auto trCol = floor(m_pinky.getTarget().x / TILE_SIZE);
-    debugOss << "chasing r, c: " << trRow << ", " << trCol << "\n";
-    debugOss << "\t offset: " << m_labyrinth.getOffset(trCol, trRow);
+    debugOss << "    chasing r, c: " << trRow << ", " << trCol << "\n";
+    debugOss << "          offset: " << m_labyrinth.getOffset(trCol, trRow);
 
     auto path = m_pinky.getPath();
     debugOss << "\npath: \n";

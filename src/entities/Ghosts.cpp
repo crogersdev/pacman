@@ -67,17 +67,6 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
     target.x = 0;
   }
 
-  /* 
-  // following debug info verifies that the target is correct
-  // and that hcost through tunnel and hcost itself work
-  // just fine
-  std::cout << "my target is at: " << floor(target.y / TILE_SIZE) << ", " << floor(target.x / TILE_SIZE) << "\n";
-  auto t  = rLabyrinth.getOffset(target);
-  auto h  = rLabyrinth.heuristic(ghostOffset, t);
-  auto ht = rLabyrinth.heuristicThroughTunnel(ghostOffset, t);
-  std::cout << "hcost: " << h << ",\thcost tunnel: " << ht << "\n";
-  */
-
   // find path by defining cameFrom
   while (!frontier.empty()) {
     TileScore current = frontier.top();
