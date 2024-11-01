@@ -1,0 +1,37 @@
+pipeline:
+  name: crogers-pacman
+  identifier: crogerspacman
+  projectIdentifier: default_project
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: cmake
+        identifier: cmake
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: false
+          infrastructure:
+            type: KubernetesDirect
+            spec:
+              connectorRef: crogersdesktophelm
+              namespace: build
+              automountServiceAccountToken: true
+              nodeSelector: {}
+              containerSecurityContext:
+                capabilities:
+                  add:
+                    - ""
+              os: Linux
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: run cmake
+                  identifier: run_cmake
+                  spec:
+                    connectorRef: account.harnessImage
+                    image: danger89/cmake
+                    shell: Bash
+                    command: cmake
