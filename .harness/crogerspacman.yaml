@@ -28,6 +28,6 @@ pipeline:
                   identifier: run_cmake
                   spec:
                     connectorRef: account.harnessImage
-                    image: docker.io/danger89/cmake
+                    image: docker.io/danger89/cmake:latest
                     shell: Bash
                     command: cmake
