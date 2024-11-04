@@ -19,10 +19,6 @@ pipeline:
               namespace: build
               automountServiceAccountToken: true
               nodeSelector: {}
-              containerSecurityContext:
-                capabilities:
-                  add:
-                    - ""
               os: Linux
           execution:
             steps:
@@ -32,6 +28,6 @@ pipeline:
                   identifier: run_cmake
                   spec:
                     connectorRef: account.harnessImage
-                    image: danger89/cmake
+                    image: docker.io/danger89/cmake
                     shell: Bash
                     command: cmake
