@@ -129,7 +129,10 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
     mDirection.x = (mDirection.x != 0) ? std::copysign(1.f, mDirection.x) : 0.f;
     mDirection.y = (mDirection.y != 0) ? std::copysign(1.f, mDirection.y) : 0.f;
 
-    if 
+    // this is where we're going to detect if we're on the tunnel row
+    // and then keep the direction to cross the tunnel properly even though
+    // the direction vector determined by new position and current position
+    // will point in the opposite direction 
 
     if (std::abs(mDirection.x) == 1.f && std::abs(mDirection.y) == 1.f) {
       mDirection.y = 0.f;
