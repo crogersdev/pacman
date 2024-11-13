@@ -79,8 +79,8 @@ void GameManager::updateEntities() {
   sf::Vector2f pacmanCenter = sf::Vector2f(
     pacmanPosition.x + (TILE_SIZE / 2), pacmanPosition.y + (TILE_SIZE / 2));
 
-  // m_pinky.chase(m_labyrinth, pacmanCenter);
-  m_pinky.meander(m_labyrinth);
+  m_pinky.chase(m_labyrinth, pacmanCenter);
+  // m_pinky.meander(m_labyrinth);
   //m_blinky.chase(m_labyrinth, pacmanCenter);
   //m_inky.chase(m_labyrinth, pacmanCenter);
   //m_clyde.meander(m_labyrinth);
@@ -121,6 +121,10 @@ void GameManager::updateWindow() {
     debugOss << "Pacman\n";
     debugOss << "    pos r,c: " << pacmanRow << ", " << pacmanCol << "\n";
     debugOss << "    offset:  " << m_labyrinth.getOffset(pacmanCol, pacmanRow) << "\n";
+    auto pair = m_labyrinth.getPairFromOffset(m_labyrinth.getOffset(pacmanCol, pacmanRow));
+    debugOss << "    pair:    " << pair.second << ", " << pair.first << "\n";
+    auto o = m_labyrinth.getOffset(pair);
+    debugOss << "    offset2: " << o << "\n";
     debugOss << "    tile:    " << tileInfo << "\n";
 
     auto pinkyRow = floor(m_pinky.getPosition().y / TILE_SIZE);
@@ -129,7 +133,8 @@ void GameManager::updateWindow() {
     debugOss << "Pinky\n";
     debugOss << "    pos r,c: " << pinkyRow << ", " << pinkyCol << "\n";
     debugOss << "    offset : " << pinkyOffset << "\n";
-    debugOss << "\nghost neighbors: ";
+    debugOss << "\nghost neighbors at offset " << pinkyOffset;
+    debugOss << "\n        ";
     for (auto n : m_labyrinth.getNeighbors(pinkyOffset)) {
       debugOss << n << ", ";
     }

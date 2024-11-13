@@ -39,7 +39,7 @@ Labyrinth::Labyrinth()
 }
 
 int Labyrinth::getOffset(std::pair<int, int> position) const {
-  return getOffset(position.second, position.first);
+  return getOffset(position.first, position.second);
 }
 
 int Labyrinth::getOffset(int col, int row) const {
@@ -101,7 +101,6 @@ int Labyrinth::heuristicThroughTunnel(std::pair<int, int> start, std::pair<int, 
 
   auto leftTunnelHCost = heuristic(start, leftTunnelEntrance);
   leftTunnelHCost += 10 + heuristic(rightTunnelEntrance, end);
-
   auto rightTunnelHCost = heuristic(start, rightTunnelEntrance);;
   rightTunnelHCost += 10 + heuristic(leftTunnelEntrance, end);
 
@@ -129,43 +128,29 @@ std::list<int> Labyrinth::getNeighbors(int offset) const {
   //       coords.second == row
   std::pair<int, int> coords = getPairFromOffset(offset);
 
-  std::vector<std::pair<int, int>> dirs = {
-    std::pair<int, int>(0, 1),
-    std::pair<int, int>(1, 0),
-    std::pair<int, int>(0, -1),
-    std::pair<int, int>(-1, 0),
-  };
-
   std::list<int> neighbors;
-  for (const auto& dirPair : dirs) {
-    auto potentialNeighborPair = std::pair<int, int>();
+  std::vector<int> offsets = { offset+LABYRINTH_COLS-1, offset-(LABYRINTH_COLS-1) };
 
-    // goes left across to the right side
-    /*
-    if (coords.first  + dirPair.first  == -1 &&
-        coords.second + dirPair.second == TUNNEL_ROW) {
-      potentialNeighborPair = std::pair<int, int>(LABYRINTH_COLS - 1, TUNNEL_ROW);
+  if (offset == 392) {
+    offsets.push_back(393);
+    offsets.push_back(419);
+  } else if (offset == 419) {
+    offsets.push_back(392);
+    offsets.push_back(418);
+  } else {
+    offsets.push_back(offset-1);
+    offsets.push_back(offset+1);
+  }
 
-    } else if (coords.first  + dirPair.first == LABYRINTH_COLS &&
-               coords.second + dirPair.second == TUNNEL_ROW) {
-      std::cout << "you should see me now\n";
-      potentialNeighborPair = std::pair<int, int>(0, TUNNEL_ROW);
-
-    } else {
-      potentialNeighborPair = std::pair<int, int>(
-        coords.first + dirPair.first, coords.second + dirPair.second);
-    }
-    */
-    potentialNeighborPair = std::pair<int, int>(
-      coords.first + dirPair.first, coords.second + dirPair.second);
-
+  for (const auto& o : offsets) {
+    auto potentialNeighborPair = getPairFromOffset(o);
     auto potentialNeighbor = at(potentialNeighborPair);
 
     if (potentialNeighbor != Tile::ERROR &&
         potentialNeighbor != Tile::GATE &&
         potentialNeighbor != Tile::WALL)
         neighbors.push_back(getOffset(potentialNeighborPair));
-  }
+    }
 
   return neighbors;
 }

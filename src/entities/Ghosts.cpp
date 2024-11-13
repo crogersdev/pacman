@@ -61,9 +61,9 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
   //          of the labyrinth so we just tie them to the max/
   //          min of the labyrinth
   if (floor(target.x / TILE_SIZE) <= 0) {
-    target.x = LABYRINTH_COLS - 1;
+    target.x = LABYRINTH_COLS - 2;
   }
-  if (floor(target.x / TILE_SIZE) >= LABYRINTH_COLS - 1) {
+  if (floor(target.x / TILE_SIZE) >= LABYRINTH_COLS - 2) {
     target.x = 0;
   }
 
@@ -72,8 +72,9 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
     TileScore current = frontier.top();
     frontier.pop();
 
-    if (current.positionOffset == rLabyrinth.getOffset(target))
+    if (current.positionOffset == rLabyrinth.getOffset(target)) {
       break;
+    }
 
     auto neighbors = rLabyrinth.getNeighbors(current.positionOffset);
     for (auto next : neighbors) {
@@ -85,6 +86,7 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
 
         auto h = rLabyrinth.heuristic(next, rLabyrinth.getOffset(target));
         auto ht = rLabyrinth.heuristicThroughTunnel(next, rLabyrinth.getOffset(target));
+
         auto lowerHeuristic = std::min(h, ht);
 
         int priority = newCost + lowerHeuristic;
@@ -98,8 +100,8 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
     // Ghost doesn't change direction unless Ghost occupies a single tile
     auto movement = mDirection * mSpeedMultiplier;
     auto newPosition = mGhostShape.getPosition() + movement;
-    wrapCoordinate(newPosition.x, mGhostShape.getOrigin().x, rLabyrinth.mMaxLabyrinthWidth);
-    wrapCoordinate(newPosition.y, mGhostShape.getOrigin().y, rLabyrinth.mMaxLabyrinthHeight);
+    wrapCoordinate(newPosition.x, -TILE_SIZE, rLabyrinth.mMaxLabyrinthWidth);
+    wrapCoordinate(newPosition.y, -TILE_SIZE, rLabyrinth.mMaxLabyrinthHeight);
     mGhostShape.setPosition(newPosition);
     return;
   }
@@ -111,6 +113,7 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
     mPath.emplace_front(rLabyrinth.getSfVecFromOffset(current));
     auto iterator = cameFrom.find(current);
     if (iterator == cameFrom.end() || !iterator->second.has_value()) {
+      std::cout << "path broken\n";
       break;
     }
     current = *iterator->second;
@@ -118,12 +121,15 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
 
   if (!mPath.empty()) {
     sf::Vector2f nextPosition = mPath.front();
+    std::cout << "next position row, col: " << nextPosition.x << ", " << nextPosition.y << "\n";
     auto ghostPosition = mGhostShape.getPosition();
     mDirection = nextPosition - ghostPosition;
 
     // Normalize direction to unit vector
     mDirection.x = (mDirection.x != 0) ? std::copysign(1.f, mDirection.x) : 0.f;
     mDirection.y = (mDirection.y != 0) ? std::copysign(1.f, mDirection.y) : 0.f;
+
+    if 
 
     if (std::abs(mDirection.x) == 1.f && std::abs(mDirection.y) == 1.f) {
       mDirection.y = 0.f;
@@ -132,8 +138,8 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
 
     auto movement = mDirection * mSpeedMultiplier;
     auto newPosition = mGhostShape.getPosition() + movement;
-    wrapCoordinate(newPosition.x, mGhostShape.getOrigin().x, rLabyrinth.mMaxLabyrinthWidth);
-    wrapCoordinate(newPosition.y, mGhostShape.getOrigin().y, rLabyrinth.mMaxLabyrinthHeight);
+    wrapCoordinate(newPosition.x, -TILE_SIZE, rLabyrinth.mMaxLabyrinthWidth);
+    wrapCoordinate(newPosition.y, -TILE_SIZE, rLabyrinth.mMaxLabyrinthHeight);
     mGhostShape.setPosition(newPosition);
   }
 }
