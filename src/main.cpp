@@ -7,8 +7,7 @@
 
 #include "GameManager.hpp"
 
-int main()
-{
+int main() {
   auto height = TILE_SIZE * LABYRINTH_ROWS + 6 * TILE_SIZE;
 
   // debug info
@@ -19,7 +18,11 @@ int main()
 
   while (window->isOpen()) {
     gameManager.handleInputs();
-    gameManager.updateEntities();
+
+    if (!gameManager.mPaused) {
+      gameManager.updateEntities();
+    }
+
     gameManager.updateWindow();
   }
 

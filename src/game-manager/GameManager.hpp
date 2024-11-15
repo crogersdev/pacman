@@ -19,6 +19,9 @@ public:
 
   std::map<sf::Keyboard::Key, std::function<void(sf::Time)>> m_keyActions;
 
+  bool mPaused;
+  sf::Vector2i mMousePos;
+
   Pacman m_pacman;
   Ghost m_inky;
   Ghost m_blinky;

@@ -1,6 +1,7 @@
 #include <chrono>
 #include <iostream>
 #include <map>
+#include <cmath>
 #include <optional>
 #include <queue>
 #include <unordered_set>
@@ -10,6 +11,21 @@
 #include "./Ghosts.hpp"
 #include "../helpers/Collisions.hpp"
 
+<<<<<<< HEAD
+Ghost::Ghost(float speed, bool debugMode)
+  : mDebugMode(debugMode),
+    mMeanderOdds(66.6),
+    mSpeed(speed),
+    mGhostShape(sf::Vector2f(25.f, 25.f)),
+    mMovement(sf::Vector2f(1.f, 0.f)),
+    mInitialPosition(sf::Vector2f(12.f * TILE_SIZE, 8.f * TILE_SIZE)),
+    // mInitialPosition(sf::Vector2f(3.f * TILE_SIZE, 1.f * TILE_SIZE)),
+    mDirection(RIGHT),
+    mState(MEANDER) {
+  mSeed = std::chrono::system_clock::now().time_since_epoch().count();
+  mRandGenerator = std::mt19937(mSeed);
+  mGhostShape.setFillColor(sf::Color(219, 48, 130));
+=======
 Ghost::Ghost(float speed, sf::Vector2f pos, sf::Color c, bool debugMode)
     : mColor(c),
       mDebugMode(debugMode),
@@ -24,6 +40,7 @@ Ghost::Ghost(float speed, sf::Vector2f pos, sf::Color c, bool debugMode)
   mSeed = std::chrono::system_clock::now().time_since_epoch().count();
   mRandGenerator = std::mt19937(mSeed);
   mGhostShape.setFillColor(mColor);
+>>>>>>> 08-ghost-chase
   mGhostShape.setPosition(mInitialPosition);
 
 #ifndef NDEBUG
@@ -43,7 +60,11 @@ bool Ghost::occupiesSingleTile() {
 void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
   mTarget = target;
   std::priority_queue<TileScore, std::vector<TileScore>, OrderByScore> frontier;
+<<<<<<< HEAD
+  const int offset = rLabyrinth.getOffset(mGhostShape.getPosition());
+=======
   const int ghostOffset = rLabyrinth.getOffset(mGhostShape.getPosition());
+>>>>>>> 08-ghost-chase
 
   frontier.push(TileScore(ghostOffset, 0));
 
@@ -53,6 +74,8 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
   cameFrom[ghostOffset] = NULL;
   costSoFar[ghostOffset] = 0;
 
+<<<<<<< HEAD
+=======
   // EXPLAIN: This is a hack to get past the position Pacman
   //          will be in as he wraps his coordinates as
   //          he goes across that open chasm thing from one
@@ -61,23 +84,87 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
   //          of the labyrinth so we just tie them to the max/
   //          min of the labyrinth
   if (floor(target.x / TILE_SIZE) <= 0) {
-    target.x = LABYRINTH_COLS - 2;
+    target.x = LABYRINTH_COLS - 1;
   }
-  if (floor(target.x / TILE_SIZE) >= LABYRINTH_COLS - 2) {
+  if (floor(target.x / TILE_SIZE) >= LABYRINTH_COLS - 1) {
     target.x = 0;
   }
 
+  /* 
+  // following debug info verifies that the target is correct
+  // and that hcost through tunnel and hcost itself work
+  // just fine
+  std::cout << "my target is at: " << floor(target.y / TILE_SIZE) << ", " << floor(target.x / TILE_SIZE) << "\n";
+  auto t  = rLabyrinth.getOffset(target);
+  auto h  = rLabyrinth.heuristic(ghostOffset, t);
+  auto ht = rLabyrinth.heuristicThroughTunnel(ghostOffset, t);
+  std::cout << "hcost: " << h << ",\thcost tunnel: " << ht << "\n";
+  */
+
+>>>>>>> 08-ghost-chase
   // find path by defining cameFrom
   while (!frontier.empty()) {
     TileScore current = frontier.top();
     frontier.pop();
 
-    if (current.positionOffset == rLabyrinth.getOffset(target)) {
+    if (current.positionOffset == rLabyrinth.getOffset(target))
       break;
-    }
 
     auto neighbors = rLabyrinth.getNeighbors(current.positionOffset);
     for (auto next : neighbors) {
+<<<<<<< HEAD
+      int newCost = costSoFar[current.positionOffset] + rLabyrinth.heuristic(current.positionOffset, next);
+
+      if (costSoFar.find(next) != costSoFar.end())
+        std::cout << "costSoFar[ " << next << "]:\t" << costSoFar[next] << "\n";
+      else
+        std::cout << "wasnt' there homey\n";
+
+      if (costSoFar.find(next) == costSoFar.end() || newCost < costSoFar[next]) {
+        costSoFar[next] = newCost;
+        int priority = newCost + rLabyrinth.heuristic(next, rLabyrinth.getOffset(target));
+        frontier.push(TileScore(next, priority));
+        cameFrom[next] = current.positionOffset;
+      }
+    }
+  }
+
+  // reconstruct path from cameFrom
+  std::list<sf::Vector2f> path;
+  int current = rLabyrinth.getOffset(target);
+  while (current != offset) {
+    path.emplace_front(rLabyrinth.getSfVecFromOffset(current));
+    auto iterator = cameFrom.find(current);
+    if (iterator == cameFrom.end() || !iterator->second.has_value()) {
+      break;
+    }
+    current = *iterator->second;
+  }
+  path.emplace_front(rLabyrinth.getSfVecFromOffset(current));
+
+  while (!path.empty()) {
+    sf::Vector2f nextPosition = path.front();
+    sf::Vector2f direction = nextPosition - mGhostShape.getPosition();
+    float length = std::sqrt(direction.x * direction.x - direction.y * direction.y);
+    if (length > 0) {
+      direction /= length;
+    }
+    if (direction == sf::Vector2f(0.f, 0.f)) {
+      path.pop_front();
+      continue;
+    }
+
+    while (mGhostShape.getPosition() != nextPosition) {
+      auto newPosition = mGhostShape.getPosition() + direction;
+      mGhostShape.setPosition(newPosition);
+    }
+
+    path.pop_front();
+  }
+
+}
+
+=======
       int movementCost = rLabyrinth.movementCost(current.positionOffset, next);
       int newCost = costSoFar[current.positionOffset] + movementCost;
 
@@ -86,7 +173,6 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
 
         auto h = rLabyrinth.heuristic(next, rLabyrinth.getOffset(target));
         auto ht = rLabyrinth.heuristicThroughTunnel(next, rLabyrinth.getOffset(target));
-
         auto lowerHeuristic = std::min(h, ht);
 
         int priority = newCost + lowerHeuristic;
@@ -100,8 +186,8 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
     // Ghost doesn't change direction unless Ghost occupies a single tile
     auto movement = mDirection * mSpeedMultiplier;
     auto newPosition = mGhostShape.getPosition() + movement;
-    wrapCoordinate(newPosition.x, -TILE_SIZE, rLabyrinth.mMaxLabyrinthWidth);
-    wrapCoordinate(newPosition.y, -TILE_SIZE, rLabyrinth.mMaxLabyrinthHeight);
+    wrapCoordinate(newPosition.x, mGhostShape.getOrigin().x, rLabyrinth.mMaxLabyrinthWidth);
+    wrapCoordinate(newPosition.y, mGhostShape.getOrigin().y, rLabyrinth.mMaxLabyrinthHeight);
     mGhostShape.setPosition(newPosition);
     return;
   }
@@ -113,7 +199,6 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
     mPath.emplace_front(rLabyrinth.getSfVecFromOffset(current));
     auto iterator = cameFrom.find(current);
     if (iterator == cameFrom.end() || !iterator->second.has_value()) {
-      std::cout << "path broken\n";
       break;
     }
     current = *iterator->second;
@@ -128,18 +213,6 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
     mDirection.x = (mDirection.x != 0) ? std::copysign(1.f, mDirection.x) : 0.f;
     mDirection.y = (mDirection.y != 0) ? std::copysign(1.f, mDirection.y) : 0.f;
 
-    // this is where we're going to detect if we're on the tunnel row
-    // and then keep the direction to cross the tunnel properly even though
-    // the direction vector determined by new position and current position
-    // will point in the opposite direction 
-    if ((ghostPosition.y / TILE_SIZE) == 14 && (nextPosition.y / TILE_SIZE) == 14) {
-      if (ghostPosition.x <= 50 && nextPosition.x == 675) {
-        mDirection = sf::Vector2f(-1.f, 0.f);
-      } else if (ghostPosition.x >= 650 && nextPosition.x == 0) {
-        mDirection = sf::Vector2f(1.f, 0.f);
-      }
-    }
-
     if (std::abs(mDirection.x) == 1.f && std::abs(mDirection.y) == 1.f) {
       mDirection.y = 0.f;
       std::cout << "caution rogue robots\n";
@@ -147,12 +220,13 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
 
     auto movement = mDirection * mSpeedMultiplier;
     auto newPosition = mGhostShape.getPosition() + movement;
-    wrapCoordinate(newPosition.x, -TILE_SIZE, rLabyrinth.mMaxLabyrinthWidth);
-    wrapCoordinate(newPosition.y, -TILE_SIZE, rLabyrinth.mMaxLabyrinthHeight);
+    wrapCoordinate(newPosition.x, mGhostShape.getOrigin().x, rLabyrinth.mMaxLabyrinthWidth);
+    wrapCoordinate(newPosition.y, mGhostShape.getOrigin().y, rLabyrinth.mMaxLabyrinthHeight);
     mGhostShape.setPosition(newPosition);
   }
 }
 
+>>>>>>> 08-ghost-chase
 void Ghost::changeDirection(Direction newDirection) {
   switch (newDirection) {
   case DOWN:
