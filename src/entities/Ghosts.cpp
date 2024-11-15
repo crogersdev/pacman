@@ -121,7 +121,6 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
 
   if (!mPath.empty()) {
     sf::Vector2f nextPosition = mPath.front();
-    std::cout << "next position row, col: " << nextPosition.y << ", " << nextPosition.x << "\n";
     auto ghostPosition = mGhostShape.getPosition();
     mDirection = nextPosition - ghostPosition;
 
