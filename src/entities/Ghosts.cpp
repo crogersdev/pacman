@@ -121,7 +121,7 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
 
   if (!mPath.empty()) {
     sf::Vector2f nextPosition = mPath.front();
-    std::cout << "next position row, col: " << nextPosition.x << ", " << nextPosition.y << "\n";
+    std::cout << "next position row, col: " << nextPosition.y << ", " << nextPosition.x << "\n";
     auto ghostPosition = mGhostShape.getPosition();
     mDirection = nextPosition - ghostPosition;
 
@@ -133,6 +133,13 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
     // and then keep the direction to cross the tunnel properly even though
     // the direction vector determined by new position and current position
     // will point in the opposite direction 
+    if ((ghostPosition.y / TILE_SIZE) == 14 && (nextPosition.y / TILE_SIZE) == 14) {
+      if (ghostPosition.x <= 50 && nextPosition.x == 675) {
+        mDirection = sf::Vector2f(-1.f, 0.f);
+      } else if (ghostPosition.x >= 650 && nextPosition.x == 0) {
+        mDirection = sf::Vector2f(1.f, 0.f);
+      }
+    }
 
     if (std::abs(mDirection.x) == 1.f && std::abs(mDirection.y) == 1.f) {
       mDirection.y = 0.f;
