@@ -14,7 +14,7 @@
 const int   LABYRINTH_ROWS = 31;
 const int   LABYRINTH_COLS = 29;
 const int   TUNNEL_ROW     = 14;
-const float TILE_SIZE      = 25.f;
+const float TILE_SIZE      = 26.f;
 
 class Labyrinth {
 public:

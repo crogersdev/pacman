@@ -36,6 +36,7 @@ Ghost::~Ghost() {}
 bool Ghost::occupiesSingleTile() {
   auto isTileX = mGhostShape.getPosition().x / TILE_SIZE;
   auto isTileY = mGhostShape.getPosition().y / TILE_SIZE;
+  std::cout << "y: " << isTileY << ", x: " << isTileX << "\n";
   // i just like parentheses
   return (floor(isTileX) == isTileX && floor(isTileY) == isTileY);
 }
@@ -131,8 +132,8 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
     // this is where we're going to detect if we're on the tunnel row
     // and then keep the direction to cross the tunnel properly even though
     // the direction vector determined by new position and current position
-    // will point in the opposite direction 
-    if ((ghostPosition.y / TILE_SIZE) == 14 && (nextPosition.y / TILE_SIZE) == 14) {
+    // will point in the opposite direction
+    if ((ghostPosition.y / TILE_SIZE) == TUNNEL_ROW && (nextPosition.y / TILE_SIZE) == TUNNEL_ROW) {
       if (ghostPosition.x <= 50 && nextPosition.x == 675) {
         mDirection = sf::Vector2f(-1.f, 0.f);
       } else if (ghostPosition.x >= 650 && nextPosition.x == 0) {

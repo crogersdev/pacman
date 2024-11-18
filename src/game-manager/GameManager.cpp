@@ -7,10 +7,10 @@
 
 GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
   : m_pacman((TILE_SIZE / 2) - 1, 200.f, sf::Vector2f(TILE_SIZE + 1.f, TILE_SIZE + 1.f)),
-    // speeds: 1, 1.25, 1.5, 1.875, 2, 2.5, 3, 3.75, 5, 6, 7.5, 10, 15
-    m_pinky(1.f, sf::Vector2f(9.f * TILE_SIZE,  6.f * TILE_SIZE),  sf::Color(219, 48, 130)),
-    m_inky(1.25f, sf::Vector2f(12.f * TILE_SIZE, 13.f * TILE_SIZE), sf::Color(255, 89, 143)),
-    m_blinky(1.5f, sf::Vector2f(16.f * TILE_SIZE, 13.f * TILE_SIZE), sf::Color(117, 254, 255)),
+    // tile size 25 speeds: 1, 1.25, 1.5625
+    m_pinky(   1.f, sf::Vector2f(9.f  * TILE_SIZE, 7.f  * TILE_SIZE), sf::Color(219, 48,  130)),
+    m_inky(  1.25f, sf::Vector2f(12.f * TILE_SIZE, 13.f * TILE_SIZE), sf::Color(255, 89,  143)),
+    m_blinky( .625f, sf::Vector2f(9.f  * TILE_SIZE, 6.f  * TILE_SIZE), sf::Color(117, 254, 255)),
     m_clyde(1.875f, sf::Vector2f(11.f * TILE_SIZE, 15.f * TILE_SIZE), sf::Color(255, 179, 71)),
     m_clock(),
     m_windowBounds(),
@@ -81,10 +81,10 @@ void GameManager::updateEntities() {
   sf::Vector2f pacmanCenter = sf::Vector2f(
     pacmanPosition.x + (TILE_SIZE / 2), pacmanPosition.y + (TILE_SIZE / 2));
 
-  m_pinky.meander(m_labyrinth);
+  // m_pinky.chase(m_labyrinth, pacmanCenter);
   m_blinky.chase(m_labyrinth, pacmanCenter);
-  m_inky.chase(m_labyrinth, pacmanCenter);
-  m_clyde.meander(m_labyrinth);
+  // m_inky.chase(m_labyrinth, pacmanCenter);
+  // m_clyde.meander(m_labyrinth);
 
   if (entityCollides(m_pinky, m_pacman)) {
     m_pinky.resetPath(m_labyrinth);
@@ -172,7 +172,6 @@ void GameManager::updateWindow() {
   m_labyrinth.draw(m_pGameWindow);
   m_pacman.draw(m_pGameWindow);
   m_pinky.draw(m_pGameWindow);
-
   m_inky.draw(m_pGameWindow);
   m_blinky.draw(m_pGameWindow);
   m_clyde.draw(m_pGameWindow);
