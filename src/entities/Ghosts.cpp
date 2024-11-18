@@ -1,4 +1,5 @@
 #include <chrono>
+#include <cmath>
 #include <iostream>
 #include <map>
 #include <optional>
@@ -34,11 +35,36 @@ Ghost::Ghost(float speed, sf::Vector2f pos, sf::Color c, bool debugMode)
 Ghost::~Ghost() {}
 
 bool Ghost::occupiesSingleTile() {
-  auto isTileX = mGhostShape.getPosition().x / TILE_SIZE;
-  auto isTileY = mGhostShape.getPosition().y / TILE_SIZE;
-  std::cout << "y: " << isTileY << ", x: " << isTileX << "\n";
-  // i just like parentheses
-  return (floor(isTileX) == isTileX && floor(isTileY) == isTileY);
+  float tilePosX = mGhostShape.getPosition().x / TILE_SIZE;
+  float tilePosY = mGhostShape.getPosition().y / TILE_SIZE;
+  if (floor(tilePosX) == tilePosX && floor(tilePosY) == tilePosY)
+    return true;
+
+  // let's try to force it to occupy a single tile
+  // if the ghost is within a margin of .01 then
+  // we'll snap it to the grid
+  double ignore;
+  auto marginX = modf(tilePosX, &ignore);
+  auto marginY = modf(tilePosY, &ignore);
+
+  if (marginX <.02 && marginY <.02) {
+    switch (directionVecToDirection(mDirection)) {
+      case UP:
+      case LEFT:
+        mGhostShape.setPosition(floor(tilePosX) * TILE_SIZE, floor(tilePosY) * TILE_SIZE);
+        break;
+
+      case DOWN:
+      case RIGHT:
+        mGhostShape.setPosition(ceil(tilePosX) * TILE_SIZE, ceil(tilePosY) * TILE_SIZE);
+        break;
+
+      default:
+        break;
+    }
+    return true;
+  }
+  return false;
 }
 
 void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
