@@ -47,23 +47,22 @@ bool Ghost::occupiesSingleTile() {
   auto marginX = modf(tilePosX, &ignore);
   auto marginY = modf(tilePosY, &ignore);
 
-  if (marginX <.02 && marginY <.02) {
-    switch (directionVecToDirection(mDirection)) {
-      case UP:
-      case LEFT:
-        mGhostShape.setPosition(floor(tilePosX) * TILE_SIZE, floor(tilePosY) * TILE_SIZE);
-        break;
+  auto dir = directionVecToDirection(mDirection);
 
-      case DOWN:
-      case RIGHT:
-        mGhostShape.setPosition(ceil(tilePosX) * TILE_SIZE, ceil(tilePosY) * TILE_SIZE);
-        break;
-
-      default:
-        break;
-    }
+  if (marginX < .05 && marginY < .05 && (dir == LEFT || dir == UP)) {
+    mGhostShape.setPosition(floor(tilePosX) * TILE_SIZE, floor(tilePosY) * TILE_SIZE);
     return true;
   }
+
+  tilePosX = (mGhostShape.getPosition().x + mGhostShape.getSize().x) / TILE_SIZE;
+  tilePosY = (mGhostShape.getPosition().y + mGhostShape.getSize().y) / TILE_SIZE;
+  
+  if (marginX < .05 && marginY < .05 && (dir == RIGHT || dir == DOWN)) {
+    return true;
+  }
+  //      mGhostShape.setPosition(ceil(tilePosX) * TILE_SIZE, ceil(tilePosY) * TILE_SIZE);
+  //      break;
+
   return false;
 }
 
