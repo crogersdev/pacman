@@ -8,10 +8,10 @@
 GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
   : m_pacman((TILE_SIZE / 2) - 1, 200.f, sf::Vector2f(TILE_SIZE + 1.f, TILE_SIZE + 1.f)),
     // tile size 25 speeds: 1, 1.25, 1.5625
-    m_pinky(   1.f, sf::Vector2f(9.f  * TILE_SIZE, 7.f  * TILE_SIZE), sf::Color(219, 48,  130)),
-    m_inky(  1.25f, sf::Vector2f(12.f * TILE_SIZE, 13.f * TILE_SIZE), sf::Color(255, 89,  143)),
-    m_blinky( 1.1f, sf::Vector2f(9.f  * TILE_SIZE, 6.f  * TILE_SIZE), sf::Color(117, 254, 255)),
-    m_clyde(1.875f, sf::Vector2f(11.f * TILE_SIZE, 15.f * TILE_SIZE), sf::Color(255, 179, 71)),
+    m_pinky( 1.0f, sf::Vector2f(9.f  * TILE_SIZE, 7.f  * TILE_SIZE), sf::Color(219, 48,  130)),
+    m_inky(  1.2f, sf::Vector2f(12.f * TILE_SIZE, 13.f * TILE_SIZE), sf::Color(255, 89,  143)),
+    m_blinky(1.1f, sf::Vector2f(9.f  * TILE_SIZE, 6.f  * TILE_SIZE), sf::Color(117, 254, 255)),
+    m_clyde( 0.9f, sf::Vector2f(11.f * TILE_SIZE, 15.f * TILE_SIZE), sf::Color(255, 179, 71)),
     m_clock(),
     m_windowBounds(),
     m_gameHud(),

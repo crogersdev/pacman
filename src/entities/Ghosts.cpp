@@ -34,34 +34,56 @@ Ghost::Ghost(float speed, sf::Vector2f pos, sf::Color c, bool debugMode)
 
 Ghost::~Ghost() {}
 
-bool Ghost::occupiesSingleTile() {
-  float tilePosX = mGhostShape.getPosition().x / TILE_SIZE;
-  float tilePosY = mGhostShape.getPosition().y / TILE_SIZE;
-  if (floor(tilePosX) == tilePosX && floor(tilePosY) == tilePosY)
-    return true;
+bool Ghost::checkAndSnapToTile() {
 
-  // let's try to force it to occupy a single tile
-  // if the ghost is within a margin of .01 then
-  // we'll snap it to the grid
-  double ignore;
-  auto marginX = modf(tilePosX, &ignore);
-  auto marginY = modf(tilePosY, &ignore);
+  auto isAlmostEqual = [](float a, float b, float epsilon =.001f) {
+    return std::abs(a - b) < epsilon;
+  };
 
-  auto dir = directionVecToDirection(mDirection);
+  const float LEADING_EDGE_SNAP_THRESHOLD = 0.05f;   // use this for going UP and LEFT
+  const float TRAILING_EDGE_SNAP_THRESHOLD = 0.95f;  // use this for going DOWN and RIGHT
+  const float TILE_ALIGNMENT_THRESHOLD = 0.01f;
 
-  if (marginX < .05 && marginY < .05 && (dir == LEFT || dir == UP)) {
-    mGhostShape.setPosition(floor(tilePosX) * TILE_SIZE, floor(tilePosY) * TILE_SIZE);
-    return true;
+  sf::Vector2f tilePos = sf::Vector2f(
+    mGhostShape.getPosition().x / TILE_SIZE,
+    mGhostShape.getPosition().y / TILE_SIZE
+  );
+
+  if (isAlmostEqual(tilePos.x, std::round(tilePos.x)) &&
+      isAlmostEqual(tilePos.y, std::round(tilePos.y))) {
+      return true;
   }
 
-  tilePosX = (mGhostShape.getPosition().x + mGhostShape.getSize().x) / TILE_SIZE;
-  tilePosY = (mGhostShape.getPosition().y + mGhostShape.getSize().y) / TILE_SIZE;
-  
-  if (marginX < .05 && marginY < .05 && (dir == RIGHT || dir == DOWN)) {
+  float fracX = tilePos.x - std::floor(tilePos.x);
+  float fracY = tilePos.y - std::floor(tilePos.y);
+
+  Direction dir = directionVecToDirection(mDirection);
+  sf::Vector2f newPosition = mGhostShape.getPosition();
+  bool shouldSnap = false;
+
+  switch (dir) {
+    case UP:
+      shouldSnap = fracY <= LEADING_EDGE_SNAP_THRESHOLD && fracX <= TILE_ALIGNMENT_THRESHOLD;
+      if (shouldSnap) newPosition.y = std::floor(tilePos.y) * TILE_SIZE;
+      break;
+    case DOWN:
+      shouldSnap = fracY >= TRAILING_EDGE_SNAP_THRESHOLD && fracX <= TILE_ALIGNMENT_THRESHOLD;
+      if (shouldSnap) newPosition.y = std::ceil(tilePos.y) * TILE_SIZE;
+      break;
+    case LEFT:
+      shouldSnap = fracY <= TILE_ALIGNMENT_THRESHOLD && fracX <= LEADING_EDGE_SNAP_THRESHOLD;
+      if (shouldSnap) newPosition.x = std::floor(tilePos.x) * TILE_SIZE;
+      break;
+    case RIGHT:
+      shouldSnap = fracY <= TILE_ALIGNMENT_THRESHOLD && fracX >= TRAILING_EDGE_SNAP_THRESHOLD;
+      if (shouldSnap) newPosition.x = std::ceil(tilePos.x) * TILE_SIZE;
+      break;
+  }
+
+  if (shouldSnap) {
+    mGhostShape.setPosition(newPosition);
     return true;
   }
-  //      mGhostShape.setPosition(ceil(tilePosX) * TILE_SIZE, ceil(tilePosY) * TILE_SIZE);
-  //      break;
 
   return false;
 }
@@ -122,7 +144,7 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
     }
   }
 
-  if (!occupiesSingleTile()) {
+  if (!checkAndSnapToTile()) {
     // Ghost doesn't change direction unless Ghost occupies a single tile
     auto movement = mDirection * mSpeedMultiplier;
     auto newPosition = mGhostShape.getPosition() + movement;
@@ -234,7 +256,7 @@ void Ghost::meander(const Labyrinth &rLabyrinth) {
 
   auto turns = availableTurns(mGhostShape.getPosition(), calculatedDirection, rLabyrinth);
 
-  if (occupiesSingleTile() && turns.size() > 2) {
+  if (checkAndSnapToTile() && turns.size() > 2) {
     bool doesGhostTurn = (mRandGenerator() % 100) <= mMeanderOdds;
     if (doesGhostTurn) {
       unsigned int newDirection;
