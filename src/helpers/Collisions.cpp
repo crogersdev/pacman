@@ -25,6 +25,7 @@ std::vector<Direction> availableTurns(
       rLabyrinth.at(coords.first - 1, coords.second) != Labyrinth::GATE)
     turns.push_back(Direction::LEFT);
 
+  std::cout << "available turns: " << turns.size() << "\n";
   return turns;
 }
 

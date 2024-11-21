@@ -144,7 +144,7 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
     }
   }
 
-  if (!checkAndSnapToTile()) {
+  if (checkAndSnapToTile() == false) {
     // Ghost doesn't change direction unless Ghost occupies a single tile
     auto movement = mDirection * mSpeedMultiplier;
     auto newPosition = mGhostShape.getPosition() + movement;
