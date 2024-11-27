@@ -17,7 +17,7 @@ public:
 
   float mMeanderOdds;
 
-  bool occupiesSingleTile();
+  bool checkAndSnapToTile();
   void chase(const Labyrinth &, sf::Vector2f);
   void changeDirection(Direction);
   void draw(std::shared_ptr<sf::RenderWindow>);

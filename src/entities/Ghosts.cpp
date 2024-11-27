@@ -1,4 +1,5 @@
 #include <chrono>
+#include <cmath>
 #include <iostream>
 #include <map>
 #include <optional>
@@ -33,11 +34,58 @@ Ghost::Ghost(float speed, sf::Vector2f pos, sf::Color c, bool debugMode)
 
 Ghost::~Ghost() {}
 
-bool Ghost::occupiesSingleTile() {
-  auto isTileX = mGhostShape.getPosition().x / TILE_SIZE;
-  auto isTileY = mGhostShape.getPosition().y / TILE_SIZE;
-  // i just like parentheses
-  return (floor(isTileX) == isTileX && floor(isTileY) == isTileY);
+bool Ghost::checkAndSnapToTile() {
+
+  auto isAlmostEqual = [](float a, float b, float epsilon =.001f) {
+    return std::abs(a - b) < epsilon;
+  };
+
+  const float LEADING_EDGE_SNAP_THRESHOLD = 0.05f;   // use this for going UP and LEFT
+  const float TRAILING_EDGE_SNAP_THRESHOLD = 0.95f;  // use this for going DOWN and RIGHT
+  const float TILE_ALIGNMENT_THRESHOLD = 0.01f;
+
+  sf::Vector2f tilePos = sf::Vector2f(
+    mGhostShape.getPosition().x / TILE_SIZE,
+    mGhostShape.getPosition().y / TILE_SIZE
+  );
+
+  if (isAlmostEqual(tilePos.x, std::round(tilePos.x)) &&
+      isAlmostEqual(tilePos.y, std::round(tilePos.y))) {
+      return true;
+  }
+
+  float fracX = tilePos.x - std::floor(tilePos.x);
+  float fracY = tilePos.y - std::floor(tilePos.y);
+
+  Direction dir = directionVecToDirection(mDirection);
+  sf::Vector2f newPosition = mGhostShape.getPosition();
+  bool shouldSnap = false;
+
+  switch (dir) {
+    case UP:
+      shouldSnap = fracY <= LEADING_EDGE_SNAP_THRESHOLD && fracX <= TILE_ALIGNMENT_THRESHOLD;
+      if (shouldSnap) newPosition.y = std::floor(tilePos.y) * TILE_SIZE;
+      break;
+    case DOWN:
+      shouldSnap = fracY >= TRAILING_EDGE_SNAP_THRESHOLD && fracX <= TILE_ALIGNMENT_THRESHOLD;
+      if (shouldSnap) newPosition.y = std::ceil(tilePos.y) * TILE_SIZE;
+      break;
+    case LEFT:
+      shouldSnap = fracY <= TILE_ALIGNMENT_THRESHOLD && fracX <= LEADING_EDGE_SNAP_THRESHOLD;
+      if (shouldSnap) newPosition.x = std::floor(tilePos.x) * TILE_SIZE;
+      break;
+    case RIGHT:
+      shouldSnap = fracY <= TILE_ALIGNMENT_THRESHOLD && fracX >= TRAILING_EDGE_SNAP_THRESHOLD;
+      if (shouldSnap) newPosition.x = std::ceil(tilePos.x) * TILE_SIZE;
+      break;
+  }
+
+  if (shouldSnap) {
+    mGhostShape.setPosition(newPosition);
+    return true;
+  }
+
+  return false;
 }
 
 void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
@@ -96,7 +144,7 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
     }
   }
 
-  if (!occupiesSingleTile()) {
+  if (checkAndSnapToTile() == false) {
     // Ghost doesn't change direction unless Ghost occupies a single tile
     auto movement = mDirection * mSpeedMultiplier;
     auto newPosition = mGhostShape.getPosition() + movement;
@@ -131,8 +179,8 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
     // this is where we're going to detect if we're on the tunnel row
     // and then keep the direction to cross the tunnel properly even though
     // the direction vector determined by new position and current position
-    // will point in the opposite direction 
-    if ((ghostPosition.y / TILE_SIZE) == 14 && (nextPosition.y / TILE_SIZE) == 14) {
+    // will point in the opposite direction
+    if ((ghostPosition.y / TILE_SIZE) == TUNNEL_ROW && (nextPosition.y / TILE_SIZE) == TUNNEL_ROW) {
       if (ghostPosition.x <= 50 && nextPosition.x == 675) {
         mDirection = sf::Vector2f(-1.f, 0.f);
       } else if (ghostPosition.x >= 650 && nextPosition.x == 0) {
@@ -141,8 +189,11 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
     }
 
     if (std::abs(mDirection.x) == 1.f && std::abs(mDirection.y) == 1.f) {
-      mDirection.y = 0.f;
       std::cout << "caution rogue robots\n";
+      // not sure where this bug is, and why the path gives us a diagonal
+      // or if it's the location of the position being at a diagonal
+      // in relation to the next position or something
+      return;
     }
 
     auto movement = mDirection * mSpeedMultiplier;
@@ -208,7 +259,7 @@ void Ghost::meander(const Labyrinth &rLabyrinth) {
 
   auto turns = availableTurns(mGhostShape.getPosition(), calculatedDirection, rLabyrinth);
 
-  if (occupiesSingleTile() && turns.size() > 2) {
+  if (checkAndSnapToTile() && turns.size() > 2) {
     bool doesGhostTurn = (mRandGenerator() % 100) <= mMeanderOdds;
     if (doesGhostTurn) {
       unsigned int newDirection;
