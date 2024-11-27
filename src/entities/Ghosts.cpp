@@ -189,8 +189,11 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
     }
 
     if (std::abs(mDirection.x) == 1.f && std::abs(mDirection.y) == 1.f) {
-      mDirection.y = 0.f;
       std::cout << "caution rogue robots\n";
+      // not sure where this bug is, and why the path gives us a diagonal
+      // or if it's the location of the position being at a diagonal
+      // in relation to the next position or something
+      return;
     }
 
     auto movement = mDirection * mSpeedMultiplier;

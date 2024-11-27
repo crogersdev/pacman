@@ -147,7 +147,7 @@ std::list<int> Labyrinth::getNeighbors(int offset) const {
     auto potentialNeighbor = at(potentialNeighborPair);
 
     if (potentialNeighbor != Tile::ERROR &&
-        potentialNeighbor != Tile::GATE &&
+        // potentialNeighbor != Tile::GATE &&
         potentialNeighbor != Tile::WALL)
         neighbors.push_back(getOffset(potentialNeighborPair));
     }

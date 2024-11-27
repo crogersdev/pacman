@@ -11,10 +11,10 @@ GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
     //             sf::Vector2f(xval, yval)
     //             or
     //             sf::Vector2f(col,  row)
-    m_pinky( 1.0f, sf::Vector2f(16.f * TILE_SIZE, 15.f * TILE_SIZE), sf::Color(228, 160, 191)),
+    m_pinky(  .9f, sf::Vector2f(16.f * TILE_SIZE, 15.f * TILE_SIZE), sf::Color(228, 160, 191)),
     m_inky(  1.3f, sf::Vector2f(11.f * TILE_SIZE, 15.f * TILE_SIZE), sf::Color(255, 29,  33)),
     m_blinky(1.5f, sf::Vector2f(16.f * TILE_SIZE, 13.f * TILE_SIZE), sf::Color(117, 254, 255)),
-    m_clyde( 1.0f, sf::Vector2f(11.f * TILE_SIZE, 13.f * TILE_SIZE), sf::Color(255, 179, 71)),
+    m_clyde( 1.1f, sf::Vector2f(11.f * TILE_SIZE, 13.f * TILE_SIZE), sf::Color(255, 179, 71)),
     m_clock(),
     m_windowBounds(),
     m_gameHud(),
@@ -57,9 +57,9 @@ void GameManager::handleInputs() {
   while (m_pGameWindow->pollEvent(event)) {
     if (event.type == sf::Event::Closed)
       m_pGameWindow->close();
-    if (event.type == sf::Event::KeyPressed && 
+    if (event.type == sf::Event::KeyPressed &&
           (event.key.code == sf::Keyboard::Escape ||
-          (event.key.code == sf::Keyboard::C && 
+          (event.key.code == sf::Keyboard::C &&
             (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
              sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)))))
       m_pGameWindow->close();
@@ -89,15 +89,15 @@ void GameManager::updateEntities() {
   sf::Vector2f pacmanCenter = sf::Vector2f(
     pacmanPosition.x + (TILE_SIZE / 2), pacmanPosition.y + (TILE_SIZE / 2));
 
-  // m_pinky.chase(m_labyrinth, pacmanCenter);
-  // m_blinky.chase(m_labyrinth, pacmanCenter);
-  // m_inky.chase(m_labyrinth, pacmanCenter);
-  // m_clyde.meander(m_labyrinth);
+  m_pinky.chase(m_labyrinth, pacmanCenter);
+  m_blinky.chase(m_labyrinth, pacmanCenter);
+  m_inky.chase(m_labyrinth, pacmanCenter);
+  m_clyde.chase(m_labyrinth, pacmanCenter);
 
-  m_pinky.meander(m_labyrinth);
-  m_blinky.meander(m_labyrinth);
-  m_clyde.meander(m_labyrinth);
-  m_inky.meander(m_labyrinth);
+  // m_pinky.meander(m_labyrinth);
+  // m_blinky.meander(m_labyrinth);
+  // m_clyde.meander(m_labyrinth);
+  // m_inky.meander(m_labyrinth);
 
   if (entityCollides(m_pinky, m_pacman)) {
     m_pinky.resetPath(m_labyrinth);
