@@ -74,7 +74,7 @@ bool Ghost::checkAndSnapToTile() {
       shouldSnap = fracY <= TILE_ALIGNMENT_THRESHOLD && fracX <= LEADING_EDGE_SNAP_THRESHOLD;
       if (shouldSnap) newPosition.x = std::floor(tilePos.x) * TILE_SIZE;
       break;
-    case RIGHT:
+    case Direction::RIGHT:
       shouldSnap = fracY <= TILE_ALIGNMENT_THRESHOLD && fracX >= TRAILING_EDGE_SNAP_THRESHOLD;
       if (shouldSnap) newPosition.x = std::ceil(tilePos.x) * TILE_SIZE;
       break;
