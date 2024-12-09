@@ -12,20 +12,19 @@ std::vector<Direction> availableTurns(
 
   std::vector<Direction> turns;
 
-  if (rLabyrinth.at(coords.first, coords.second - 1) != Labyrinth::WALL &&
-      rLabyrinth.at(coords.first, coords.second - 1) != Labyrinth::GATE)
+  if (rLabyrinth.at(coords.first, coords.second - 1) != Labyrinth::Tile::WALL &&
+      rLabyrinth.at(coords.first, coords.second - 1) != Labyrinth::Tile::GATE)
     turns.push_back(Direction::UP);
-  if (rLabyrinth.at(coords.first, coords.second + 1) != Labyrinth::WALL &&
-      rLabyrinth.at(coords.first, coords.second + 1) != Labyrinth::GATE)
+  if (rLabyrinth.at(coords.first, coords.second + 1) != Labyrinth::Tile::WALL &&
+      rLabyrinth.at(coords.first, coords.second + 1) != Labyrinth::Tile::GATE)
     turns.push_back(Direction::DOWN);
-  if (rLabyrinth.at(coords.first + 1, coords.second) != Labyrinth::WALL &&
-      rLabyrinth.at(coords.first + 1, coords.second) != Labyrinth::GATE)
+  if (rLabyrinth.at(coords.first + 1, coords.second) != Labyrinth::Tile::WALL &&
+      rLabyrinth.at(coords.first + 1, coords.second) != Labyrinth::Tile::GATE)
     turns.push_back(Direction::RIGHT);
-  if (rLabyrinth.at(coords.first - 1, coords.second) != Labyrinth::WALL &&
-      rLabyrinth.at(coords.first - 1, coords.second) != Labyrinth::GATE)
+  if (rLabyrinth.at(coords.first - 1, coords.second) != Labyrinth::Tile::WALL &&
+      rLabyrinth.at(coords.first - 1, coords.second) != Labyrinth::Tile::GATE)
     turns.push_back(Direction::LEFT);
 
-  std::cout << "available turns: " << turns.size() << "\n";
   return turns;
 }
 
@@ -49,7 +48,7 @@ bool wallCollides(sf::Vector2f entity, sf::Vector2f dimensions, const Labyrinth 
     collisionCorners.begin(),
     collisionCorners.end(),
     [&](auto coords) {
-      if (rLabyrinth.at(coords.first, coords.second) == rLabyrinth.WALL)
+      if (rLabyrinth.at(coords.first, coords.second) == rLabyrinth.Tile::WALL)
         return true;
       else
         return false;

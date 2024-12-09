@@ -21,7 +21,7 @@ Ghost::Ghost(float speed, sf::Vector2f pos, sf::Color c, bool debugMode)
       mInitialPosition(pos),
       mTarget(),
       mPath(),
-      mState(MEANDER) {
+      mState(Ghost::State::MEANDER) {
   mSeed = std::chrono::system_clock::now().time_since_epoch().count();
   mRandGenerator = std::mt19937(mSeed);
   mGhostShape.setFillColor(mColor);
@@ -62,15 +62,15 @@ bool Ghost::checkAndSnapToTile() {
   bool shouldSnap = false;
 
   switch (dir) {
-    case UP:
+    case Direction::UP:
       shouldSnap = fracY <= LEADING_EDGE_SNAP_THRESHOLD && fracX <= TILE_ALIGNMENT_THRESHOLD;
       if (shouldSnap) newPosition.y = std::floor(tilePos.y) * TILE_SIZE;
       break;
-    case DOWN:
+    case Direction::DOWN:
       shouldSnap = fracY >= TRAILING_EDGE_SNAP_THRESHOLD && fracX <= TILE_ALIGNMENT_THRESHOLD;
       if (shouldSnap) newPosition.y = std::ceil(tilePos.y) * TILE_SIZE;
       break;
-    case LEFT:
+    case Direction::LEFT:
       shouldSnap = fracY <= TILE_ALIGNMENT_THRESHOLD && fracX <= LEADING_EDGE_SNAP_THRESHOLD;
       if (shouldSnap) newPosition.x = std::floor(tilePos.x) * TILE_SIZE;
       break;
@@ -206,16 +206,16 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
 
 void Ghost::changeDirection(Direction newDirection) {
   switch (newDirection) {
-  case DOWN:
+  case Direction::DOWN:
     mDirection = sf::Vector2f(0.f, 1.f);
     break;
-  case UP:
+  case Direction::UP:
     mDirection = sf::Vector2f(0.f, -1.f);
     break;
-  case RIGHT:
+  case Direction::RIGHT:
     mDirection = sf::Vector2f(1.f, 0.f);
     break;
-  case LEFT:
+  case Direction::LEFT:
     mDirection = sf::Vector2f(-1.f, 0.f);
     break;
   }

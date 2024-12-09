@@ -37,7 +37,7 @@ public:
   operator const sf::Shape&() const { return mGhostShape; }
 
 private:
-  enum State {
+  enum class State {
     SCATTER    = 1,
     MEANDER    = 2,
     CHASE      = 3,

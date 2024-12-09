@@ -34,6 +34,7 @@ public:
   void updateWindow();
 
 private:
+
   struct HUD {
     sf::Font font;
 

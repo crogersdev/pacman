@@ -19,7 +19,7 @@ const float TILE_SIZE      = 25.f;  // WARNING: changing this value has differen
 
 class Labyrinth {
 public:
-  enum Tile {
+  enum class Tile {
     EMPTY   = ' ',
     GATE    = '-',
     WALL    = '#',

@@ -3,7 +3,7 @@
 #include <cmath>
 #include <SFML/Graphics.hpp>
 
-enum Direction {
+enum class Direction {
   DOWN  = 0,
   UP    = 1,
   RIGHT = 2,

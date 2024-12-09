@@ -39,7 +39,7 @@ GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
 
   auto pacmanPosition = sf::Vector2f(TILE_SIZE + 1, TILE_SIZE + 1);
 
-  m_labyrinth.set(pacmanPosition, Labyrinth::PACMAN);
+  m_labyrinth.set(pacmanPosition, Labyrinth::Tile::PACMAN);
 
   m_keyActions = {
     {sf::Keyboard::Left,  [&](sf::Time dt) { m_pacman.move(sf::Vector2f(-1.f, 0.f), dt, m_labyrinth); }},
@@ -107,9 +107,9 @@ void GameManager::updateEntities() {
     m_pacman.getPosition().x / TILE_SIZE,
     m_pacman.getPosition().y / TILE_SIZE);
 
-  if (whatDidPacmanEat == Labyrinth::PELLET) {
+  if (whatDidPacmanEat == Labyrinth::Tile::PELLET) {
     m_score += m_pelletValue;
-    m_labyrinth.set(m_pacman.getPosition(), Labyrinth::EMPTY);
+    m_labyrinth.set(m_pacman.getPosition(), Labyrinth::Tile::EMPTY);
   }
 }
 
