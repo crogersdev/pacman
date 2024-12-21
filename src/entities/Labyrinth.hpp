@@ -77,8 +77,8 @@ public:
     return os;
   }
 
-  std::map<char, Tile> m_tileLut;
-  std::map<Tile, std::string> m_tileLabelLut;
+  std::map<char, Tile> mTileLut;
+  std::map<Tile, std::string> mTileLabelLut;
   std::vector<std::pair<int, int>> mDirs = {
     std::pair<int, int>(0, 1),     // UP
     std::pair<int, int>(1, 0),     // RIGHT
@@ -89,8 +89,8 @@ public:
   float mMaxLabyrinthWidth = LABYRINTH_COLS * (TILE_SIZE - 1);
   float mMaxLabyrinthHeight = LABYRINTH_ROWS * (TILE_SIZE - 1);
 
-  sf::RectangleShape m_wallTile;
-  sf::CircleShape m_pellet;
+  sf::RectangleShape mWallTile;
+  sf::CircleShape mPellet;
 
   int getOffset(std::pair<int, int>) const;
   int getOffset(int, int) const;
@@ -124,7 +124,7 @@ public:
   Labyrinth();
 
 private:
-  std::array<std::array<char, LABYRINTH_COLS>, LABYRINTH_ROWS> m_labyrinth = {
+  std::array<std::array<char, LABYRINTH_COLS>, LABYRINTH_ROWS> mLabyrinth = {
     "############################",
     "#............##............#",
     "#.####.#####.##.#####.####@#",

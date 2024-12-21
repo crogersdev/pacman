@@ -17,24 +17,21 @@ public:
   explicit GameManager(std::shared_ptr<sf::RenderWindow> pWindow);
   ~GameManager();
 
-  std::map<sf::Keyboard::Key, std::function<void(sf::Time)>> m_keyActions;
-
-  bool mPaused;
-  sf::Vector2i mMousePos;
-
-  Pacman m_pacman;
-  Ghost m_inky;
-  Ghost m_blinky;
-  Ghost m_pinky;
-  Ghost m_clyde;
+  Pacman mPacman;
+  Ghost mInky;
+  Ghost mBlinky;
+  Ghost mPinky;
+  Ghost mClyde;
 
   void drawLabyrinth();
   void handleInputs();
   void updateEntities();
   void updateWindow();
 
-private:
+  std::map<sf::Keyboard::Key, std::function<void(sf::Time)>> mKeyActions;
+  bool mPaused;
 
+private:
   struct HUD {
     sf::Font font;
 
@@ -83,25 +80,26 @@ private:
       }
     }
 
-    void drawGuys(std::shared_ptr<sf::RenderWindow> pWin) {
+    void drawGuys(std::shared_ptr<sf::RenderWindow> pWin) const {
       for (const auto& g : guys)
         pWin->draw(g);
     }
   };
 
-  sf::Clock m_clock;
-  sf::FloatRect m_windowBounds;
-  GameHUD m_gameHud;
-  ExtraDebugHUD m_debugHud;
+  sf::Clock mClock;
+  sf::Clock mStateClock;
+  sf::FloatRect mWindowBounds;
+  sf::Vector2i mMousePos;
+  GameHUD mGameHud;
+  ExtraDebugHUD mDebugHud;
 
-  sf::Time m_deltaTime;
-  std::shared_ptr<sf::RenderWindow> m_pGameWindow;
-  Labyrinth m_labyrinth;
+  std::shared_ptr<sf::RenderWindow> mpGameWindow;
+  Labyrinth mLabyrinth;
 
-  float m_fps;
+  float mFps;
 
-  int m_score;
-  int m_pelletValue;
+  int mScore;
+  int mPelletValue;
 
-  bool m_debugMode;
+  bool mDebugMode;
 };

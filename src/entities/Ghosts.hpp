@@ -70,7 +70,7 @@ private:
   };
 
   struct OrderByScore {
-    bool operator() (const TileScore &a, const TileScore &b) {
+    bool operator() (const TileScore &a, const TileScore &b) const {
       return a.score > b.score;
     }
   };

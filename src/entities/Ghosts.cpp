@@ -12,12 +12,12 @@
 #include "../helpers/Collisions.hpp"
 
 Ghost::Ghost(float speed, sf::Vector2f pos, sf::Color c, bool debugMode)
-    : mColor(c),
+    : mMeanderOdds(66.6),
+      mColor(c),
+      mDirection(sf::Vector2f(1.f, 0.f)),
       mDebugMode(debugMode),
-      mMeanderOdds(66.6),
       mSpeedMultiplier(speed),
       mGhostShape(sf::Vector2f(TILE_SIZE, TILE_SIZE)),
-      mDirection(sf::Vector2f(1.f, 0.f)),
       mInitialPosition(pos),
       mTarget(),
       mPath(),

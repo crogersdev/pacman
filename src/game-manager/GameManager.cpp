@@ -6,46 +6,47 @@
 #include <sstream>
 
 GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
-  : m_pacman((TILE_SIZE / 2) - 1, 200.f, sf::Vector2f(TILE_SIZE + 1.f, TILE_SIZE + 1.f)),
+  : mPacman((TILE_SIZE / 2) - 1, 200.f, sf::Vector2f(TILE_SIZE + 1.f, TILE_SIZE + 1.f)),
     // remember the order in the vector!
     //             sf::Vector2f(xval, yval)
     //             or
     //             sf::Vector2f(col,  row)
-    m_pinky(  .9f, sf::Vector2f(16.f * TILE_SIZE, 15.f * TILE_SIZE), sf::Color(228, 160, 191)),
-    m_inky(  1.3f, sf::Vector2f(11.f * TILE_SIZE, 15.f * TILE_SIZE), sf::Color(255, 29,  33)),
-    m_blinky(1.5f, sf::Vector2f(16.f * TILE_SIZE, 13.f * TILE_SIZE), sf::Color(117, 254, 255)),
-    m_clyde( 1.1f, sf::Vector2f(11.f * TILE_SIZE, 13.f * TILE_SIZE), sf::Color(255, 179, 71)),
-    m_clock(),
-    m_windowBounds(),
-    m_gameHud(),
-    m_debugHud(),
-    m_deltaTime(),
-    m_pGameWindow(pWindow),
-    m_labyrinth(),
-    m_fps(60.0),
-    m_score(0),
-    m_pelletValue(50),
-    mMousePos(),
+    mInky(  1.3f, sf::Vector2f(11.f * TILE_SIZE, 15.f * TILE_SIZE), sf::Color(255, 29,  33)),
+    mBlinky(1.5f, sf::Vector2f(16.f * TILE_SIZE, 13.f * TILE_SIZE), sf::Color(117, 254, 255)),
+    mPinky(  .9f, sf::Vector2f(16.f * TILE_SIZE, 15.f * TILE_SIZE), sf::Color(228, 160, 191)),
+    mClyde( 1.1f, sf::Vector2f(11.f * TILE_SIZE, 13.f * TILE_SIZE), sf::Color(255, 179, 71)),
     mPaused(false),
-    m_debugMode(false) {
+    mClock(),
+    mStateClock(),
+    mWindowBounds(),
+    mMousePos(),
+    mGameHud(),
+    mDebugHud(),
+    mpGameWindow(pWindow),
+    mLabyrinth(),
+    mFps(60.0),
+    mScore(0),
+    mPelletValue(50),
+    mDebugMode(false) {
   #ifndef NDEBUG
-    m_debugMode = true;
+    mDebugMode = true;
   #else
-    m_debugMode = false;
+    mDebugMode = false;
   #endif
 
-  m_pGameWindow->setFramerateLimit(m_fps);
-  m_windowBounds = sf::FloatRect(0, 0, m_pGameWindow->getSize().x, m_pGameWindow->getSize().y);
+  mpGameWindow->setFramerateLimit(mFps);
+  mWindowBounds = sf::FloatRect(0, 0, mpGameWindow->getSize().x, mpGameWindow->getSize().y);
 
   auto pacmanPosition = sf::Vector2f(TILE_SIZE + 1, TILE_SIZE + 1);
+  auto mPaused = false;
 
-  m_labyrinth.set(pacmanPosition, Labyrinth::Tile::PACMAN);
+  mLabyrinth.set(pacmanPosition, Labyrinth::Tile::PACMAN);
 
-  m_keyActions = {
-    {sf::Keyboard::Left,  [&](sf::Time dt) { m_pacman.move(sf::Vector2f(-1.f, 0.f), dt, m_labyrinth); }},
-    {sf::Keyboard::Right, [&](sf::Time dt) { m_pacman.move(sf::Vector2f( 1.f, 0.f), dt, m_labyrinth); }},
-    {sf::Keyboard::Up,    [&](sf::Time dt) { m_pacman.move(sf::Vector2f(0.f, -1.f), dt, m_labyrinth); }},
-    {sf::Keyboard::Down,  [&](sf::Time dt) { m_pacman.move(sf::Vector2f(0.f,  1.f), dt, m_labyrinth); }}
+  mKeyActions = {
+    {sf::Keyboard::Left,  [&](sf::Time dt) { mPacman.move(sf::Vector2f(-1.f, 0.f), dt, mLabyrinth); }},
+    {sf::Keyboard::Right, [&](sf::Time dt) { mPacman.move(sf::Vector2f( 1.f, 0.f), dt, mLabyrinth); }},
+    {sf::Keyboard::Up,    [&](sf::Time dt) { mPacman.move(sf::Vector2f(0.f, -1.f), dt, mLabyrinth); }},
+    {sf::Keyboard::Down,  [&](sf::Time dt) { mPacman.move(sf::Vector2f(0.f,  1.f), dt, mLabyrinth); }}
   };
 }
 
@@ -54,116 +55,116 @@ GameManager::~GameManager() {}
 void GameManager::handleInputs() {
   sf::Event event;
 
-  while (m_pGameWindow->pollEvent(event)) {
+  while (mpGameWindow->pollEvent(event)) {
     if (event.type == sf::Event::Closed)
-      m_pGameWindow->close();
+      mpGameWindow->close();
     if (event.type == sf::Event::KeyPressed &&
           (event.key.code == sf::Keyboard::Escape ||
           (event.key.code == sf::Keyboard::C &&
             (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
              sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)))))
-      m_pGameWindow->close();
+      mpGameWindow->close();
     if (event.type)
     if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space)
       mPaused = !mPaused;
     if (event.type == sf::Event::MouseMoved) {
-      mMousePos = sf::Mouse::getPosition(*m_pGameWindow);
+      mMousePos = sf::Mouse::getPosition(*mpGameWindow);
     }
   }
 
   if (mPaused) return;
 
-  m_deltaTime = m_clock.restart();
+  auto dt = mClock.restart();
 
-  for (const auto& pair : m_keyActions) {
+  for (const auto& pair : mKeyActions) {
     if (sf::Keyboard::isKeyPressed(pair.first)) {
       // note: this invokes the lambdas defined in
       //       the ctor that move pacman
-      pair.second(m_deltaTime);
+      pair.second(dt);
     }
   }
 }
 
 void GameManager::updateEntities() {
-  sf::Vector2f pacmanPosition = m_pacman.getPosition();
+  sf::Vector2f pacmanPosition = mPacman.getPosition();
   sf::Vector2f pacmanCenter = sf::Vector2f(
     pacmanPosition.x + (TILE_SIZE / 2), pacmanPosition.y + (TILE_SIZE / 2));
 
-  m_pinky.chase(m_labyrinth, pacmanCenter);
-  m_blinky.chase(m_labyrinth, pacmanCenter);
-  m_inky.chase(m_labyrinth, pacmanCenter);
-  m_clyde.chase(m_labyrinth, pacmanCenter);
+  mPinky.chase(mLabyrinth, pacmanCenter);
+  mBlinky.chase(mLabyrinth, pacmanCenter);
+  mInky.chase(mLabyrinth, pacmanCenter);
+  mClyde.chase(mLabyrinth, pacmanCenter);
 
-  // m_pinky.meander(m_labyrinth);
-  // m_blinky.meander(m_labyrinth);
-  // m_clyde.meander(m_labyrinth);
-  // m_inky.meander(m_labyrinth);
+  // mPinky.meander(mLabyrinth);
+  // mBlinky.meander(mLabyrinth);
+  // mClyde.meander(mLabyrinth);
+  // mInky.meander(mLabyrinth);
 
-  if (entityCollides(m_pinky, m_pacman)) {
-    m_pinky.resetPath(m_labyrinth);
+  if (entityCollides(mPinky, mPacman)) {
+    mPinky.resetPath(mLabyrinth);
   }
 
-  auto whatDidPacmanEat = m_labyrinth.at(
-    m_pacman.getPosition().x / TILE_SIZE,
-    m_pacman.getPosition().y / TILE_SIZE);
+  auto whatDidPacmanEat = mLabyrinth.at(
+    mPacman.getPosition().x / TILE_SIZE,
+    mPacman.getPosition().y / TILE_SIZE);
 
   if (whatDidPacmanEat == Labyrinth::Tile::PELLET) {
-    m_score += m_pelletValue;
-    m_labyrinth.set(m_pacman.getPosition(), Labyrinth::Tile::EMPTY);
+    mScore += mPelletValue;
+    mLabyrinth.set(mPacman.getPosition(), Labyrinth::Tile::EMPTY);
   }
 }
 
 void GameManager::updateWindow() {
-  sf::Time elapsed = m_clock.restart();
-  m_fps = 1.f / elapsed.asSeconds();
+  sf::Time elapsed = mClock.restart();
+  mFps = 1.f / elapsed.asSeconds();
 
-  m_pGameWindow->clear();
+  mpGameWindow->clear();
   std::ostringstream oss;
-  oss << "Score: " << m_score << "\n";
-  m_gameHud.score.setString(oss.str());
-  m_pGameWindow->draw(m_gameHud.score);
-  m_gameHud.drawGuys(m_pGameWindow);
+  oss << "Score: " << mScore << "\n";
+  mGameHud.score.setString(oss.str());
+  mpGameWindow->draw(mGameHud.score);
+  mGameHud.drawGuys(mpGameWindow);
   oss.clear();
 
   // Update debug information
-  if (m_debugMode) {
+  if (mDebugMode) {
     std::ostringstream debugOss;
-    auto pacmanRow = floor(m_pacman.getPosition().y / TILE_SIZE);
-    auto pacmanCol = floor(m_pacman.getPosition().x / TILE_SIZE);
-    auto tileInfoEnum = m_labyrinth.at(pacmanCol, pacmanRow);
-    auto tileInfo = m_labyrinth.m_tileLabelLut.at(tileInfoEnum);
+    auto pacmanRow = floor(mPacman.getPosition().y / TILE_SIZE);
+    auto pacmanCol = floor(mPacman.getPosition().x / TILE_SIZE);
+    auto tileInfoEnum = mLabyrinth.at(pacmanCol, pacmanRow);
+    auto tileInfo = mLabyrinth.mTileLabelLut.at(tileInfoEnum);
     debugOss << "Pacman\n";
     debugOss << "    pos r,c: " << pacmanRow << ", " << pacmanCol << "\n";
-    debugOss << "    offset:  " << m_labyrinth.getOffset(pacmanCol, pacmanRow) << "\n";
-    auto pair = m_labyrinth.getPairFromOffset(m_labyrinth.getOffset(pacmanCol, pacmanRow));
+    debugOss << "    offset:  " << mLabyrinth.getOffset(pacmanCol, pacmanRow) << "\n";
+    auto pair = mLabyrinth.getPairFromOffset(mLabyrinth.getOffset(pacmanCol, pacmanRow));
     debugOss << "    pair:    " << pair.second << ", " << pair.first << "\n";
-    auto o = m_labyrinth.getOffset(pair);
+    auto o = mLabyrinth.getOffset(pair);
     debugOss << "    offset2: " << o << "\n";
     debugOss << "    tile:    " << tileInfo << "\n";
 
-    auto pinkyRow = floor(m_pinky.getPosition().y / TILE_SIZE);
-    auto pinkyCol = floor(m_pinky.getPosition().x / TILE_SIZE);
-    auto pinkyOffset = m_labyrinth.getOffset(pinkyCol, pinkyRow);
+    auto pinkyRow = floor(mPinky.getPosition().y / TILE_SIZE);
+    auto pinkyCol = floor(mPinky.getPosition().x / TILE_SIZE);
+    auto pinkyOffset = mLabyrinth.getOffset(pinkyCol, pinkyRow);
     debugOss << "Pinky\n";
     debugOss << "    pos r,c: " << pinkyRow << ", " << pinkyCol << "\n";
     debugOss << "    offset : " << pinkyOffset << "\n";
     debugOss << "\nghost neighbors at offset " << pinkyOffset;
     debugOss << "\n        ";
-    for (auto n : m_labyrinth.getNeighbors(pinkyOffset)) {
+    for (auto n : mLabyrinth.getNeighbors(pinkyOffset)) {
       debugOss << n << ", ";
     }
     debugOss << "\n";
 
-    auto trRow = floor(m_pinky.getTarget().y / TILE_SIZE);
-    auto trCol = floor(m_pinky.getTarget().x / TILE_SIZE);
+    auto trRow = floor(mPinky.getTarget().y / TILE_SIZE);
+    auto trCol = floor(mPinky.getTarget().x / TILE_SIZE);
     debugOss << "    chasing r, c: " << trRow << ", " << trCol << "\n";
-    debugOss << "          offset: " << m_labyrinth.getOffset(trCol, trRow);
+    debugOss << "          offset: " << mLabyrinth.getOffset(trCol, trRow);
 
-    auto path = m_pinky.getPath();
+    auto path = mPinky.getPath();
     debugOss << "\npath: \n";
     int count = 0;
     for (auto p : path) {
-      auto foo = m_labyrinth.getOffset(p);
+      auto foo = mLabyrinth.getOffset(p);
       debugOss << foo << ", ";
       count++;
       if (count == 8) {
@@ -172,21 +173,24 @@ void GameManager::updateWindow() {
       }
     }
 
+    debugOss << "\n\n\n";
+    debugOss << "state clock: " << mStateClock.getElapsedTime().asSeconds() << "\n";
+
     debugOss << "\n\n";
     debugOss << "mouse position r, c: (" << mMousePos.y / TILE_SIZE << ", " << mMousePos.x / TILE_SIZE << ")\n";
-    debugOss << "      offset       :  " << m_labyrinth.getOffset(mMousePos.y, mMousePos.x) << "\n";
-    debugOss << "      map lut info :  " << m_labyrinth.m_tileLabelLut.at(m_labyrinth.at(mMousePos.y, mMousePos.x));
+    debugOss << "      offset       :  " << mLabyrinth.getOffset(mMousePos.y, mMousePos.x) << "\n";
+    debugOss << "      map lut info :  " << mLabyrinth.mTileLabelLut.at(mLabyrinth.at(mMousePos.y, mMousePos.x));
     debugOss << "\n";
 
-    m_debugHud.debugText.setString(debugOss.str());
-    m_pGameWindow->draw(m_debugHud.debugText);
+    mDebugHud.debugText.setString(debugOss.str());
+    mpGameWindow->draw(mDebugHud.debugText);
   }
 
-  m_labyrinth.draw(m_pGameWindow);
-  m_pacman.draw(m_pGameWindow);
-  m_pinky.draw(m_pGameWindow);
-  m_inky.draw(m_pGameWindow);
-  m_blinky.draw(m_pGameWindow);
-  m_clyde.draw(m_pGameWindow);
-  m_pGameWindow->display();
+  mLabyrinth.draw(mpGameWindow);
+  mPacman.draw(mpGameWindow);
+  mPinky.draw(mpGameWindow);
+  mInky.draw(mpGameWindow);
+  mBlinky.draw(mpGameWindow);
+  mClyde.draw(mpGameWindow);
+  mpGameWindow->display();
 }
