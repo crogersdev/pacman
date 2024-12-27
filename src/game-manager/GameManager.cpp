@@ -55,20 +55,19 @@ GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
 GameManager::~GameManager() {}
 
 void GameManager::handleInputs() {
-  //sf::Event event;
-  const std::optional event = mpGameWindow->pollEvent();
-
-  while (true) {
+  while (const std::optional event = mpGameWindow->pollEvent()) {
     if (event->is<sf::Event::Closed>())
       mpGameWindow->close();
+
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape) ||
         sf::Keyboard::isKeyPressed(sf::Keyboard::Key::C) &&
           (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LControl) ||
            sf::Keyboard::isKeyPressed(sf::Keyboard::Key::RControl)))
       mpGameWindow->close();
-    //if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space)
+
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space))
       mPaused = !mPaused;
+
     if (event->is<sf::Event::MouseMoved>()) {
       mMousePos = sf::Mouse::getPosition(*mpGameWindow);
     }
