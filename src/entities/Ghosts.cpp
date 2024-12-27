@@ -62,6 +62,8 @@ void Ghost::changeDirection(Direction newDirection) {
   case Direction::LEFT:
     mDirection = sf::Vector2f(-1.f, 0.f);
     break;
+  default:
+    break;
   }
 }
 
@@ -106,6 +108,8 @@ bool Ghost::checkAndSnapToTile() {
     case Direction::RIGHT:
       shouldSnap = fracY <= TILE_ALIGNMENT_THRESHOLD && fracX >= TRAILING_EDGE_SNAP_THRESHOLD;
       if (shouldSnap) newPosition.x = std::ceil(tilePos.x) * TILE_SIZE;
+      break;
+    default:
       break;
   }
 
@@ -253,8 +257,8 @@ void Ghost::meander() {
   auto movement = mDirection * mMeanderSpeed;
   auto newPosition = mGhostShape.getPosition() + movement;
 
-  auto ghostSizeX = mGhostShape.getGlobalBounds().width;
-  auto ghostSizeY = mGhostShape.getGlobalBounds().height;
+  auto ghostSizeX = mGhostShape.getGlobalBounds().size.x;
+  auto ghostSizeY = mGhostShape.getGlobalBounds().size.y;
 
   wrapCoordinate(newPosition.x, -ghostSizeX, mRLabyrinth.mMaxLabyrinthWidth);
   wrapCoordinate(newPosition.y, -ghostSizeY, mRLabyrinth.mMaxLabyrinthHeight);
