@@ -43,30 +43,31 @@ GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
   mLabyrinth.set(pacmanPosition, Labyrinth::Tile::PACMAN);
 
   mKeyActions = {
-    {sf::Keyboard::Left,  [&](sf::Time dt) { mPacman.move(sf::Vector2f(-1.f, 0.f), dt, mLabyrinth); }},
-    {sf::Keyboard::Right, [&](sf::Time dt) { mPacman.move(sf::Vector2f( 1.f, 0.f), dt, mLabyrinth); }},
-    {sf::Keyboard::Up,    [&](sf::Time dt) { mPacman.move(sf::Vector2f(0.f, -1.f), dt, mLabyrinth); }},
-    {sf::Keyboard::Down,  [&](sf::Time dt) { mPacman.move(sf::Vector2f(0.f,  1.f), dt, mLabyrinth); }}
+    {sf::Keyboard::Key::Left,  [&](sf::Time dt) { mPacman.move(sf::Vector2f(-1.f, 0.f), dt, mLabyrinth); }},
+    {sf::Keyboard::Key::Right, [&](sf::Time dt) { mPacman.move(sf::Vector2f( 1.f, 0.f), dt, mLabyrinth); }},
+    {sf::Keyboard::Key::Up,    [&](sf::Time dt) { mPacman.move(sf::Vector2f(0.f, -1.f), dt, mLabyrinth); }},
+    {sf::Keyboard::Key::Down,  [&](sf::Time dt) { mPacman.move(sf::Vector2f(0.f,  1.f), dt, mLabyrinth); }}
   };
 }
 
 GameManager::~GameManager() {}
 
 void GameManager::handleInputs() {
-  sf::Event event;
+  //sf::Event event;
+  const std::optional event = mpGameWindow->pollEvent();
 
-  while (mpGameWindow->pollEvent(event)) {
-    if (event.type == sf::Event::Closed)
+  while (true) {
+    if (event->is<sf::Event::Closed>())
       mpGameWindow->close();
-    if (event.type == sf::Event::KeyPressed &&
-          (event.key.code == sf::Keyboard::Escape ||
-          (event.key.code == sf::Keyboard::C &&
-            (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
-             sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)))))
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape) ||
+        sf::Keyboard::isKeyPressed(sf::Keyboard::Key::C) &&
+          (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LControl) ||
+           sf::Keyboard::isKeyPressed(sf::Keyboard::Key::RControl)))
       mpGameWindow->close();
-    if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space)
+    //if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space)
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space))
       mPaused = !mPaused;
-    if (event.type == sf::Event::MouseMoved) {
+    if (event->is<sf::Event::MouseMoved>()) {
       mMousePos = sf::Mouse::getPosition(*mpGameWindow);
     }
   }

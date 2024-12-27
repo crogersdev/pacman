@@ -26,7 +26,6 @@ public:
   Ghost mPinky;
   Ghost mClyde;
 
-  void drawLabyrinth();
   void handleInputs();
   void updateEntities();
   void updateWindow();
@@ -36,10 +35,10 @@ public:
 
 private:
   struct HUD {
-    sf::Font font;
+    sf::Font hudFont;
 
     HUD() {
-      if (!font.loadFromFile("./res/PublicPixel.ttf"))
+      if (!hudFont.openFromFile("./res/PublicPixel.ttf"))
         throw std::runtime_error("Failed to load font from file!");
     }
   };
@@ -47,15 +46,16 @@ private:
   struct ExtraDebugHUD : public HUD {
     sf::Text debugText;
 
-    ExtraDebugHUD() {
-      if (!font.loadFromFile("./res/Bitty.ttf"))
+    ExtraDebugHUD()
+      : debugText(hudFont) // EXPLAIN: no default sf::Text ctor exists, so give it a font
+      {
+      if (!hudFont.openFromFile("./res/Bitty.ttf"))
         throw std::runtime_error("Failed to load font from file!");
 
-      debugText.setFont(font);
+      debugText.setFont(hudFont);
       debugText.setCharacterSize(28);
       debugText.setFillColor(sf::Color::White);
-
-      debugText.setPosition(TILE_SIZE * (LABYRINTH_COLS + 1), 10.f);
+      debugText.setPosition(sf::Vector2f(TILE_SIZE * (LABYRINTH_COLS + 1), 10.f));
     }
   };
 
@@ -69,17 +69,17 @@ private:
       debugText.setFont(font);
       debugText.setCharacterSize(18);
       debugText.setFillColor(sf::Color::White);
-      debugText.setPosition(10.f, TILE_SIZE * LABYRINTH_ROWS + 36.f);
+      debugText.setPosition(sf::Vector2f(10.f, TILE_SIZE * LABYRINTH_ROWS + 36.f));
 
       score.setFont(font);
       score.setCharacterSize(22);
       score.setFillColor(sf::Color::White);
-      score.setPosition(10.f, TILE_SIZE * LABYRINTH_ROWS + 10.f);
+      score.setPosition(sf::Vector2f(10.f, TILE_SIZE * LABYRINTH_ROWS + 10.f));
 
       for (unsigned int g = 0; g < numGuys; ++g) {
         guys[g].setRadius(12.f);
         guys[g].setFillColor(sf::Color::Yellow);
-        guys[g].setPosition(TILE_SIZE * LABYRINTH_COLS - 35.f - (g+1)*26.f, TILE_SIZE * LABYRINTH_ROWS + 10.f);
+        guys[g].setPosition(sf::Vector2f(TILE_SIZE * LABYRINTH_COLS - 35.f - (g+1)*26.f, TILE_SIZE * LABYRINTH_ROWS + 10.f);
       }
     }
 
@@ -95,13 +95,9 @@ private:
   sf::Vector2i mMousePos;
   GameHUD mGameHud;
   ExtraDebugHUD mDebugHud;
-
   std::shared_ptr<sf::RenderWindow> mpGameWindow;
-
   float mFps;
-
   int mScore;
   int mPelletValue;
-
   bool mDebugMode;
 };
