@@ -253,8 +253,8 @@ void Ghost::meander() {
   auto movement = mDirection * mMeanderSpeed;
   auto newPosition = mGhostShape.getPosition() + movement;
 
-  auto ghostSizeX = mGhostShape.getGlobalBounds().width;
-  auto ghostSizeY = mGhostShape.getGlobalBounds().height;
+  auto ghostSizeX = mGhostShape.getGlobalBounds().size.x;
+  auto ghostSizeY = mGhostShape.getGlobalBounds().size.y;
 
   wrapCoordinate(newPosition.x, -ghostSizeX, mRLabyrinth.mMaxLabyrinthWidth);
   wrapCoordinate(newPosition.y, -ghostSizeY, mRLabyrinth.mMaxLabyrinthHeight);

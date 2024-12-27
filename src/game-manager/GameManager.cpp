@@ -35,7 +35,9 @@ GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
   #endif
 
   mpGameWindow->setFramerateLimit(mFps);
-  mWindowBounds = sf::FloatRect(0, 0, mpGameWindow->getSize().x, mpGameWindow->getSize().y);
+  mWindowBounds = sf::IntRect(
+    sf::Vector2i(0, 0),
+    sf::Vector2i(mpGameWindow->getSize()));
 
   auto pacmanPosition = sf::Vector2f(TILE_SIZE + 1, TILE_SIZE + 1);
   auto mPaused = false;
@@ -110,8 +112,8 @@ void GameManager::updateWindow() {
   mpGameWindow->clear();
   std::ostringstream oss;
   oss << "Score: " << mScore << "\n";
-  mGameHud.score.setString(oss.str());
-  mpGameWindow->draw(mGameHud.score);
+  mGameHud.scoreText.setString(oss.str());
+  mpGameWindow->draw(mGameHud.scoreText);
   mGameHud.drawGuys(mpGameWindow);
   oss.clear();
 

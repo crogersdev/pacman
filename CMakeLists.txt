@@ -1,14 +1,12 @@
 cmake_minimum_required(VERSION 3.21)
 project(pacman LANGUAGES CXX)
 
-include_directories(/usr/local/include)
-link_directories(/usr/local/lib)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-# set(SFML_DIR "/usr/local/opt/sfml/lib/cmake/SFML")
+
+find_package(SFML 3 COMPONENTS Graphics Audio Network)
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to 'Debug' as none was specified...")
@@ -50,21 +48,20 @@ add_custom_target(run-cppcheck
 
 add_dependencies(pacman run-cppcheck)
 
-#find_package(SFML 2.5.1 COMPONENTS graphics window system REQUIRED)
-
-
 # having linker errors?  undefined references to things?  make sure
 # the appropriate folder's named library from its CMakeLists.txt file
 # is appended here
 # TODO: can we auto-detect these...?
+# TRICKY: order here matters
 target_link_libraries(
     pacman
-    sfml-graphics
-    sfml-system
-    sfml-window
+    SFML::Graphics
+    SFML::System
+    SFML::Window 
     game-manager
     entities
     helpers
+    # state  # todo: add me in later
 )
 
 install(TARGETS pacman)

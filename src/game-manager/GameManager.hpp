@@ -1,10 +1,10 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
-
 #include <functional>
 #include <map>
 #include <memory>
+
+#include <SFML/Graphics.hpp>
 
 #include "../entities/Ghosts.hpp"
 #include "../entities/Labyrinth.hpp"
@@ -45,11 +45,11 @@ private:
 
   struct ExtraDebugHUD : public HUD {
     sf::Text debugText;
+    sf::Font debugHudFont;
 
     ExtraDebugHUD()
-      : debugText(hudFont) // EXPLAIN: no default sf::Text ctor exists, so give it a font
-      {
-      if (!hudFont.openFromFile("./res/Bitty.ttf"))
+      : debugText(debugHudFont) {
+      if (!debugHudFont.openFromFile("./res/Bitty.ttf"))
         throw std::runtime_error("Failed to load font from file!");
 
       debugText.setFont(hudFont);
@@ -60,26 +60,22 @@ private:
   };
 
   struct GameHUD : public HUD {
-    sf::Text debugText;
-    sf::Text score;
+    sf::Text scoreText;
     static constexpr unsigned int numGuys = 3;
     std::array<sf::CircleShape, numGuys> guys;
 
-    GameHUD() {
-      debugText.setFont(font);
-      debugText.setCharacterSize(18);
-      debugText.setFillColor(sf::Color::White);
-      debugText.setPosition(sf::Vector2f(10.f, TILE_SIZE * LABYRINTH_ROWS + 36.f));
-
-      score.setFont(font);
-      score.setCharacterSize(22);
-      score.setFillColor(sf::Color::White);
-      score.setPosition(sf::Vector2f(10.f, TILE_SIZE * LABYRINTH_ROWS + 10.f));
+    GameHUD()
+    : scoreText(hudFont) {
+      scoreText.setCharacterSize(22);
+      scoreText.setFillColor(sf::Color::White);
+      scoreText.setPosition(sf::Vector2f(10.f, TILE_SIZE * LABYRINTH_ROWS + 10.f));
 
       for (unsigned int g = 0; g < numGuys; ++g) {
         guys[g].setRadius(12.f);
         guys[g].setFillColor(sf::Color::Yellow);
-        guys[g].setPosition(sf::Vector2f(TILE_SIZE * LABYRINTH_COLS - 35.f - (g+1)*26.f, TILE_SIZE * LABYRINTH_ROWS + 10.f);
+        guys[g].setPosition(
+          sf::Vector2f(TILE_SIZE * LABYRINTH_COLS - 35.f - (g+1)*26.f,
+          TILE_SIZE * LABYRINTH_ROWS + 10.f));
       }
     }
 
@@ -91,7 +87,7 @@ private:
 
   sf::Clock mClock;
   sf::Clock mStateClock;
-  sf::FloatRect mWindowBounds;
+  sf::IntRect mWindowBounds;
   sf::Vector2i mMousePos;
   GameHUD mGameHud;
   ExtraDebugHUD mDebugHud;
