@@ -50,8 +50,7 @@ add_custom_target(run-cppcheck
 
 add_dependencies(pacman run-cppcheck)
 
-#find_package(SFML 2.5.1 COMPONENTS graphics window system REQUIRED)
-
+find_package(SFML 3 REQUIRED COMPONENTS Graphics Audio Network)
 
 # having linker errors?  undefined references to things?  make sure
 # the appropriate folder's named library from its CMakeLists.txt file
@@ -59,12 +58,9 @@ add_dependencies(pacman run-cppcheck)
 # TODO: can we auto-detect these...?
 target_link_libraries(
     pacman
-    sfml-graphics
-    sfml-system
-    sfml-window
-    game-manager
-    entities
-    helpers
+    SFML::Graphics
+    SFML::System
+    SFML::Window 
 )
 
 install(TARGETS pacman)
