@@ -12,6 +12,9 @@
 
 class GameManager
 {
+private:
+  Labyrinth mLabyrinth;
+
 public:
   // NOTE: apparently single arg ctors _should_ be explicit.
   explicit GameManager(std::shared_ptr<sf::RenderWindow> pWindow);
@@ -94,7 +97,6 @@ private:
   ExtraDebugHUD mDebugHud;
 
   std::shared_ptr<sf::RenderWindow> mpGameWindow;
-  Labyrinth mLabyrinth;
 
   float mFps;
 

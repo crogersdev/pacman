@@ -11,32 +11,62 @@
 #include "./Ghosts.hpp"
 #include "../helpers/Collisions.hpp"
 
-Ghost::Ghost(float speed, sf::Vector2f pos, sf::Color c, bool debugMode)
-    : mMeanderOdds(66.6),
-      mColor(c),
-      mDirection(sf::Vector2f(1.f, 0.f)),
-      mDebugMode(debugMode),
-      mSpeedMultiplier(speed),
-      mGhostShape(sf::Vector2f(TILE_SIZE, TILE_SIZE)),
-      mInitialPosition(pos),
-      mTarget(),
-      mPath(),
-      mState(Ghost::State::MEANDER) {
-  mSeed = std::chrono::system_clock::now().time_since_epoch().count();
-  mRandGenerator = std::mt19937(mSeed);
+Ghost::Ghost(float s, sf::Vector2f p, sf::Color c, const Labyrinth &rl)
+    :   mChaseSpeed(s)
+      , mColor(c)
+      , mDirection(sf::Vector2f(1.f, 0.f))
+      , mFrightenedSpeed(.3f)
+      , mGhostShape(sf::Vector2f(TILE_SIZE, TILE_SIZE))
+      , mInitialPosition(p)
+      , mMeanderOdds(66.6f)
+      , mMeanderSpeed(.8f)
+      , mPath()
+      , mRLabyrinth(rl)
+      , mState(Ghost::State::WAIT) {
+  mDebugMode = false;
   mGhostShape.setFillColor(mColor);
   mGhostShape.setPosition(mInitialPosition);
-
-#ifndef NDEBUG
-  mDebugMode = true;
-#endif
+  mSeed = std::chrono::system_clock::now().time_since_epoch().count();
+  mRandGenerator = std::mt19937(mSeed);
 }
 
 Ghost::~Ghost() {}
 
-bool Ghost::checkAndSnapToTile() {
+void Ghost::act() {
+  switch (mState) {
+    case State::CHASE:
+      this->chase();
+      break;
+    case State::MEANDER:
+      this->meander();
+      break;
+    case State::FRIGHTENED:
+      this->scatter();
+      break;
+    default:
+      break;
+  }
+}
 
-  auto isAlmostEqual = [](float a, float b, float epsilon =.001f) {
+void Ghost::changeDirection(Direction newDirection) {
+  switch (newDirection) {
+  case Direction::DOWN:
+    mDirection = sf::Vector2f(0.f, 1.f);
+    break;
+  case Direction::UP:
+    mDirection = sf::Vector2f(0.f, -1.f);
+    break;
+  case Direction::RIGHT:
+    mDirection = sf::Vector2f(1.f, 0.f);
+    break;
+  case Direction::LEFT:
+    mDirection = sf::Vector2f(-1.f, 0.f);
+    break;
+  }
+}
+
+bool Ghost::checkAndSnapToTile() {
+  auto isAlmostEqual = [](float a, float b, float epsilon = .001f) {
     return std::abs(a - b) < epsilon;
   };
 
@@ -46,8 +76,7 @@ bool Ghost::checkAndSnapToTile() {
 
   sf::Vector2f tilePos = sf::Vector2f(
     mGhostShape.getPosition().x / TILE_SIZE,
-    mGhostShape.getPosition().y / TILE_SIZE
-  );
+    mGhostShape.getPosition().y / TILE_SIZE);
 
   if (isAlmostEqual(tilePos.x, std::round(tilePos.x)) &&
       isAlmostEqual(tilePos.y, std::round(tilePos.y))) {
@@ -88,10 +117,26 @@ bool Ghost::checkAndSnapToTile() {
   return false;
 }
 
-void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
-  mTarget = target;
+void Ghost::draw(std::shared_ptr<sf::RenderWindow> pGameWindow) {
+  pGameWindow->draw(mGhostShape);
+}
+
+sf::Vector2f Ghost::getPosition() {
+  sf::Vector2f pos = mGhostShape.getPosition();
+  pos.x += (TILE_SIZE / 2.f) - 1.f;
+  pos.y += (TILE_SIZE / 2.f) - 1.f;
+
+  return pos;
+}
+
+void Ghost::resetPath() {
+  mPath.clear();
+}
+
+void Ghost::chase() {
+  auto target = mTarget;
   std::priority_queue<TileScore, std::vector<TileScore>, OrderByScore> frontier;
-  const int ghostOffset = rLabyrinth.getOffset(mGhostShape.getPosition());
+  const int ghostOffset = mRLabyrinth.getOffset(mGhostShape.getPosition());
 
   frontier.push(TileScore(ghostOffset, 0));
 
@@ -120,20 +165,20 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
     TileScore current = frontier.top();
     frontier.pop();
 
-    if (current.positionOffset == rLabyrinth.getOffset(target)) {
+    if (current.positionOffset == mRLabyrinth.getOffset(target)) {
       break;
     }
 
-    auto neighbors = rLabyrinth.getNeighbors(current.positionOffset);
+    auto neighbors = mRLabyrinth.getNeighbors(current.positionOffset);
     for (auto next : neighbors) {
-      int movementCost = rLabyrinth.movementCost(current.positionOffset, next);
+      int movementCost = mRLabyrinth.movementCost(current.positionOffset, next);
       int newCost = costSoFar[current.positionOffset] + movementCost;
 
       if (costSoFar.find(next) == costSoFar.end() || newCost < costSoFar[next]) {
         costSoFar[next] = newCost;
 
-        auto h = rLabyrinth.heuristic(next, rLabyrinth.getOffset(target));
-        auto ht = rLabyrinth.heuristicThroughTunnel(next, rLabyrinth.getOffset(target));
+        auto h = mRLabyrinth.heuristic(next, mRLabyrinth.getOffset(target));
+        auto ht = mRLabyrinth.heuristicThroughTunnel(next, mRLabyrinth.getOffset(target));
 
         auto lowerHeuristic = std::min(h, ht);
 
@@ -146,19 +191,19 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
 
   if (checkAndSnapToTile() == false) {
     // Ghost doesn't change direction unless Ghost occupies a single tile
-    auto movement = mDirection * mSpeedMultiplier;
+    auto movement = mDirection * mChaseSpeed;
     auto newPosition = mGhostShape.getPosition() + movement;
-    wrapCoordinate(newPosition.x, -TILE_SIZE, rLabyrinth.mMaxLabyrinthWidth);
-    wrapCoordinate(newPosition.y, -TILE_SIZE, rLabyrinth.mMaxLabyrinthHeight);
+    wrapCoordinate(newPosition.x, -TILE_SIZE, mRLabyrinth.mMaxLabyrinthWidth);
+    wrapCoordinate(newPosition.y, -TILE_SIZE, mRLabyrinth.mMaxLabyrinthHeight);
     mGhostShape.setPosition(newPosition);
     return;
   }
 
   // reconstruct path from cameFrom
   mPath.clear();  // we don't have to do this if we made it a map or something
-  int current = rLabyrinth.getOffset(target);
+  int current = mRLabyrinth.getOffset(target);
   while (current != ghostOffset) {
-    mPath.emplace_front(rLabyrinth.getSfVecFromOffset(current));
+    mPath.emplace_front(mRLabyrinth.getSfVecFromOffset(current));
     auto iterator = cameFrom.find(current);
     if (iterator == cameFrom.end() || !iterator->second.has_value()) {
       std::cout << "path broken\n";
@@ -196,60 +241,31 @@ void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
       return;
     }
 
-    auto movement = mDirection * mSpeedMultiplier;
+    auto movement = mDirection * mChaseSpeed;
     auto newPosition = mGhostShape.getPosition() + movement;
-    wrapCoordinate(newPosition.x, -TILE_SIZE, rLabyrinth.mMaxLabyrinthWidth);
-    wrapCoordinate(newPosition.y, -TILE_SIZE, rLabyrinth.mMaxLabyrinthHeight);
+    wrapCoordinate(newPosition.x, -TILE_SIZE, mRLabyrinth.mMaxLabyrinthWidth);
+    wrapCoordinate(newPosition.y, -TILE_SIZE, mRLabyrinth.mMaxLabyrinthHeight);
     mGhostShape.setPosition(newPosition);
   }
 }
 
-void Ghost::changeDirection(Direction newDirection) {
-  switch (newDirection) {
-  case Direction::DOWN:
-    mDirection = sf::Vector2f(0.f, 1.f);
-    break;
-  case Direction::UP:
-    mDirection = sf::Vector2f(0.f, -1.f);
-    break;
-  case Direction::RIGHT:
-    mDirection = sf::Vector2f(1.f, 0.f);
-    break;
-  case Direction::LEFT:
-    mDirection = sf::Vector2f(-1.f, 0.f);
-    break;
-  }
-}
-
-void Ghost::draw(std::shared_ptr<sf::RenderWindow> pGameWindow) {
-  pGameWindow->draw(mGhostShape);
-}
-
-sf::Vector2f Ghost::getPosition() {
-  sf::Vector2f pos = mGhostShape.getPosition();
-  pos.x += (TILE_SIZE / 2.f) - 1.f;
-  pos.y += (TILE_SIZE / 2.f) - 1.f;
-
-  return pos;
-}
-
-void Ghost::meander(const Labyrinth &rLabyrinth) {
-  auto movement = mDirection * mSpeedMultiplier;
+void Ghost::meander() {
+  auto movement = mDirection * mMeanderSpeed;
   auto newPosition = mGhostShape.getPosition() + movement;
 
   auto ghostSizeX = mGhostShape.getGlobalBounds().width;
   auto ghostSizeY = mGhostShape.getGlobalBounds().height;
 
-  wrapCoordinate(newPosition.x, -ghostSizeX, rLabyrinth.mMaxLabyrinthWidth);
-  wrapCoordinate(newPosition.y, -ghostSizeY, rLabyrinth.mMaxLabyrinthHeight);
+  wrapCoordinate(newPosition.x, -ghostSizeX, mRLabyrinth.mMaxLabyrinthWidth);
+  wrapCoordinate(newPosition.y, -ghostSizeY, mRLabyrinth.mMaxLabyrinthHeight);
 
   // EXPLAIN:
   // when we calculate the direction across the open 'tunnel' where
   // we pop on the other side of the labyrinth, we do it by wrapping the
   // coordinates.  this messes up the direction vector, so
   // our availableTurns and directionVecToDirection get messed up as well
-  auto x2 = fmod(newPosition.x + rLabyrinth.mMaxLabyrinthWidth, rLabyrinth.mMaxLabyrinthWidth);
-  auto y2 = fmod(newPosition.y + rLabyrinth.mMaxLabyrinthHeight, rLabyrinth.mMaxLabyrinthHeight);
+  auto x2 = fmod(newPosition.x + mRLabyrinth.mMaxLabyrinthWidth, mRLabyrinth.mMaxLabyrinthWidth);
+  auto y2 = fmod(newPosition.y + mRLabyrinth.mMaxLabyrinthHeight, mRLabyrinth.mMaxLabyrinthHeight);
   auto x1 = mGhostShape.getPosition().x;
   auto y1 = mGhostShape.getPosition().y;
 
@@ -257,7 +273,7 @@ void Ghost::meander(const Labyrinth &rLabyrinth) {
       static_cast<float>(x2 - x1),
       static_cast<float>(y2 - y1));
 
-  auto turns = availableTurns(mGhostShape.getPosition(), calculatedDirection, rLabyrinth);
+  auto turns = availableTurns(mGhostShape.getPosition(), calculatedDirection, mRLabyrinth);
 
   if (checkAndSnapToTile() && turns.size() > 2) {
     bool doesGhostTurn = (mRandGenerator() % 100) <= mMeanderOdds;
@@ -273,18 +289,18 @@ void Ghost::meander(const Labyrinth &rLabyrinth) {
   bool wallCollision = wallCollides(
     newPosition,
     sf::Vector2f(TILE_SIZE - 1.f, TILE_SIZE - 1.f),
-    rLabyrinth);
+    mRLabyrinth);
 
   while (wallCollision) {
     auto newDirection = static_cast<Direction>(mRandGenerator() % 4);
     changeDirection(newDirection);
-    movement = mDirection * mSpeedMultiplier;
+    movement = mDirection * mMeanderSpeed;
     newPosition = mGhostShape.getPosition() + movement;
 
     wallCollision = wallCollides(
       newPosition,
       sf::Vector2f(TILE_SIZE - 1.f, TILE_SIZE - 1.f),
-      rLabyrinth);
+      mRLabyrinth);
 
     if (!wallCollision) {
       mGhostShape.setPosition(newPosition);
@@ -298,21 +314,8 @@ void Ghost::meander(const Labyrinth &rLabyrinth) {
   mGhostShape.setPosition(newPosition);
 }
 
-void Ghost::scatter() {}
-
-void Ghost::drawPath(Labyrinth &rLabyrinth) {
-  if (mDebugMode) {
-    for (const auto &p : mPath) {
-      rLabyrinth.set(p, Labyrinth::Tile::PATH);
-    }
-  }
-}
-
-void Ghost::resetPath(Labyrinth &rLabyrinth) {
-  if (mDebugMode) {
-    for (const auto &p : mPath) {
-      rLabyrinth.set(p, Labyrinth::Tile::EMPTY);
-    }
-  }
-  mPath.clear();
+void Ghost::scatter() {
+  mTarget = mFrightenedTarget;
+  mChaseSpeed = mFrightenedSpeed;
+  this->chase();
 }

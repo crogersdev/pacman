@@ -11,10 +11,11 @@ GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
     //             sf::Vector2f(xval, yval)
     //             or
     //             sf::Vector2f(col,  row)
-    mInky(  1.3f, sf::Vector2f(11.f * TILE_SIZE, 15.f * TILE_SIZE), sf::Color(255, 29,  33)),
-    mBlinky(1.5f, sf::Vector2f(16.f * TILE_SIZE, 13.f * TILE_SIZE), sf::Color(117, 254, 255)),
-    mPinky(  .9f, sf::Vector2f(16.f * TILE_SIZE, 15.f * TILE_SIZE), sf::Color(228, 160, 191)),
-    mClyde( 1.1f, sf::Vector2f(11.f * TILE_SIZE, 13.f * TILE_SIZE), sf::Color(255, 179, 71)),
+    mLabyrinth(),
+    mInky(  1.3f, sf::Vector2f(11.f * TILE_SIZE, 15.f * TILE_SIZE), sf::Color(255, 29,  33), mLabyrinth),
+    mBlinky(1.5f, sf::Vector2f(16.f * TILE_SIZE, 13.f * TILE_SIZE), sf::Color(117, 254, 255), mLabyrinth),
+    mPinky(  .9f, sf::Vector2f(16.f * TILE_SIZE, 15.f * TILE_SIZE), sf::Color(228, 160, 191), mLabyrinth),
+    mClyde( 1.1f, sf::Vector2f(11.f * TILE_SIZE, 13.f * TILE_SIZE), sf::Color(255, 179, 71), mLabyrinth),
     mPaused(false),
     mClock(),
     mStateClock(),
@@ -23,7 +24,6 @@ GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
     mGameHud(),
     mDebugHud(),
     mpGameWindow(pWindow),
-    mLabyrinth(),
     mFps(60.0),
     mScore(0),
     mPelletValue(50),
@@ -64,7 +64,6 @@ void GameManager::handleInputs() {
             (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
              sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)))))
       mpGameWindow->close();
-    if (event.type)
     if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space)
       mPaused = !mPaused;
     if (event.type == sf::Event::MouseMoved) {
@@ -75,7 +74,6 @@ void GameManager::handleInputs() {
   if (mPaused) return;
 
   auto dt = mClock.restart();
-
   for (const auto& pair : mKeyActions) {
     if (sf::Keyboard::isKeyPressed(pair.first)) {
       // note: this invokes the lambdas defined in
@@ -90,18 +88,8 @@ void GameManager::updateEntities() {
   sf::Vector2f pacmanCenter = sf::Vector2f(
     pacmanPosition.x + (TILE_SIZE / 2), pacmanPosition.y + (TILE_SIZE / 2));
 
-  mPinky.chase(mLabyrinth, pacmanCenter);
-  mBlinky.chase(mLabyrinth, pacmanCenter);
-  mInky.chase(mLabyrinth, pacmanCenter);
-  mClyde.chase(mLabyrinth, pacmanCenter);
-
-  // mPinky.meander(mLabyrinth);
-  // mBlinky.meander(mLabyrinth);
-  // mClyde.meander(mLabyrinth);
-  // mInky.meander(mLabyrinth);
-
   if (entityCollides(mPinky, mPacman)) {
-    mPinky.resetPath(mLabyrinth);
+    mPinky.resetPath();
   }
 
   auto whatDidPacmanEat = mLabyrinth.at(
