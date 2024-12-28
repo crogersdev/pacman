@@ -12,23 +12,29 @@
 class Ghost {
 public:
   // ctors with one callable arg should be marked explicit
-  explicit Ghost(float, sf::Vector2f, sf::Color, bool = false);
+  explicit Ghost(float, sf::Vector2f, sf::Color, const Labyrinth &);
   ~Ghost();
 
-  float mMeanderOdds;
+  enum class State {
+    CHASE      = 1,
+    FRIGHTENED = 2,
+    MEANDER    = 3,
+    WAIT       = 4
+  };
 
-  bool checkAndSnapToTile();
-  void chase(const Labyrinth &, sf::Vector2f);
-  void changeDirection(Direction);
-  void draw(std::shared_ptr<sf::RenderWindow>);
-  sf::Vector2f getPosition();
-  sf::Vector2f getTarget() const { return mTarget; }
-  void meander(const Labyrinth &);
-  void scatter();
-  void drawPath(Labyrinth &);
-  void resetPath(Labyrinth &);
-
+  void                    act();
+  void                    changeDirection(Direction);
+  bool                    checkAndSnapToTile();
+  void                    draw(std::shared_ptr<sf::RenderWindow>);
   std::list<sf::Vector2f> getPath() const { return std::list<sf::Vector2f>(mPath); }
+  sf::Vector2f            getPosition();
+  State                   getState() const { return mState; }
+  sf::Vector2f            getTarget() const { return mTarget; }
+  void                    resetPath();
+  void                    setState(State);
+  void                    setChaseSpeed(float s) { mChaseSpeed = s; }
+  void                    setMeanderSpeed(float s) { mMeanderSpeed = s; }
+  void                    setTarget(sf::Vector2f t) { mTarget = t; }
 
   // conversion methods so we don't have to write a getter for
   // the ghost shape when we use the collides(sf::Shape, sf::Shape)
@@ -37,28 +43,28 @@ public:
   operator const sf::Shape&() const { return mGhostShape; }
 
 private:
-  enum State {
-    SCATTER    = 1,
-    MEANDER    = 2,
-    CHASE      = 3,
-    FRIGHTENED = 4,
-    WAIT       = 5
-  };
+  void chase();
+  void meander();
+  void scatter();
 
-  unsigned mSeed;
-  std::mt19937 mRandGenerator;
-
-  sf::Color mColor;
-  sf::Vector2f mDirection;
-  bool mDebugMode;
-  float mSpeedMultiplier;
-  sf::RectangleShape mGhostShape;
-  sf::Vector2f mMovement;
-  sf::Vector2f mInitialPosition;
-  sf::Vector2f mTarget;
-  std::list<sf::Vector2f> mPath;
+  float                             mChaseSpeed;
+  sf::Color                         mColor;
+  sf::Vector2f                      mDirection;
+  bool                              mDebugMode;
+  float                             mFrightenedSpeed;
+  sf::Vector2f                      mFrightenedTarget;
+  sf::RectangleShape                mGhostShape;
+  sf::Vector2f                      mInitialPosition;
+  float                             mMeanderOdds;
+  float                             mMeanderSpeed;
+  sf::Vector2f                      mMovement;
+  std::list<sf::Vector2f>           mPath;
   std::shared_ptr<sf::RenderWindow> mPGameWindow;
-  State mState;
+  const Labyrinth &                 mRLabyrinth;
+  std::mt19937                      mRandGenerator;
+  unsigned                          mSeed;
+  State                             mState;
+  sf::Vector2f                      mTarget;
 
   struct TileScore {
     int positionOffset;
@@ -70,7 +76,7 @@ private:
   };
 
   struct OrderByScore {
-    bool operator() (const TileScore &a, const TileScore &b) {
+    bool operator() (const TileScore &a, const TileScore &b) const {
       return a.score > b.score;
     }
   };

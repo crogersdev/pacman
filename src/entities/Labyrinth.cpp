@@ -4,38 +4,38 @@
 #include "../helpers/TileCoordConversion.hpp"
 
 Labyrinth::Labyrinth()
-  : m_tileLut({
-      {' ', Labyrinth::EMPTY},
-      {'#', Labyrinth::WALL},
-      {'.', Labyrinth::PELLET},
-      {'@', Labyrinth::POWERUP},
-      {'M', Labyrinth::PACMAN},
-      {'B', Labyrinth::BLINKY},
-      {'P', Labyrinth::PINKY},
-      {'I', Labyrinth::INKY},
-      {'C', Labyrinth::CLYDE},
-      {'-', Labyrinth::GATE},
-      {'X', Labyrinth::PATH},
-      {'E', Labyrinth::ERROR}
+  : mTileLut({
+      {' ', Labyrinth::Tile::EMPTY},
+      {'#', Labyrinth::Tile::WALL},
+      {'.', Labyrinth::Tile::PELLET},
+      {'@', Labyrinth::Tile::POWERUP},
+      {'M', Labyrinth::Tile::PACMAN},
+      {'B', Labyrinth::Tile::BLINKY},
+      {'P', Labyrinth::Tile::PINKY},
+      {'I', Labyrinth::Tile::INKY},
+      {'C', Labyrinth::Tile::CLYDE},
+      {'-', Labyrinth::Tile::GATE},
+      {'X', Labyrinth::Tile::PATH},
+      {'E', Labyrinth::Tile::ERROR}
     }),
-    m_tileLabelLut({
-      {Labyrinth::EMPTY, "Empty"},
-      {Labyrinth::WALL, "Wall"},
-      {Labyrinth::PELLET, "Pellet"},
-      {Labyrinth::POWERUP, "Powerup"},
-      {Labyrinth::PACMAN, "Pacman"},
-      {Labyrinth::BLINKY, "Blinky"},
-      {Labyrinth::PINKY, "Pinky"},
-      {Labyrinth::INKY, "Inky"},
-      {Labyrinth::CLYDE, "Clyde"},
-      {Labyrinth::GATE, "Gate"},
-      {Labyrinth::PATH, "Path"},
-      {Labyrinth::ERROR, "Error"}
+    mTileLabelLut({
+      {Labyrinth::Tile::EMPTY, "Empty"},
+      {Labyrinth::Tile::WALL, "Wall"},
+      {Labyrinth::Tile::PELLET, "Pellet"},
+      {Labyrinth::Tile::POWERUP, "Powerup"},
+      {Labyrinth::Tile::PACMAN, "Pacman"},
+      {Labyrinth::Tile::BLINKY, "Blinky"},
+      {Labyrinth::Tile::PINKY, "Pinky"},
+      {Labyrinth::Tile::INKY, "Inky"},
+      {Labyrinth::Tile::CLYDE, "Clyde"},
+      {Labyrinth::Tile::GATE, "Gate"},
+      {Labyrinth::Tile::PATH, "Path"},
+      {Labyrinth::Tile::ERROR, "Error"}
     }),
-    m_wallTile(sf::RectangleShape(sf::Vector2f(TILE_SIZE, TILE_SIZE))),
-    m_pellet(sf::CircleShape(3.f)) {
-  m_wallTile.setFillColor(sf::Color::Blue);
-  m_pellet.setFillColor(sf::Color(255, 255, 191));  // "faint yellow, #FFFFBF"
+    mWallTile(sf::RectangleShape(sf::Vector2f(TILE_SIZE, TILE_SIZE))),
+    mPellet(sf::CircleShape(3.f)) {
+  mWallTile.setFillColor(sf::Color::Blue);
+  mPellet.setFillColor(sf::Color(255, 255, 191));  // "faint yellow, #FFFFBF"
 }
 
 int Labyrinth::getOffset(std::pair<int, int> position) const {
@@ -124,10 +124,6 @@ int Labyrinth::movementCost(std::pair<int, int> start, std::pair<int, int> end) 
 }
 
 std::list<int> Labyrinth::getNeighbors(int offset) const {
-  // NOTE: coords.first  == col
-  //       coords.second == row
-  std::pair<int, int> coords = getPairFromOffset(offset);
-
   std::list<int> neighbors;
   std::vector<int> offsets = { offset+LABYRINTH_COLS-1, offset-(LABYRINTH_COLS-1) };
 
@@ -146,9 +142,8 @@ std::list<int> Labyrinth::getNeighbors(int offset) const {
     auto potentialNeighborPair = getPairFromOffset(o);
     auto potentialNeighbor = at(potentialNeighborPair);
 
-    if (potentialNeighbor != Tile::ERROR &&
-        // potentialNeighbor != Tile::GATE &&
-        potentialNeighbor != Tile::WALL)
+    if (potentialNeighbor != Labyrinth::Tile::ERROR &&
+        potentialNeighbor != Labyrinth::Tile::WALL)
         neighbors.push_back(getOffset(potentialNeighborPair));
     }
 
@@ -189,13 +184,13 @@ Labyrinth::Tile Labyrinth::at(int col, int row) const {
   if (row >= LABYRINTH_ROWS)
     row = LABYRINTH_ROWS - 1;
 
-  char tile = static_cast<char>(m_labyrinth[row][col]);
+  char tile = static_cast<char>(mLabyrinth[row][col]);
   Tile t = Tile::ERROR;
   try {
-    t = m_tileLut.at(tile);
+    t = mTileLut.at(tile);
   }
   catch (std::out_of_range& exc) {
-    std::cout << "oh no!  failed to access m_labyrinth[" << row << "][" << col << "]\n";
+    std::cout << "oh no!  failed to access mLabyrinth[" << row << "][" << col << "]\n";
   }
   return t;
 }
@@ -210,11 +205,11 @@ void Labyrinth::draw(std::shared_ptr<sf::RenderWindow> pGameWindow) {
     for (int col = 0; col < LABYRINTH_COLS - 1; ++col) {
       auto tile = at(col, row);
       switch (tile) {
-        case Labyrinth::WALL:
-          m_wallTile.setPosition(sf::Vector2f(TILE_SIZE * col, TILE_SIZE * row));
-          pGameWindow->draw(m_wallTile);
+        case Labyrinth::Tile::WALL:
+          mWallTile.setPosition(sf::Vector2f(TILE_SIZE * col, TILE_SIZE * row));
+          pGameWindow->draw(mWallTile);
           break;
-        case Labyrinth::PELLET:
+        case Labyrinth::Tile::PELLET:
         { // EXPLAIN: new scope is needed for declaring a variable in
           //          a case that might not be invoked at runtime, causing
           //          some weird memory errors because we'd be avoiding
@@ -222,13 +217,13 @@ void Labyrinth::draw(std::shared_ptr<sf::RenderWindow> pGameWindow) {
           //          where the variables were not initialized - and
           //          in C++ you must initialize variables that are used
           //          in switch statements
-          auto x = TILE_SIZE * col + TILE_SIZE / 2.f - m_pellet.getRadius();
-          auto y = TILE_SIZE * row + TILE_SIZE / 2.f - m_pellet.getRadius();
-          m_pellet.setPosition(sf::Vector2f(x, y));
-          pGameWindow->draw(m_pellet);
+          auto x = TILE_SIZE * col + TILE_SIZE / 2.f - mPellet.getRadius();
+          auto y = TILE_SIZE * row + TILE_SIZE / 2.f - mPellet.getRadius();
+          mPellet.setPosition(sf::Vector2f(x, y));
+          pGameWindow->draw(mPellet);
         }
           break;
-        case Labyrinth::PATH:
+        case Labyrinth::Tile::PATH:
         {
           sf::RectangleShape rectangle(sf::Vector2f(25.f, 25.f));
           rectangle.setFillColor(sf::Color(139, 0, 0));  // Dark red
@@ -237,8 +232,8 @@ void Labyrinth::draw(std::shared_ptr<sf::RenderWindow> pGameWindow) {
           rectangle.setPosition(sf::Vector2f(x, y));
           pGameWindow->draw(rectangle);
         }
-        case Labyrinth::POWERUP:
-        case Labyrinth::GATE:
+        case Labyrinth::Tile::POWERUP:
+        case Labyrinth::Tile::GATE:
           break;
         default:
           break;
@@ -250,7 +245,7 @@ void Labyrinth::draw(std::shared_ptr<sf::RenderWindow> pGameWindow) {
 void Labyrinth::set(sf::Vector2f pos, Tile entity) {
   auto coords = tileCoordsAtPosition(pos);
 
-  m_labyrinth[coords.second][coords.first] = entity;
+  mLabyrinth[coords.second][coords.first] = static_cast<char>(entity);
 }
 
 void Labyrinth::set(int col, int row, Tile entity) {
@@ -261,5 +256,5 @@ void Labyrinth::set(int col, int row, Tile entity) {
   if (col == 29 || col <= -1)
     return;
 
-  m_labyrinth[row][col] = entity;
+  mLabyrinth[row][col] = static_cast<char>(entity);
 }
