@@ -52,7 +52,7 @@ private:
       if (!debugHudFont.openFromFile("./res/Bitty.ttf"))
         throw std::runtime_error("Failed to load font from file!");
 
-      debugText.setFont(hudFont);
+      debugText.setFont(debugHudFont);
       debugText.setCharacterSize(28);
       debugText.setFillColor(sf::Color::White);
       debugText.setPosition(sf::Vector2f(TILE_SIZE * (LABYRINTH_COLS + 1), 10.f));
