@@ -1,9 +1,10 @@
 #include "GameManager.hpp"
-#include "../helpers/Collisions.hpp"
 
 #include <algorithm>
 #include <iostream>
 #include <sstream>
+
+#include "../helpers/Collisions.hpp"
 
 GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
   : mPacman((TILE_SIZE / 2) - 1, 200.f, sf::Vector2f(TILE_SIZE + 1.f, TILE_SIZE + 1.f)),
@@ -90,17 +91,23 @@ void GameManager::updateEntities() {
   sf::Vector2f pacmanCenter = sf::Vector2f(
     pacmanPosition.x + (TILE_SIZE / 2), pacmanPosition.y + (TILE_SIZE / 2));
 
-  if (entityCollides(mPinky, mPacman)) {
-    mPinky.resetPath();
-  }
-
   auto whatDidPacmanEat = mLabyrinth.at(
     mPacman.getPosition().x / TILE_SIZE,
     mPacman.getPosition().y / TILE_SIZE);
 
+  if (mStateClock < 5.0f) { 
+    mPinky.setState(Ghost::State::MEANDER)
+  mPinky.setTarget(pacmanCenter);
+  mPinky.setState(Ghost::State::CHASE);
+  mPinky.act();
+
   if (whatDidPacmanEat == Labyrinth::Tile::PELLET) {
     mScore += mPelletValue;
     mLabyrinth.set(mPacman.getPosition(), Labyrinth::Tile::EMPTY);
+  }
+
+  if (entityCollides(mPinky, mPacman)) {
+    mPinky.resetPath();
   }
 }
 

@@ -31,7 +31,7 @@ public:
   State                   getState() const { return mState; }
   sf::Vector2f            getTarget() const { return mTarget; }
   void                    resetPath();
-  void                    setState(State);
+  void                    setState(State s) { mState = s; }
   void                    setChaseSpeed(float s) { mChaseSpeed = s; }
   void                    setMeanderSpeed(float s) { mMeanderSpeed = s; }
   void                    setTarget(sf::Vector2f t) { mTarget = t; }
