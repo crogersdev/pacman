@@ -11,7 +11,7 @@
 #include "./Ghosts.hpp"
 #include "../helpers/Collisions.hpp"
 
-Ghost::Ghost(float s, sf::Vector2f p, sf::Color c, const Labyrinth &rl)
+Ghost::Ghost(float s, sf::Vector2f p, sf::Color c, const Labyrinth &rl, float wt)
     :   mChaseSpeed(s)
       , mColor(c)
       , mDirection(sf::Vector2f(1.f, 0.f))
@@ -20,9 +20,9 @@ Ghost::Ghost(float s, sf::Vector2f p, sf::Color c, const Labyrinth &rl)
       , mInitialPosition(p)
       , mMeanderOdds(66.6f)
       , mMeanderSpeed(.8f)
-      , mPath()
       , mRLabyrinth(rl)
-      , mState(Ghost::State::WAIT) {
+      , mState(Ghost::State::WAIT)
+      , mWaitTime(wt) {
   mDebugMode = false;
   mGhostShape.setFillColor(mColor);
   mGhostShape.setPosition(mInitialPosition);

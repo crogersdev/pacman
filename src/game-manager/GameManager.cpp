@@ -14,9 +14,9 @@ GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
     //             sf::Vector2f(col,  row)
     mLabyrinth(),
     mInky(  1.3f, sf::Vector2f(11.f * TILE_SIZE, 15.f * TILE_SIZE), sf::Color(255, 29,  33), mLabyrinth),
-    mBlinky(1.5f, sf::Vector2f(16.f * TILE_SIZE, 13.f * TILE_SIZE), sf::Color(117, 254, 255), mLabyrinth),
-    mPinky(  .9f, sf::Vector2f(16.f * TILE_SIZE, 15.f * TILE_SIZE), sf::Color(228, 160, 191), mLabyrinth),
-    mClyde( 1.1f, sf::Vector2f(11.f * TILE_SIZE, 13.f * TILE_SIZE), sf::Color(255, 179, 71), mLabyrinth),
+    mBlinky(1.5f, sf::Vector2f(16.f * TILE_SIZE, 13.f * TILE_SIZE), sf::Color(117, 254, 255), mLabyrinth, 6.0f),
+    mPinky(  .9f, sf::Vector2f(16.f * TILE_SIZE, 15.f * TILE_SIZE), sf::Color(228, 160, 191), mLabyrinth, 10.5f),
+    mClyde( 1.1f, sf::Vector2f(11.f * TILE_SIZE, 13.f * TILE_SIZE), sf::Color(255, 179, 71), mLabyrinth, 7.0f),
     mPaused(false),
     mClock(),
     mStateClock(),
@@ -95,10 +95,11 @@ void GameManager::updateEntities() {
     mPacman.getPosition().x / TILE_SIZE,
     mPacman.getPosition().y / TILE_SIZE);
 
-  if (mStateClock < 5.0f) { 
-    mPinky.setState(Ghost::State::MEANDER)
-  mPinky.setTarget(pacmanCenter);
+  if (mStateClock.getElapsedTime().asSeconds() < mPinky.getWaitTime()) {
+    mPinky.setState(Ghost::State::MEANDER);
+  }
   mPinky.setState(Ghost::State::CHASE);
+  mPinky.setTarget(pacmanCenter);
   mPinky.act();
 
   if (whatDidPacmanEat == Labyrinth::Tile::PELLET) {

@@ -12,7 +12,7 @@
 class Ghost {
 public:
   // ctors with one callable arg should be marked explicit
-  explicit Ghost(float, sf::Vector2f, sf::Color, const Labyrinth &);
+  explicit Ghost(float s, sf::Vector2f p, sf::Color c, const Labyrinth &rl, float wt=5.0f);
   ~Ghost();
 
   enum class State {
@@ -35,6 +35,8 @@ public:
   void                    setChaseSpeed(float s) { mChaseSpeed = s; }
   void                    setMeanderSpeed(float s) { mMeanderSpeed = s; }
   void                    setTarget(sf::Vector2f t) { mTarget = t; }
+  void                    setWaitTime(float wt) { mWaitTime = wt; }
+  float                   getWaitTime() { return mWaitTime; }
 
   // conversion methods so we don't have to write a getter for
   // the ghost shape when we use the collides(sf::Shape, sf::Shape)
@@ -65,6 +67,7 @@ private:
   unsigned                          mSeed;
   State                             mState;
   sf::Vector2f                      mTarget;
+  float                             mWaitTime;
 
   struct TileScore {
     int positionOffset;
