@@ -14,9 +14,10 @@ GameManager::GameManager(std::shared_ptr<sf::RenderWindow> pWindow)
     //             sf::Vector2f(col,  row)
     mLabyrinth(),
     mInky(  1.3f, sf::Vector2f(11.f * TILE_SIZE, 15.f * TILE_SIZE), sf::Color(255, 29,  33), mLabyrinth),
-    mBlinky(1.5f, sf::Vector2f(16.f * TILE_SIZE, 13.f * TILE_SIZE), sf::Color(117, 254, 255), mLabyrinth, 6.0f),
-    mPinky(  .9f, sf::Vector2f(16.f * TILE_SIZE, 15.f * TILE_SIZE), sf::Color(228, 160, 191), mLabyrinth, 10.5f),
-    mClyde( 1.1f, sf::Vector2f(11.f * TILE_SIZE, 13.f * TILE_SIZE), sf::Color(255, 179, 71), mLabyrinth, 7.0f),
+    mBlinky(1.5f, sf::Vector2f(16.f * TILE_SIZE, 13.f * TILE_SIZE), sf::Color(117, 254, 255), mLabyrinth),
+    //mPinky(  .9f, sf::Vector2f(16.f * TILE_SIZE, 15.f * TILE_SIZE), sf::Color(228, 160, 191), mLabyrinth),
+    mPinky( 1.f, sf::Vector2f(16.f * TILE_SIZE, 15.f * TILE_SIZE), sf::Color(228, 160, 191), mLabyrinth),
+    mClyde( 1.1f, sf::Vector2f(11.f * TILE_SIZE, 13.f * TILE_SIZE), sf::Color(255, 179, 71), mLabyrinth),
     mPaused(false),
     mClock(),
     mStateClock(),
@@ -95,12 +96,39 @@ void GameManager::updateEntities() {
     mPacman.getPosition().x / TILE_SIZE,
     mPacman.getPosition().y / TILE_SIZE);
 
-  if (mStateClock.getElapsedTime().asSeconds() < mPinky.getWaitTime()) {
-    mPinky.setState(Ghost::State::MEANDER);
-  }
-  mPinky.setState(Ghost::State::CHASE);
   mPinky.setTarget(pacmanCenter);
+  mPinky.setState(Ghost::State::CHASE);
+  mInky.setState(Ghost::State::MEANDER);
+  mBlinky.setState(Ghost::State::MEANDER);
+  mClyde.setState(Ghost::State::MEANDER);
+
+  auto clkSeconds = mStateClock.getElapsedTime().asSeconds();
+
+  if (clkSeconds > 4.0f) {
+    mPinky.setState(Ghost::State::CHASE);
+    mPinky.setTarget(pacmanCenter);
+  }
+
+  if (clkSeconds > 2.0f) {
+    mInky.setState(Ghost::State::CHASE);
+    mInky.setTarget(pacmanCenter);
+  }
+
+  if (clkSeconds > 3.0f) {
+    mBlinky.setState(Ghost::State::CHASE);
+    mBlinky.setTarget(pacmanCenter);
+  }
+
+  if (clkSeconds > 4.0f) {
+    mClyde.setState(Ghost::State::CHASE);
+    mClyde.setTarget(pacmanCenter);
+  }
+
   mPinky.act();
+  // mInky.act();
+  // mBlinky.act();
+  // mClyde.act();
+
 
   if (whatDidPacmanEat == Labyrinth::Tile::PELLET) {
     mScore += mPelletValue;
@@ -145,7 +173,9 @@ void GameManager::updateWindow() {
     auto pinkyOffset = mLabyrinth.getOffset(pinkyCol, pinkyRow);
     debugOss << "Pinky\n";
     debugOss << "    pos r,c: " << pinkyRow << ", " << pinkyCol << "\n";
+    debugOss << "    pinky true r,c: " << mPinky.getPosition().y << ", " << mPinky.getPosition().x << "\n";
     debugOss << "    offset : " << pinkyOffset << "\n";
+    debugOss << "    state  : " << mPinky.getState() << "\n";
     debugOss << "\nghost neighbors at offset " << pinkyOffset;
     debugOss << "\n        ";
     for (auto n : mLabyrinth.getNeighbors(pinkyOffset)) {

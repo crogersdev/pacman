@@ -67,10 +67,13 @@ public:
       break;
     case Tile::CLYDE:
       os << "CLYDE";
+      break;
     case Tile::PATH:
       os << "PATH";
+      break;
     case Tile::ERROR:
       os << "ERROR";
+      break;
     default:
       os << "DUH";
     }
@@ -84,6 +87,13 @@ public:
     std::pair<int, int>(1, 0),     // RIGHT
     std::pair<int, int>(0, -1),    // DOWN
     std::pair<int, int>(-1, 0),    // LEFT    <--- all these are assuming that it goes col, row
+  };
+
+  std::vector<sf::Vector2f> mCorners = {
+    sf::Vector2f(1.f  * TILE_SIZE, 1.f  * TILE_SIZE),
+    sf::Vector2f(28.f * TILE_SIZE, 1.f  * TILE_SIZE),
+    sf::Vector2f(1.f  * TILE_SIZE, 24.f * TILE_SIZE),
+    sf::Vector2f(28.f * TILE_SIZE, 24.f * TILE_SIZE)
   };
 
   float mMaxLabyrinthWidth = LABYRINTH_COLS * (TILE_SIZE - 1);
@@ -138,9 +148,9 @@ private:
     "     #.#####.##.#####.#     ",
     "     #.##..........##.#     ",
     "     #.##.###--###.##.#     ",
-    "######.##.#------#.##.######",
-    "..........#------#..........",
-    "######.##.#------#.##.######",
+    "######.##.#      #.##.######",
+    "..........#      #..........",
+    "######.##.#      #.##.######",
     "     #.##.########.##.#     ",
     "     #.##..........##.#     ",
     "     #.##.########.##.#     ",

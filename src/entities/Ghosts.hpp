@@ -3,6 +3,7 @@
 #include <list>
 #include <memory>
 #include <random>
+#include <string>
 
 #include "./Labyrinth.hpp"
 #include "../helpers/TileCoordConversion.hpp"
@@ -12,15 +13,35 @@
 class Ghost {
 public:
   // ctors with one callable arg should be marked explicit
-  explicit Ghost(float s, sf::Vector2f p, sf::Color c, const Labyrinth &rl, float wt=5.0f);
+  explicit Ghost(float s, sf::Vector2f p, sf::Color c, const Labyrinth &rl);
   ~Ghost();
 
   enum class State {
-    CHASE      = 1,
-    FRIGHTENED = 2,
-    MEANDER    = 3,
-    WAIT       = 4
+    CHASE      = 0,
+    FRIGHTENED = 1,
+    MEANDER    = 2,
+    SCATTER    = 3,
   };
+
+  friend std::ostream &operator<<(std::ostream& os, State s) {
+    switch (s) {
+    case State::CHASE:
+      os << "CHASE";
+      break;
+    case State::FRIGHTENED:
+      os << "FRIGTHENED";
+      break;
+    case State::MEANDER:
+      os << "MEANDER";
+      break;
+    case State::SCATTER:
+      os << "SCATTER";
+      break;
+    default:
+      os << "BUPKIS";
+    }
+    return os;
+  }
 
   void                    act();
   void                    changeDirection(Direction);
@@ -30,13 +51,13 @@ public:
   sf::Vector2f            getPosition();
   State                   getState() const { return mState; }
   sf::Vector2f            getTarget() const { return mTarget; }
+  bool                    hasLeftCurrentTile();
   void                    resetPath();
   void                    setState(State s) { mState = s; }
+  void                    setFrightenedTarget(sf::Vector2f pos) { mFrightenedTarget = pos; }
   void                    setChaseSpeed(float s) { mChaseSpeed = s; }
   void                    setMeanderSpeed(float s) { mMeanderSpeed = s; }
   void                    setTarget(sf::Vector2f t) { mTarget = t; }
-  void                    setWaitTime(float wt) { mWaitTime = wt; }
-  float                   getWaitTime() { return mWaitTime; }
 
   // conversion methods so we don't have to write a getter for
   // the ghost shape when we use the collides(sf::Shape, sf::Shape)
@@ -67,7 +88,6 @@ private:
   unsigned                          mSeed;
   State                             mState;
   sf::Vector2f                      mTarget;
-  float                             mWaitTime;
 
   struct TileScore {
     int positionOffset;

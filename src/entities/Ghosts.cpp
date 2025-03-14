@@ -11,7 +11,7 @@
 #include "./Ghosts.hpp"
 #include "../helpers/Collisions.hpp"
 
-Ghost::Ghost(float s, sf::Vector2f p, sf::Color c, const Labyrinth &rl, float wt)
+Ghost::Ghost(float s, sf::Vector2f p, sf::Color c, const Labyrinth &rl)
     :   mChaseSpeed(s)
       , mColor(c)
       , mDirection(sf::Vector2f(1.f, 0.f))
@@ -21,8 +21,7 @@ Ghost::Ghost(float s, sf::Vector2f p, sf::Color c, const Labyrinth &rl, float wt
       , mMeanderOdds(66.6f)
       , mMeanderSpeed(.8f)
       , mRLabyrinth(rl)
-      , mState(Ghost::State::WAIT)
-      , mWaitTime(wt) {
+      , mState(Ghost::State::MEANDER) {
   mDebugMode = false;
   mGhostShape.setFillColor(mColor);
   mGhostShape.setPosition(mInitialPosition);
@@ -35,13 +34,16 @@ Ghost::~Ghost() {}
 void Ghost::act() {
   switch (mState) {
     case State::CHASE:
-      this->chase();
+      chase();
       break;
     case State::MEANDER:
-      this->meander();
+      meander();
       break;
+    case State::SCATTER:
+      // setTarget( some corner )
+      chase();
     case State::FRIGHTENED:
-      this->scatter();
+      scatter();
       break;
     default:
       break;
@@ -66,67 +68,62 @@ void Ghost::changeDirection(Direction newDirection) {
 }
 
 bool Ghost::checkAndSnapToTile() {
-  auto isAlmostEqual = [](float a, float b, float epsilon = .001f) {
-    return std::abs(a - b) < epsilon;
-  };
+    sf::Vector2f currentPos = mGhostShape.getPosition();
+    sf::Vector2f tilePos(currentPos.x / TILE_SIZE, currentPos.y / TILE_SIZE);
 
-  const float LEADING_EDGE_SNAP_THRESHOLD = 0.05f;   // use this for going UP and LEFT
-  const float TRAILING_EDGE_SNAP_THRESHOLD = 0.95f;  // use this for going DOWN and RIGHT
-  const float TILE_ALIGNMENT_THRESHOLD = 0.01f;
+    // If we're already perfectly aligned, return early
+    if (tilePos.x == std::round(tilePos.x) &&
+        tilePos.y == std::round(tilePos.y)) {
+        return false;
+    }
 
-  sf::Vector2f tilePos = sf::Vector2f(
-    mGhostShape.getPosition().x / TILE_SIZE,
-    mGhostShape.getPosition().y / TILE_SIZE);
+    // Round to nearest tile
+    sf::Vector2f newPos(
+        std::round(tilePos.x) * TILE_SIZE,
+        std::round(tilePos.y) * TILE_SIZE);
 
-  if (isAlmostEqual(tilePos.x, std::round(tilePos.x)) &&
-      isAlmostEqual(tilePos.y, std::round(tilePos.y))) {
-      return true;
-  }
+    mGhostShape.setPosition(newPos);
+    std::cout << "setting a new position0: " << newPos.y << ", " << newPos.x << "\n";
 
-  float fracX = tilePos.x - std::floor(tilePos.x);
-  float fracY = tilePos.y - std::floor(tilePos.y);
-
-  Direction dir = directionVecToDirection(mDirection);
-  sf::Vector2f newPosition = mGhostShape.getPosition();
-  bool shouldSnap = false;
-
-  switch (dir) {
-    case Direction::UP:
-      shouldSnap = fracY <= LEADING_EDGE_SNAP_THRESHOLD && fracX <= TILE_ALIGNMENT_THRESHOLD;
-      if (shouldSnap) newPosition.y = std::floor(tilePos.y) * TILE_SIZE;
-      break;
-    case Direction::DOWN:
-      shouldSnap = fracY >= TRAILING_EDGE_SNAP_THRESHOLD && fracX <= TILE_ALIGNMENT_THRESHOLD;
-      if (shouldSnap) newPosition.y = std::ceil(tilePos.y) * TILE_SIZE;
-      break;
-    case Direction::LEFT:
-      shouldSnap = fracY <= TILE_ALIGNMENT_THRESHOLD && fracX <= LEADING_EDGE_SNAP_THRESHOLD;
-      if (shouldSnap) newPosition.x = std::floor(tilePos.x) * TILE_SIZE;
-      break;
-    case Direction::RIGHT:
-      shouldSnap = fracY <= TILE_ALIGNMENT_THRESHOLD && fracX >= TRAILING_EDGE_SNAP_THRESHOLD;
-      if (shouldSnap) newPosition.x = std::ceil(tilePos.x) * TILE_SIZE;
-      break;
-  }
-
-  if (shouldSnap) {
-    mGhostShape.setPosition(newPosition);
-    return true;
-  }
-
-  return false;
+    return true;  // Snap occurred
 }
 
 void Ghost::draw(std::shared_ptr<sf::RenderWindow> pGameWindow) {
   pGameWindow->draw(mGhostShape);
 }
 
-sf::Vector2f Ghost::getPosition() {
-  sf::Vector2f pos = mGhostShape.getPosition();
-  pos.x += (TILE_SIZE / 2.f) - 1.f;
-  pos.y += (TILE_SIZE / 2.f) - 1.f;
+bool Ghost::hasLeftCurrentTile() {
+    sf::Vector2f pos = mGhostShape.getPosition();
+    sf::Vector2f tilePos(pos.x / TILE_SIZE, pos.y / TILE_SIZE);
 
-  return pos;
+    // Get fractional part of position (how far into current tile)
+    float fracX = tilePos.x - std::floor(tilePos.x);
+    float fracY = tilePos.y - std::floor(tilePos.y);
+
+    // Check if we've moved past tile midpoint based on direction
+    switch (directionVecToDirection(mDirection)) {
+        case Direction::UP:
+          if (fracY < 0.5f) {
+            return true;
+          }
+        case Direction::DOWN:
+          if (fracY > 0.5f) {
+            return true;
+          }
+        case Direction::LEFT:
+          if (fracX < 0.5f) {
+            return true;
+          }
+        case Direction::RIGHT:
+          if (fracX > 0.5f) {
+            return true;
+          }
+    }
+    return false;
+}
+
+sf::Vector2f Ghost::getPosition() {
+  return mGhostShape.getPosition();
 }
 
 void Ghost::resetPath() {
@@ -189,20 +186,12 @@ void Ghost::chase() {
     }
   }
 
-  if (checkAndSnapToTile() == false) {
-    // Ghost doesn't change direction unless Ghost occupies a single tile
-    auto movement = mDirection * mChaseSpeed;
-    auto newPosition = mGhostShape.getPosition() + movement;
-    wrapCoordinate(newPosition.x, -TILE_SIZE, mRLabyrinth.mMaxLabyrinthWidth);
-    wrapCoordinate(newPosition.y, -TILE_SIZE, mRLabyrinth.mMaxLabyrinthHeight);
-    mGhostShape.setPosition(newPosition);
-    return;
-  }
-
   // reconstruct path from cameFrom
   mPath.clear();  // we don't have to do this if we made it a map or something
   int current = mRLabyrinth.getOffset(target);
   while (current != ghostOffset) {
+    auto o = mRLabyrinth.getSfVecFromOffset(current);
+    // std::cout << "emplacing: " << o.x << ", " << o.y;
     mPath.emplace_front(mRLabyrinth.getSfVecFromOffset(current));
     auto iterator = cameFrom.find(current);
     if (iterator == cameFrom.end() || !iterator->second.has_value()) {
@@ -210,6 +199,31 @@ void Ghost::chase() {
       break;
     }
     current = *iterator->second;
+  }
+
+  for (int i = 0; i < mPath.size(); ++i) {
+    if (i == mPath.size() - 1)
+      return;
+
+    auto it = mPath.begin();
+    std::advance(it, i);
+    auto p = *it;
+    std::advance(it, 1);
+    auto nextP = *it;
+
+    if (p.x != nextP.x && p.y != nextP.y) {
+      std::cout << "whoa whoa whoa whoa whoa\n";
+    }
+  }
+
+  if (!hasLeftCurrentTile()) {
+    // Ghost doesn't change direction unless Ghost occupies a single tile
+    auto movement = mDirection * mChaseSpeed;
+    auto newPosition = mGhostShape.getPosition() + movement;
+    wrapCoordinate(newPosition.x, -TILE_SIZE, mRLabyrinth.mMaxLabyrinthWidth);
+    wrapCoordinate(newPosition.y, -TILE_SIZE, mRLabyrinth.mMaxLabyrinthHeight);
+    mGhostShape.setPosition(newPosition);
+    return;
   }
 
   if (!mPath.empty()) {
@@ -249,6 +263,121 @@ void Ghost::chase() {
   }
 }
 
+/*
+void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
+  mTarget = target;
+  std::priority_queue<TileScore, std::vector<TileScore>, OrderByScore> frontier;
+  const int ghostOffset = rLabyrinth.getOffset(mGhostShape.getPosition());
+
+  frontier.push(TileScore(ghostOffset, 0));
+
+  std::map<int, std::optional<int>> cameFrom;
+  std::map<int, int> costSoFar;
+
+  cameFrom[ghostOffset] = NULL;
+  costSoFar[ghostOffset] = 0;
+
+  // EXPLAIN: This is a hack to get past the position Pacman
+  //          will be in as he wraps his coordinates as
+  //          he goes across that open chasm thing from one
+  //          side of the labyrinth to the other.  his x
+  //          position could be more or less than the bounds
+  //          of the labyrinth so we just tie them to the max/
+  //          min of the labyrinth
+  if (floor(target.x / TILE_SIZE) <= 0) {
+    target.x = LABYRINTH_COLS - 2;
+  }
+  if (floor(target.x / TILE_SIZE) >= LABYRINTH_COLS - 2) {
+    target.x = 0;
+  }
+
+  // find path by defining cameFrom
+  while (!frontier.empty()) {
+    TileScore current = frontier.top();
+    frontier.pop();
+
+    if (current.positionOffset == rLabyrinth.getOffset(target)) {
+      break;
+    }
+
+    auto neighbors = rLabyrinth.getNeighbors(current.positionOffset);
+    for (auto next : neighbors) {
+      int movementCost = rLabyrinth.movementCost(current.positionOffset, next);
+      int newCost = costSoFar[current.positionOffset] + movementCost;
+
+      if (costSoFar.find(next) == costSoFar.end() || newCost < costSoFar[next]) {
+        costSoFar[next] = newCost;
+
+        auto h = rLabyrinth.heuristic(next, rLabyrinth.getOffset(target));
+        auto ht = rLabyrinth.heuristicThroughTunnel(next, rLabyrinth.getOffset(target));
+
+        auto lowerHeuristic = std::min(h, ht);
+
+        int priority = newCost + lowerHeuristic;
+        frontier.push(TileScore(next, priority));
+        cameFrom[next] = current.positionOffset;
+      }
+    }
+  }
+
+  if (!occupiesSingleTile()) {
+    // Ghost doesn't change direction unless Ghost occupies a single tile
+    auto movement = mDirection * mSpeedMultiplier;
+    auto newPosition = mGhostShape.getPosition() + movement;
+    wrapCoordinate(newPosition.x, -TILE_SIZE, rLabyrinth.mMaxLabyrinthWidth);
+    wrapCoordinate(newPosition.y, -TILE_SIZE, rLabyrinth.mMaxLabyrinthHeight);
+    mGhostShape.setPosition(newPosition);
+    return;
+  }
+
+  // reconstruct path from cameFrom
+  mPath.clear();  // we don't have to do this if we made it a map or something
+  int current = rLabyrinth.getOffset(target);
+  while (current != ghostOffset) {
+    mPath.emplace_front(rLabyrinth.getSfVecFromOffset(current));
+    auto iterator = cameFrom.find(current);
+    if (iterator == cameFrom.end() || !iterator->second.has_value()) {
+      std::cout << "path broken\n";
+      break;
+    }
+    current = *iterator->second;
+  }
+
+  if (!mPath.empty()) {
+    sf::Vector2f nextPosition = mPath.front();
+    auto ghostPosition = mGhostShape.getPosition();
+    mDirection = nextPosition - ghostPosition;
+
+    // Normalize direction to unit vector
+    mDirection.x = (mDirection.x != 0) ? std::copysign(1.f, mDirection.x) : 0.f;
+    mDirection.y = (mDirection.y != 0) ? std::copysign(1.f, mDirection.y) : 0.f;
+
+    // this is where we're going to detect if we're on the tunnel row
+    // and then keep the direction to cross the tunnel properly even though
+    // the direction vector determined by new position and current position
+    // will point in the opposite direction
+    if ((ghostPosition.y / TILE_SIZE) == 14 && (nextPosition.y / TILE_SIZE) == 14) {
+      if (ghostPosition.x <= 50 && nextPosition.x == 675) {
+        mDirection = sf::Vector2f(-1.f, 0.f);
+      } else if (ghostPosition.x >= 650 && nextPosition.x == 0) {
+        mDirection = sf::Vector2f(1.f, 0.f);
+      }
+    }
+
+    if (std::abs(mDirection.x) == 1.f && std::abs(mDirection.y) == 1.f) {
+      mDirection.y = 0.f;
+      std::cout << "caution rogue robots\n";
+    }
+
+    auto movement = mDirection * mSpeedMultiplier;
+    auto newPosition = mGhostShape.getPosition() + movement;
+    wrapCoordinate(newPosition.x, -TILE_SIZE, rLabyrinth.mMaxLabyrinthWidth);
+    wrapCoordinate(newPosition.y, -TILE_SIZE, rLabyrinth.mMaxLabyrinthHeight);
+    mGhostShape.setPosition(newPosition);
+  }
+}
+  */
+
 void Ghost::meander() {
   auto movement = mDirection * mMeanderSpeed;
   auto newPosition = mGhostShape.getPosition() + movement;
@@ -275,7 +404,7 @@ void Ghost::meander() {
 
   auto turns = availableTurns(mGhostShape.getPosition(), calculatedDirection, mRLabyrinth);
 
-  if (checkAndSnapToTile() && turns.size() > 2) {
+  if (hasLeftCurrentTile() && !checkAndSnapToTile() && turns.size() > 1) {
     bool doesGhostTurn = (mRandGenerator() % 100) <= mMeanderOdds;
     if (doesGhostTurn) {
       unsigned int newDirection;
@@ -286,10 +415,14 @@ void Ghost::meander() {
     }
   }
 
-  bool wallCollision = wallCollides(
-    newPosition,
-    sf::Vector2f(TILE_SIZE - 1.f, TILE_SIZE - 1.f),
-    mRLabyrinth);
+  bool wallCollision =
+    wallCollides(newPosition,
+                 sf::Vector2f(TILE_SIZE - 1.f, TILE_SIZE - 1.f),
+                 mRLabyrinth)
+    ||
+    mRLabyrinth.at(static_cast<int> (newPosition.x / TILE_SIZE),
+                   static_cast<int> (newPosition.y / TILE_SIZE))
+    == Labyrinth::Tile::GATE;
 
   while (wallCollision) {
     auto newDirection = static_cast<Direction>(mRandGenerator() % 4);
@@ -297,10 +430,13 @@ void Ghost::meander() {
     movement = mDirection * mMeanderSpeed;
     newPosition = mGhostShape.getPosition() + movement;
 
-    wallCollision = wallCollides(
-      newPosition,
-      sf::Vector2f(TILE_SIZE - 1.f, TILE_SIZE - 1.f),
-      mRLabyrinth);
+    wallCollision = wallCollides(newPosition,
+                                 sf::Vector2f(TILE_SIZE - 1.f, TILE_SIZE - 1.f),
+                                 mRLabyrinth)
+    ||
+    mRLabyrinth.at(static_cast<int> (newPosition.x / TILE_SIZE),
+                   static_cast<int> (newPosition.y / TILE_SIZE))
+    == Labyrinth::Tile::GATE;
 
     if (!wallCollision) {
       mGhostShape.setPosition(newPosition);
@@ -317,5 +453,5 @@ void Ghost::meander() {
 void Ghost::scatter() {
   mTarget = mFrightenedTarget;
   mChaseSpeed = mFrightenedSpeed;
-  this->chase();
+  chase();
 }
