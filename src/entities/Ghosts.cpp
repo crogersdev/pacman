@@ -190,8 +190,6 @@ void Ghost::chase() {
   mPath.clear();  // we don't have to do this if we made it a map or something
   int current = mRLabyrinth.getOffset(target);
   while (current != ghostOffset) {
-    auto o = mRLabyrinth.getSfVecFromOffset(current);
-    // std::cout << "emplacing: " << o.x << ", " << o.y;
     mPath.emplace_front(mRLabyrinth.getSfVecFromOffset(current));
     auto iterator = cameFrom.find(current);
     if (iterator == cameFrom.end() || !iterator->second.has_value()) {
@@ -203,7 +201,7 @@ void Ghost::chase() {
 
   for (int i = 0; i < mPath.size(); ++i) {
     if (i == mPath.size() - 1)
-      return;
+      break;
 
     auto it = mPath.begin();
     std::advance(it, i);
@@ -213,9 +211,12 @@ void Ghost::chase() {
 
     if (p.x != nextP.x && p.y != nextP.y) {
       std::cout << "whoa whoa whoa whoa whoa\n";
+      return;
     }
   }
 
+  // consider changing to "if in tile completely and not at final destination"
+  // that way you can get rid of 'has left current tile'
   if (!hasLeftCurrentTile()) {
     // Ghost doesn't change direction unless Ghost occupies a single tile
     auto movement = mDirection * mChaseSpeed;
