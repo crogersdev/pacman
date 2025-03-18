@@ -68,25 +68,57 @@ void Ghost::changeDirection(Direction newDirection) {
 }
 
 bool Ghost::checkAndSnapToTile() {
-    sf::Vector2f currentPos = mGhostShape.getPosition();
-    sf::Vector2f tilePos(currentPos.x / TILE_SIZE, currentPos.y / TILE_SIZE);
+  const float SNAP_THRESHOLD = 4.0f; // Adjust this value as needed
 
-    // If we're already perfectly aligned, return early
-    if (tilePos.x == std::round(tilePos.x) &&
-        tilePos.y == std::round(tilePos.y)) {
-        return false;
-    }
+  sf::Vector2f currentPos = mGhostShape.getPosition();
+  sf::Vector2f tilePos(currentPos.x / TILE_SIZE, currentPos.y / TILE_SIZE);
 
-    // Round to nearest tile
-    sf::Vector2f newPos(
-        std::round(tilePos.x) * TILE_SIZE,
-        std::round(tilePos.y) * TILE_SIZE);
+  // If we're already perfectly aligned, return true
+  if (tilePos.x == std::round(tilePos.x) &&
+    tilePos.y == std::round(tilePos.y)) {
+    return true;
+  }
 
-    mGhostShape.setPosition(newPos);
-    std::cout << "setting a new position0: " << newPos.y << ", " << newPos.x << "\n";
+  // Calculate rounded position
+  sf::Vector2f roundedPos(
+    std::round(tilePos.x) * TILE_SIZE,
+    std::round(tilePos.y) * TILE_SIZE);
 
-    return true;  // Snap occurred
+  // Calculate distance to nearest tile center
+  float distanceX = std::abs(currentPos.x - roundedPos.x);
+  float distanceY = std::abs(currentPos.y - roundedPos.y);
+
+  // If within threshold, snap and return true
+  if (distanceX <= SNAP_THRESHOLD && distanceY <= SNAP_THRESHOLD) {
+    mGhostShape.setPosition(roundedPos);
+    std::cout << "Snapped to new position: " << roundedPos.y << ", " << roundedPos.x << "\n";
+    return true;
+  }
+
+  // Not aligned and not close enough to snap
+  return false;
 }
+
+// bool Ghost::checkAndSnapToTile() {
+//     sf::Vector2f currentPos = mGhostShape.getPosition();
+//     sf::Vector2f tilePos(currentPos.x / TILE_SIZE, currentPos.y / TILE_SIZE);
+
+//     // If we're already perfectly aligned, return early
+//     if (tilePos.x == std::round(tilePos.x) &&
+//         tilePos.y == std::round(tilePos.y)) {
+//         return false;
+//     }
+
+//     // Round to nearest tile
+//     sf::Vector2f newPos(
+//         std::round(tilePos.x) * TILE_SIZE,
+//         std::round(tilePos.y) * TILE_SIZE);
+
+//     mGhostShape.setPosition(newPos);
+//     std::cout << "setting a new position0: " << newPos.y << ", " << newPos.x << "\n";
+
+//     return true;  // Snap occurred
+// }
 
 void Ghost::draw(std::shared_ptr<sf::RenderWindow> pGameWindow) {
   pGameWindow->draw(mGhostShape);
@@ -104,18 +136,22 @@ bool Ghost::hasLeftCurrentTile() {
     switch (directionVecToDirection(mDirection)) {
         case Direction::UP:
           if (fracY < 0.5f) {
+            std::cout << "we have left our current tile!\n";
             return true;
           }
         case Direction::DOWN:
           if (fracY > 0.5f) {
+            std::cout << "we have left our current tile!\n";
             return true;
           }
         case Direction::LEFT:
           if (fracX < 0.5f) {
+            std::cout << "we have left our current tile!\n";
             return true;
           }
         case Direction::RIGHT:
           if (fracX > 0.5f) {
+            std::cout << "we have left our current tile!\n";
             return true;
           }
     }
@@ -199,31 +235,21 @@ void Ghost::chase() {
     current = *iterator->second;
   }
 
-  for (int i = 0; i < mPath.size(); ++i) {
-    if (i == mPath.size() - 1)
-      break;
-
-    auto it = mPath.begin();
-    std::advance(it, i);
-    auto p = *it;
-    std::advance(it, 1);
-    auto nextP = *it;
-
-    if (p.x != nextP.x && p.y != nextP.y) {
-      std::cout << "whoa whoa whoa whoa whoa\n";
-      return;
-    }
-  }
-
   // consider changing to "if in tile completely and not at final destination"
   // that way you can get rid of 'has left current tile'
-  if (!hasLeftCurrentTile()) {
+
+  bool ready = ghostOffset == mRLabyrinth.getOffset(mPath.front());
+  if (ready)
+    std::cout << "i'm ready, son\n";
+
+  if (ready && checkAndSnapToTile()) {
     // Ghost doesn't change direction unless Ghost occupies a single tile
     auto movement = mDirection * mChaseSpeed;
     auto newPosition = mGhostShape.getPosition() + movement;
     wrapCoordinate(newPosition.x, -TILE_SIZE, mRLabyrinth.mMaxLabyrinthWidth);
     wrapCoordinate(newPosition.y, -TILE_SIZE, mRLabyrinth.mMaxLabyrinthHeight);
     mGhostShape.setPosition(newPosition);
+    std::cout << "returning\n";
     return;
   }
 
@@ -235,6 +261,14 @@ void Ghost::chase() {
     // Normalize direction to unit vector
     mDirection.x = (mDirection.x != 0) ? std::copysign(1.f, mDirection.x) : 0.f;
     mDirection.y = (mDirection.y != 0) ? std::copysign(1.f, mDirection.y) : 0.f;
+
+    std::cout << "direction: (x: "
+              << mDirection.x
+              << ", y: "
+              << mDirection.y
+              << "\t"
+              << directionVecToDirection(mDirection)
+              << "\n";
 
     // this is where we're going to detect if we're on the tunnel row
     // and then keep the direction to cross the tunnel properly even though
@@ -263,7 +297,7 @@ void Ghost::chase() {
     mGhostShape.setPosition(newPosition);
   }
 }
-
+ 
 /*
 void Ghost::chase(const Labyrinth &rLabyrinth, sf::Vector2f target) {
   mTarget = target;

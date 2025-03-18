@@ -43,6 +43,7 @@ public:
     return os;
   }
 
+
   void                    act();
   void                    changeDirection(Direction);
   bool                    checkAndSnapToTile();
@@ -51,7 +52,6 @@ public:
   sf::Vector2f            getPosition();
   State                   getState() const { return mState; }
   sf::Vector2f            getTarget() const { return mTarget; }
-  bool                    ghostOccupiesSingleTile();
   bool                    hasLeftCurrentTile();
   void                    resetPath();
   void                    setState(State s) { mState = s; }

@@ -104,6 +104,7 @@ void GameManager::updateEntities() {
 
   auto clkSeconds = mStateClock.getElapsedTime().asSeconds();
 
+  /*
   if (clkSeconds > 4.0f) {
     mPinky.setState(Ghost::State::CHASE);
     mPinky.setTarget(pacmanCenter);
@@ -123,6 +124,7 @@ void GameManager::updateEntities() {
     mClyde.setState(Ghost::State::CHASE);
     mClyde.setTarget(pacmanCenter);
   }
+    */
 
   mPinky.act();
   // mInky.act();
