@@ -1,70 +1,53 @@
-cmake_minimum_required(VERSION 3.21)
-project(pacman LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.24...3.30)
+project(pacman)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+# Generate compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-include_directories(/usr/local/include)
-link_directories(/usr/local/lib)
+# Dependencies
+set(RAYLIB_VERSION 5.0)
 
-find_package(SFML 3 COMPONENTS Graphics Audio Network)
+# Our Project
+add_executable(${PROJECT_NAME})
+add_subdirectory(src)
 
-if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  message(STATUS "Setting build type to 'Debug' as none was specified...")
-  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
-endif()
-
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  message(STATUS "Setting CXX Flags for Debug build...")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
-elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-  message(STATUS "Setting the CXX Flags for Release build...")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -DNDEBUG")
-endif()
-
-file(GLOB_RECURSE SUBDIRECTORIES LIST_DIRECTORIES true "${CMAKE_SOURCE_DIR}/src/*")
-file(COPY res DESTINATION ${CMAKE_BINARY_DIR})
-
-message(STATUS "Subdirectories found:")
-foreach(SUBDIR ${SUBDIRECTORIES})
-    if(IS_DIRECTORY ${SUBDIR})
-        message(STATUS "  Adding: ${SUBDIR}")
-        add_subdirectory(${SUBDIR})
-    endif()
-endforeach()
-
-add_executable(pacman src/main.cpp ${SOURCE_FILES})
-
-find_program(CPPCHECK cppcheck)
-if(CPPCHECK)
-    set(CMAKE_CXX_CPPCHECK "${CPPCHECK}" "--enable=all" "--inconclusive")
-endif()
-
-add_custom_target(run-cppcheck
-    COMMAND ${CMAKE_CXX_CPPCHECK} --project=compile_commands.json
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    COMMENT "Running cppcheck on the project"
+set_target_properties(
+    ${PROJECT_NAME} PROPERTIES 
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME}
 )
 
-add_dependencies(pacman run-cppcheck)
-
-# having linker errors?  undefined references to things?  make sure
-# the appropriate folder's named library from its CMakeLists.txt file
-# is appended here
-# TODO: can we auto-detect these...?
-# TRICKY: order here matters
-target_link_libraries(
-    pacman
-    SFML::Graphics
-    SFML::System
-    SFML::Window 
-    game-manager
-    entities
-    helpers
-    # state  # todo: add me in later
+set_property(
+    TARGET ${PROJECT_NAME} PROPERTY
+        VS_DEBUGGER_WORKING_DIRECTORY $<TARGET_FILE_DIR:${PROJECT_NAME}>
 )
 
-install(TARGETS pacman)
+if ("${PLATFORM}" STREQUAL "Web")
+    add_custom_command(
+        TARGET ${PROJECT_NAME} PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/resources $<TARGET_FILE_DIR:${PROJECT_NAME}>/../resources
+    )
+    #DEPENDS ${PROJECT_NAME}
+else()
+    add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/resources $<TARGET_FILE_DIR:${PROJECT_NAME}>/resources
+    )
+    #DEPENDS ${PROJECT_NAME}
+endif()
+
+#set(raylib_VERBOSE 1)
+target_link_libraries(${PROJECT_NAME} raylib dl pthread)
+
+# Web Configurations
+if ("${PLATFORM}" STREQUAL "Web")
+    # Tell Emscripten to build an example.html file.
+    set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html")
+    target_link_options(${PROJECT_NAME} PUBLIC -sUSE_GLFW=3 PUBLIC --preload-file resources)
+endif()
+
+# Checks if OSX and links appropriate frameworks (Only required on MacOS)
+if (APPLE)
+    target_link_libraries(${PROJECT_NAME} "-framework IOKit")
+    target_link_libraries(${PROJECT_NAME} "-framework Cocoa")
+    target_link_libraries(${PROJECT_NAME} "-framework OpenGL")
+endif()

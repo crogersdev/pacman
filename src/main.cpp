@@ -1,28 +1,19 @@
-#include <SFML/Graphics.hpp>
-
 #include <iostream>
-#include <memory>
-#include <functional>
-#include <unordered_map>
-
-#include "game-manager/GameManager.hpp"
+#include <raylib.h>
 
 int main() {
-  unsigned int height = TILE_SIZE * LABYRINTH_ROWS + 6 * TILE_SIZE;
-  unsigned int width  = TILE_SIZE * (LABYRINTH_COLS - 1) + 400;  // extra 400 to print out some info
+    const int SCREEN_WIDTH = 1280;
+    const int SCREEN_HEIGHT = 800;
 
-  auto window = std::make_shared<sf::RenderWindow>(sf::VideoMode(sf::Vector2u(width, height), 24), "Pacman!");
-  GameManager gameManager = GameManager(window);
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pacman!");
+    SetTargetFPS(60);
 
-  while (window->isOpen()) {
-    gameManager.handleInputs();
+    while(WindowShouldClose() == false) {
+        BeginDrawing();
 
-    if (!gameManager.mPaused) {
-      gameManager.updateEntities();
+        EndDrawing();
     }
 
-    gameManager.updateWindow();
-  }
-
-  return 0;
+    CloseWindow();
+    return 0;
 }
