@@ -5,7 +5,7 @@
 Labyrinth::Labyrinth() {}
 
 void Labyrinth::draw() {
-    int x, y = 0;
+    int x = 0, y = 0;
     Color mTile = { 33, 33, 255, 255 };
     Color mPellet = { 255, 243, 153, 255 };
     Color mPowerup = GetColor(0xff00ffff);
