@@ -3,6 +3,7 @@
 #include <raylib.h>
 
 #include "Labyrinth.hpp"
+#include "Pacman.hpp"
 
 int main() {
     const int SCREEN_WIDTH = 1280;
@@ -12,10 +13,12 @@ int main() {
     SetTargetFPS(60);
 
     Labyrinth labyrinth = Labyrinth();
+    Pacman pacman = Pacman();
 
     while(WindowShouldClose() == false) {
         BeginDrawing();
         labyrinth.draw();
+        pacman.draw();
         EndDrawing();
     }
 
