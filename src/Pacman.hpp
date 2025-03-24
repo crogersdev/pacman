@@ -8,7 +8,9 @@ public:
     void draw();
     void move();
 
-private:
+// private:
     Color   mColor;
+    float   mSpeed;
     Vector2 mPosition;
+    Vector2 mVelocity;
 };

@@ -16,6 +16,9 @@ int main() {
     Pacman pacman = Pacman();
 
     while(WindowShouldClose() == false) {
+        pacman.move();
+
+        ClearBackground(BLACK);
         BeginDrawing();
         labyrinth.draw();
         pacman.draw();
