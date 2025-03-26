@@ -79,6 +79,7 @@ public:
         return os;
     }
 
+    Tile at(int row, int col);
     void draw();
 
 

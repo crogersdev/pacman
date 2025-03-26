@@ -1,6 +1,9 @@
 #include "Labyrinth.hpp"
 #include "Pacman.hpp"
 
+// if this isn't included last, then the definitions for Vector2
+// get mangled or something.  the Vector2Add() function breaks
+
 #include <raymath.h>
 
 Pacman::Pacman()
@@ -29,5 +32,8 @@ void Pacman::move() {
     if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN))  mVelocity.y = 1.0;
     if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) mVelocity.x = 1.0;
 
-    mPosition = Vector2Add(mPosition, Vector2Scale(mVelocity, mSpeed + GetFrameTime()));
+    mPosition = Vector2Add(
+        mPosition, 
+        Vector2Scale(mVelocity, mSpeed + GetFrameTime())
+    );
 }

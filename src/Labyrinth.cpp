@@ -1,8 +1,12 @@
-#include "Labyrinth.hpp"
-
 #include <iostream> 
 
+#include "Labyrinth.hpp"
+
 Labyrinth::Labyrinth() {}
+
+Labyrinth::Tile Labyrinth::at(int row, int col) {
+    return static_cast<Labyrinth::Tile>(mLabyrinth.at(row).at(col));
+}
 
 void Labyrinth::draw() {
     int x = 0, y = 0;

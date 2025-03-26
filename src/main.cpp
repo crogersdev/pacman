@@ -4,6 +4,7 @@
 
 #include "Labyrinth.hpp"
 #include "Pacman.hpp"
+#include "helpers/CollisionDetection.hpp"
 
 int main() {
     const int SCREEN_WIDTH = 1280;
@@ -22,6 +23,7 @@ int main() {
         BeginDrawing();
         labyrinth.draw();
         pacman.draw();
+        //CheckCollisions(pacman, labyrinth);
         EndDrawing();
     }
 
