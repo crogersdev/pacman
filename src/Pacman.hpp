@@ -1,16 +1,18 @@
 #pragma once
 
+#include "Labyrinth.hpp"
+
 #include <raylib.h>
 
 class Pacman {
 public:
     Pacman();
     void draw();
-    void move();
+    void move(const Labyrinth &);
 
 // private:
     Color   mColor;
-    float   mSpeed;
+    Vector2 mDirection;
     Vector2 mPosition;
-    Vector2 mVelocity;
+    float   mSpeed;
 };

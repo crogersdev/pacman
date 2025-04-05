@@ -6,9 +6,6 @@
 
 #include <raylib.h>
 
-using std::string;
-using std::vector;
-
 const int   LABYRINTH_ROWS = 24;
 const int   LABYRINTH_COLS = 23;
 const int   TUNNEL_ROW     = LABYRINTH_ROWS / 2;
@@ -79,12 +76,13 @@ public:
         return os;
     }
 
-    Tile at(int row, int col);
+    Tile at(Vector2 pos) const;
+    Tile at(int row, int col) const;
     void draw();
 
 
 private:
-    vector<string> mLabyrinth = {
+    std::vector<std::string> mLabyrinth = {
         "#######################",  //  0
         "#..........#..........#",  //  1
         "#@###.####.#.####.###@#",  //  2      
@@ -94,10 +92,10 @@ private:
         "#.....#....#....#.....#",  //  6
         "#####.####.#.####.#####",  //  7
         "    #.#.........#.#    ",  //  8
-        "    #.#.###-###.#.#    ",  //  9
-        "#####.#.#-----#.#.#####",  // 10
-        "........#-----#........",  // 11 
-        "#####.#.#-----#.#.#####",  // 12 
+        "    #.#.##---##.#.#    ",  //  9
+        "#####.#.#     #.#.#####",  // 10
+        "........#     #........",  // 11 
+        "#####.#.#     #.#.#####",  // 12 
         "    #.#.#######.#.#    ",  // 13 
         "    #.#.........#.#    ",  // 14 
         "#####.#.#######.#.#####",  // 15 

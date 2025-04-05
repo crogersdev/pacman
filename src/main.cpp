@@ -7,7 +7,7 @@
 #include "helpers/CollisionDetection.hpp"
 
 int main() {
-    const int SCREEN_WIDTH = 1280;
+    const int SCREEN_WIDTH = 23*25;
     const int SCREEN_HEIGHT = 800;
 
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pacman!");
@@ -17,13 +17,12 @@ int main() {
     Pacman pacman = Pacman();
 
     while(WindowShouldClose() == false) {
-        pacman.move();
+        pacman.move(labyrinth);
 
         ClearBackground(BLACK);
         BeginDrawing();
         labyrinth.draw();
         pacman.draw();
-        //CheckCollisions(pacman, labyrinth);
         EndDrawing();
     }
 

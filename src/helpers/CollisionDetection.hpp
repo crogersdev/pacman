@@ -10,16 +10,14 @@ inline void CheckCollisions(Pacman pacman, Labyrinth labyrinth) {
     int windowRow = std::floor(pacman.mPosition.x);
     int windowCol = std::floor(pacman.mPosition.y);
 
-
-    for (int row = windowRow - 2; row < windowRow + 2; ++windowRow) {
-        for (int col = windowCol - 2; col < windowCol + 2; ++windowCol) {
+    for (int row = windowRow - 2; row < windowRow + 2; ++row) {
+        for (int col = windowCol - 2; col < windowCol + 2; ++col) {
         }
     }
 
-    int pacX = std::floor(pacman.mPosition.x);
-    int pacY = std::floor(pacman.mPosition.y);
+    int pacX = (int) pacman.mPosition.x / LABYRINTH_COLS;
+    int pacY = (int) pacman.mPosition.y / LABYRINTH_ROWS;
 
-    if (labyrinth.at(pacX, pacY) == Labyrinth::Tile::WALL) {
-        std::cout << "nooooooooooooooooooooo\n";
-    }
+    std::cout << labyrinth.at(pacX, pacY);
+
 }
