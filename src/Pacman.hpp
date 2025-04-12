@@ -8,11 +8,12 @@ class Pacman {
 public:
     Pacman();
     void draw();
+    
     void move(const Labyrinth &);
 
-// private:
     Color   mColor;
     Vector2 mDirection;
+    int     mRadius;
     Vector2 mPosition;
     float   mSpeed;
 };

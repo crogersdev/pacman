@@ -12,6 +12,11 @@ Labyrinth::Tile Labyrinth::at(Vector2 pos) const {
 }
 
 Labyrinth::Tile Labyrinth::at(int row, int col) const {
+    if ((row < 0 || row >= LABYRINTH_ROWS) ||
+        (col < 0 || col >= LABYRINTH_COLS)) {
+        return Labyrinth::Tile::ERROR;
+    }
+
     return static_cast<Labyrinth::Tile>(mLabyrinth.at(row).at(col));
 }
 
