@@ -79,7 +79,8 @@ public:
     Tile at(Vector2 pos) const;
     Tile at(int row, int col) const;
     void draw();
-
+    inline int getHeight() const { return mLabyrinth.size(); }
+    inline int getWidth() const { return mLabyrinth.at(0).size(); }
 
 private:
     std::vector<std::string> mLabyrinth = {
