@@ -14,21 +14,21 @@ Pacman::Pacman()
 
 void Pacman::draw() {
     // #ifndef NDEBUG
-    std::cout << "\t rendering pacman at row,  col: "
-              << static_cast<int>(mPosition.y / TILE_SIZE)
-              << ", "
-              << static_cast<int>(mPosition.x / TILE_SIZE)
-              << "\n";
+    // std::cout << "\t rendering pacman at row,  col: "
+    //           << static_cast<int>(mPosition.y / TILE_SIZE)
+    //           << ", "
+    //           << static_cast<int>(mPosition.x / TILE_SIZE)
+    //           << "\n";
     // #endif
 
     DrawCircle(mPosition.x, mPosition.y, mRadius, mColor);
+    DrawRectangle(mPosition.x, mPosition.y, TILE_SIZE, TILE_SIZE, GetColor(0x882200FF));
 }
 
-void Pacman::move(const Labyrinth &rLabyrinth) {
-
+void Pacman::move(const Labyrinth &rLabyrinth) {  // NOLINT
     // reset velocity after each frame
     mDirection = {0., 0.};
-    
+
     if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))    mDirection.y = -1.0;
     if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))  mDirection.x = -1.0;
     if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN))  mDirection.y = 1.0;
@@ -46,15 +46,15 @@ void Pacman::move(const Labyrinth &rLabyrinth) {
     int currentCol = static_cast<int>(mPosition.x / TILE_SIZE);
     int currentRow = static_cast<int>(mPosition.y / TILE_SIZE);
 
-    for (int col = currentCol-1; col <= currentCol+1; ++col) { 
-        for (int row = currentRow-1; row < currentRow+1; ++row) {
-            if (row != TUNNEL_ROW && (row < 0 || col < 0 || col >= rLabyrinth.getWidth() || row >= rLabyrinth.getHeight())) {
-                std::cout << "row: " << row << "  col: " << col << "   width: " << rLabyrinth.getWidth() << "   height: " << rLabyrinth.getHeight() << "\n";
+    for (int row = currentRow-1; row <= currentRow+1; ++row) {
+        for (int col = currentCol-1; col <= currentCol+1; ++col) {
+            if (row != TUNNEL_ROW && (row < 0 || col < 0 || col >= rLabyrinth.getWidth() || row >= rLabyrinth.getHeight())) {  // NOLINT
+                std::cout << "row: " << row << "  col: " << col << "   width: " << rLabyrinth.getWidth() << "   height: " << rLabyrinth.getHeight() << "\n";  // NOLINT
                 std::cout << "out of bounds\n";
                 continue;
             }
 
-            if (rLabyrinth.at(row, col) == Labyrinth::Tile::WALL && rLabyrinth.at(row, col) == Labyrinth::Tile::GATE) {
+            if (rLabyrinth.at(row, col) == Labyrinth::Tile::WALL || rLabyrinth.at(row, col) == Labyrinth::Tile::GATE) {
                 Rectangle wallRect = {
                     static_cast<float>(row * TILE_SIZE),
                     static_cast<float>(col * TILE_SIZE),
@@ -63,10 +63,13 @@ void Pacman::move(const Labyrinth &rLabyrinth) {
                 };
 
                 if (CheckCollisionCircleRec(newPosition, mRadius, wallRect)) {
+                    DrawRectangle(mPosition.x, mPosition.y, TILE_SIZE, TILE_SIZE, GetColor(0xFF0000FF));
+                    DrawRectangle(mPosition.x, mPosition.y, TILE_SIZE, TILE_SIZE, GetColor(0xFF0000FF));
                     std::cout << "you're colliding\n";
                     return;
                 }
             }
+            std::cout << "checking row, col: " << row << ", " << col << " -- " << rLabyrinth.at(row, col) << "\n";
         }
     }
 

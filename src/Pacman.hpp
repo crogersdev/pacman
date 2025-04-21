@@ -8,9 +8,9 @@ class Pacman {
 public:
     Pacman();
     void draw();
-    
+
     inline float lerp(float a, float b, float f) { return a + f * (b - a); }
-    void move(const Labyrinth &);
+    void move(const Labyrinth &);  // NOLINT
 
     Color   mColor;
     Vector2 mDirection;
