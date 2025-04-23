@@ -16,12 +16,11 @@ int main() {
     Labyrinth labyrinth = Labyrinth();
     Pacman pacman = Pacman();
 
-    while(WindowShouldClose() == false) {
-        pacman.move(labyrinth);
-
+    while (WindowShouldClose() == false) {
         ClearBackground(BLACK);
         BeginDrawing();
         labyrinth.draw();
+        pacman.move(labyrinth);
         pacman.draw();
         EndDrawing();
     }

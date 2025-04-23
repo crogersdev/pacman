@@ -13,6 +13,7 @@ public:
     void move(const Labyrinth &);  // NOLINT
 
     Color   mColor;
+    Color   mDebugTileColor;
     Vector2 mDirection;
     int     mRadius;
     Vector2 mPosition;
