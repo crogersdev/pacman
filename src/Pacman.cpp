@@ -26,48 +26,15 @@ void Pacman::draw() {
     // DrawRectangle(mPosition.x, mPosition.y, TILE_SIZE, TILE_SIZE, GetColor(0x882200FF));
 }
 
-void Pacman::move(const Labyrinth &rLabyrinth) {  // NOLINT
-    // reset velocity after each frame
-    Vector2 desiredDirection = {0., 0.};
-
-    if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))    desiredDirection.y = -1.0;
-    if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))  desiredDirection.x = -1.0;
-    if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN))  desiredDirection.y = 1.0;
-    if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) desiredDirection.x = 1.0;
+void Pacman::move(Vector2 newDirection, const Labyrinth &rLabyrinth) {  // NOLINT
+    // std::cout << "direction you're trying to move: [" << newDirection.x << ", " << newDirection.y << "]\n";
 
     int currentCol = static_cast<int>(mPosition.x / TILE_SIZE);
     int currentRow = static_cast<int>(mPosition.y / TILE_SIZE);
 
-    /*
-    if (currentRow != TUNNEL_ROW && (currentRow < 0 || currentCol < 0 || currentCol >= rLabyrinth.getWidth() || currentRow >= rLabyrinth.getHeight())) {  // NOLINT
-        std::cout << "out of bounds\n";
-        return;
-    }
-
-    if (rLabyrinth.at(currentRow, currentCol + desiredDirection.x) == Labyrinth::Tile::WALL) { desiredDirection.x = 0.; }  // NOLINT
-    if (rLabyrinth.at(currentRow + desiredDirection.y, currentCol) == Labyrinth::Tile::WALL) { desiredDirection.y = 0.; }  // NOLINT
-
     Vector2 newPosition = {
-        mPosition.x + (desiredDirection.x * mSpeed * GetFrameTime()),
-        mPosition.y + (desiredDirection.y * mSpeed * GetFrameTime())
-    };
-
-    mDirection = desiredDirection;
-    mPosition = newPosition;
-    */
-
-
-
-    // this way examines all 8 possibilities - up, down, left, right + diagonals
-    // and if it's open, you move
-    // but: it will go diagonally at 4 way junctions.
-    // but: if you're going down a hallway and you hold down the direction
-    //      the hallway is in and then also add a perpendicular direction
-    //      with another keypress,
-
-    Vector2 newPosition = {
-        mPosition.x + (desiredDirection.x * mSpeed * GetFrameTime()),
-        mPosition.y + (desiredDirection.y * mSpeed * GetFrameTime())
+        mPosition.x + (newDirection.x * mSpeed * GetFrameTime()),
+        mPosition.y + (newDirection.y * mSpeed * GetFrameTime())
     };
 
     // int rgb = (ColorToInt(mDebugTileColor) & 0xFFFFFF00);
@@ -101,7 +68,6 @@ void Pacman::move(const Labyrinth &rLabyrinth) {  // NOLINT
         }
     }
 
-    std::cout << "direction you're trying to move: [" << desiredDirection.x << ", " << desiredDirection.y << "]\n";
-
+    mDirection = newDirection;
     mPosition = newPosition;
 }

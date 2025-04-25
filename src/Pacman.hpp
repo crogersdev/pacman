@@ -10,7 +10,7 @@ public:
     void draw();
 
     inline float lerp(float a, float b, float f) { return a + f * (b - a); }
-    void move(const Labyrinth &);  // NOLINT
+    void move(Vector2, const Labyrinth &);  // NOLINT
 
     Color   mColor;
     Color   mDebugTileColor;

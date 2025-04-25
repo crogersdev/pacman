@@ -20,7 +20,13 @@ int main() {
         ClearBackground(BLACK);
         BeginDrawing();
         labyrinth.draw();
-        pacman.move(labyrinth);
+
+        // Handle inputs
+        if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN))  pacman.move({0, 1.}, labyrinth);
+        if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))    pacman.move({0, -1.}, labyrinth);
+        if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) pacman.move({1., 0}, labyrinth);
+        if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))  pacman.move({-1., 0}, labyrinth);
+
         pacman.draw();
         EndDrawing();
     }
