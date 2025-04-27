@@ -9,7 +9,7 @@ public:
     Pacman();
     void draw();
 
-    inline float lerp(float a, float b, float f) { return a + f * (b - a); }
+    float lerp(float a, float b, float f) { return a + f * (b - a); }
     void move(Vector2, const Labyrinth &);  // NOLINT
 
     Color   mColor;
