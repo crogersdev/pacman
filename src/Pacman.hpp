@@ -1,5 +1,6 @@
 #pragma once
 
+#include "helpers/AnimatedSprite.hpp"
 #include "Labyrinth.hpp"
 
 #include <raylib.h>
@@ -12,10 +13,11 @@ public:
     float lerp(float a, float b, float f) { return a + f * (b - a); }
     void move(Vector2, const Labyrinth &);  // NOLINT
 
-    Color   mColor;
-    Color   mDebugTileColor;
-    Vector2 mDirection;
-    int     mRadius;
-    Vector2 mPosition;
-    float   mSpeed;
+    AnimatedSprite mPacmanSprite;
+    Color          mColor;
+    Color          mDebugTileColor;
+    Vector2        mDirection;
+    int            mRadius;
+    Vector2        mPosition;
+    float          mSpeed;
 };
