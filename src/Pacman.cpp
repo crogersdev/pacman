@@ -23,8 +23,9 @@ void Pacman::draw() {
     //           << "\n";
     // #endif
 
-    DrawCircle(mPosition.x, mPosition.y, mRadius, mColor);
+    // DrawCircle(mPosition.x, mPosition.y, mRadius, mColor);
     // DrawRectangle(mPosition.x, mPosition.y, TILE_SIZE, TILE_SIZE, GetColor(0x882200FF));
+    mPacmanSprite.draw(mPosition);
 }
 
 void Pacman::move(Vector2 newDirection, const Labyrinth &rLabyrinth) {  // NOLINT
