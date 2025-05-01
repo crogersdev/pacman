@@ -29,7 +29,7 @@ public:
         DrawTextureRec(mTexture, mSourceRect, position, WHITE);
     }
 
-    void changeTexture(const char* newSpiteFile) {
+    void changeTexture(const char* newSpriteFile) {
         UnloadTexture(mTexture);
         mTexture = LoadTexture(newSpriteFile);
     }

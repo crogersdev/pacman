@@ -8,6 +8,7 @@ Pacman::Pacman()
     : mColor(GetColor(0xFFFF00FF)),
       mDebugTileColor(GetColor(0x000000FF)),
       mDirection{0., 0.},
+      mPacmanSprite("../../res/pacman-face-right.png", 32, 32, 0, .5),
       mRadius(12),
       mPosition{11*TILE_SIZE + TILE_SIZE / 2, 14*TILE_SIZE + TILE_SIZE / 2},
       mSpeed(100.)
