@@ -7,7 +7,7 @@
 #include "helpers/CollisionDetection.hpp"
 
 int main() {
-    const int SCREEN_WIDTH = 23*25;
+    const int SCREEN_WIDTH = LABYRINTH_COLS * static_cast<int>(TILE_SIZE);
     const int SCREEN_HEIGHT = 800;
 
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pacman!");
@@ -17,8 +17,8 @@ int main() {
     Pacman pacman = Pacman();
 
     while (WindowShouldClose() == false) {
-        ClearBackground(BLACK);
         BeginDrawing();
+        ClearBackground(BLACK);
         labyrinth.draw();
 
         // Handle inputs

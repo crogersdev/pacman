@@ -1,5 +1,5 @@
 #pragma once
-
+#include <iostream> // remove me later
 #include <raylib.h>
 
 /*
@@ -22,6 +22,7 @@ public:
     } 
 
     ~AnimatedSprite() {
+        std::cout << "dtor unloading the texture\n";
         UnloadTexture(mTexture);
     }
 
