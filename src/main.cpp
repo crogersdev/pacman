@@ -10,6 +10,8 @@ int main() {
     const int SCREEN_WIDTH = LABYRINTH_COLS * static_cast<int>(TILE_SIZE);
     const int SCREEN_HEIGHT = 800;
 
+    // std::cout << "Current working directory: " << GetWorkingDirectory() << "\n";
+
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pacman!");
     SetTargetFPS(60);
 

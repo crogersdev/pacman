@@ -9,25 +9,35 @@
 
 class AnimatedSprite {
 public:
-    AnimatedSprite(const char* spriteFile, int fw, int fh, int cf, float fps)
+    AnimatedSprite(const char* spriteFile, int fw, int fh, int fc, float fps)
         : mFPS(fps),
           mCurrentFrame(0),
-          mFrameCount(cf),
+          mFrameCount(fc),
           mFrameHeight(fh),
           mFrameWidth(fw),
           mFrameTimer(0.) {
 
         mTexture = LoadTexture(spriteFile);
+        if (mTexture.id == 0) {
+            std::cout << "unable to load the sprite texture\n";
+        }
         mSourceRect = { 0, 0, static_cast<float>(fw), static_cast<float>(fh) };
     } 
 
     ~AnimatedSprite() {
-        std::cout << "dtor unloading the texture\n";
+        // std::cout << "dtor unloading the texture\n";
         UnloadTexture(mTexture);
     }
 
     void draw(Vector2 position) const {
-        DrawTextureRec(mTexture, mSourceRect, position, WHITE);
+        auto halfX = mFrameWidth / 2;
+        auto halfY = mFrameHeight / 2;
+        DrawTextureRec(
+            mTexture, 
+            mSourceRect,
+            {position.x - halfX, position.y - halfY},
+            WHITE
+        );
     }
 
     void changeTexture(const char* newSpriteFile) {
@@ -35,7 +45,7 @@ public:
         mTexture = LoadTexture(newSpriteFile);
     }
 
-    void Update() {
+    void update() {
         mFrameTimer += GetFrameTime();
         if (mFrameTimer >= 1.f / mFPS) {
             mFrameTimer = 0.f;
