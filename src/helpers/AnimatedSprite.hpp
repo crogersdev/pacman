@@ -3,7 +3,7 @@
 #include <raylib.h>
 
 /*
-    This only works with horizontal sprite sheets; see the Update() function for logic
+    This only works with horizontal sprite sheets; see the update() function for logic
     that only considers moving the right along the x axis
 */
 
@@ -15,8 +15,8 @@ public:
           mFrameCount(fc),
           mFrameHeight(fh),
           mFrameWidth(fw),
-          mFrameTimer(0.) {
-
+          mFrameTimer(0.), 
+          mFrameZero(0) {
         mTexture = LoadTexture(spriteFile);
         if (mTexture.id == 0) {
             std::cout << "unable to load the sprite texture\n";
@@ -40,16 +40,13 @@ public:
         );
     }
 
-    void changeTexture(const char* newSpriteFile) {
-        UnloadTexture(mTexture);
-        mTexture = LoadTexture(newSpriteFile);
-    }
+    void setZeroFrame(int zf) { mFrameZero= zf; }
 
     void update() {
         mFrameTimer += GetFrameTime();
         if (mFrameTimer >= 1.f / mFPS) {
             mFrameTimer = 0.f;
-            mCurrentFrame = (mCurrentFrame + 1) % mFrameCount;
+            mCurrentFrame = (mCurrentFrame + 1) % mFrameCount + mFrameZero;
             mSourceRect.x = static_cast<float>(mCurrentFrame * mFrameWidth); 
         }
     }
@@ -61,6 +58,7 @@ private:
     int mFrameCount;
     int mFrameHeight;
     int mFrameWidth;
+    int mFrameZero;
 
     Rectangle mSourceRect;
     Texture2D mTexture;

@@ -8,7 +8,7 @@ Pacman::Pacman()
     : mColor(GetColor(0xFFFF00FF)),
       mDebugTileColor(GetColor(0x000000FF)),
       mDirection{0., 0.},
-      mPacmanSprite("res/pacman-face-right.png", 26, 26, 2, 10),
+      mPacmanSprite("res/pacman.png", 26, 26, 3, 10),
       mRadius(12),
       mPosition{11*TILE_SIZE + TILE_SIZE / 2, 14*TILE_SIZE + TILE_SIZE / 2},
       mSpeed(100.)
@@ -30,6 +30,11 @@ void Pacman::draw() {
 
 void Pacman::move(Vector2 newDirection, const Labyrinth &rLabyrinth) {  // NOLINT
     // std::cout << "direction you're trying to move: [" << newDirection.x << ", " << newDirection.y << "]\n";
+
+    if (mDirection == (Vector2){1., 0.})  { mPacmanSprite.setZeroFrame(0); }
+    if (mDirection == (Vector2){0., 1.})  { mPacmanSprite.setZeroFrame(3); }
+    if (mDirection == (Vector2){-1., 0.}) { mPacmanSprite.setZeroFrame(6); }
+    if (mDirection == (Vector2){0., -1.}) { mPacmanSprite.setZeroFrame(9); }
 
     mPacmanSprite.update();
 
