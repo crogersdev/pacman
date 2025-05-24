@@ -28,15 +28,21 @@ void Pacman::draw() {
     mPacmanSprite.draw(mPosition);
 }
 
-void Pacman::move(Vector2 newDirection, const Labyrinth &rLabyrinth) {  // NOLINT
-    // std::cout << "direction you're trying to move: [" << newDirection.x << ", " << newDirection.y << "]\n";
-
-    if (mDirection == (Vector2){1., 0.})  { mPacmanSprite.setZeroFrame(0); }
-    if (mDirection == (Vector2){0., 1.})  { mPacmanSprite.setZeroFrame(3); }
-    if (mDirection == (Vector2){-1., 0.}) { mPacmanSprite.setZeroFrame(6); }
-    if (mDirection == (Vector2){0., -1.}) { mPacmanSprite.setZeroFrame(9); }
+void Pacman::move(Vector2 newDirection, Vector2 newPosition) {
 
     mPacmanSprite.update();
+    mDirection = newDirection;
+    mPosition = newPosition;
+
+    if (newDirection == (Vector2){1., 0.})  { mPacmanSprite.setZeroFrame(0); }
+    if (newDirection == (Vector2){0., 1.})  { mPacmanSprite.setZeroFrame(3); }
+    if (newDirection == (Vector2){-1., 0.}) { mPacmanSprite.setZeroFrame(6); }
+    if (newDirection == (Vector2){0., -1.}) { mPacmanSprite.setZeroFrame(9); }
+
+}
+
+void Pacman::moveOLD(Vector2 newDirection, const Labyrinth &rLabyrinth) {  // NOLINT
+    // std::cout << "direction you're trying to move: [" << newDirection.x << ", " << newDirection.y << "]\n";
 
     int currentCol = static_cast<int>(mPosition.x / TILE_SIZE);
     int currentRow = static_cast<int>(mPosition.y / TILE_SIZE);
@@ -77,6 +83,13 @@ void Pacman::move(Vector2 newDirection, const Labyrinth &rLabyrinth) {  // NOLIN
         }
     }
 
+    mPacmanSprite.update();
     mDirection = newDirection;
     mPosition = newPosition;
+
+    if (newDirection == (Vector2){1., 0.})  { mPacmanSprite.setZeroFrame(0); }
+    if (newDirection == (Vector2){0., 1.})  { mPacmanSprite.setZeroFrame(3); }
+    if (newDirection == (Vector2){-1., 0.}) { mPacmanSprite.setZeroFrame(6); }
+    if (newDirection == (Vector2){0., -1.}) { mPacmanSprite.setZeroFrame(9); }
+
 }

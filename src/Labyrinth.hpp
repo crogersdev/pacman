@@ -76,11 +76,24 @@ public:
         return os;
     }
 
-    Tile at(Vector2 pos) const;
+    enum class Direction {
+        UP,
+        DOWN,
+        LEFT,
+        RIGHT
+    };
+
+    const std::array<Vector2, 4> directionLut = {{
+        {  0., -1. },  // UP
+        {  0.,  1. },  // DOWN
+        { -1.,  0. },  // LEFT
+        {  1.,  0. }   // RIGHT
+    }};
+
     Tile at(int row, int col) const;
     void draw();
-    inline int getHeight() const { return mLabyrinth.size(); }
-    inline int getWidth() const { return mLabyrinth.at(0).size(); }
+    int getHeight() const { return mLabyrinth.size(); }
+    int getWidth() const { return mLabyrinth.at(0).size(); }
 
 private:
     std::vector<std::string> mLabyrinth = {

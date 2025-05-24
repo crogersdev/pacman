@@ -16,7 +16,8 @@ public:
           mFrameHeight(fh),
           mFrameWidth(fw),
           mFrameTimer(0.), 
-          mFrameZero(0) {
+          mFrameZero(0),
+          mUpdating(0) {
         mTexture = LoadTexture(spriteFile);
         if (mTexture.id == 0) {
             std::cout << "unable to load the sprite texture\n";
@@ -43,11 +44,15 @@ public:
     void setZeroFrame(int zf) { mFrameZero= zf; }
 
     void update() {
-        mFrameTimer += GetFrameTime();
-        if (mFrameTimer >= 1.f / mFPS) {
-            mFrameTimer = 0.f;
-            mCurrentFrame = (mCurrentFrame + 1) % mFrameCount + mFrameZero;
-            mSourceRect.x = static_cast<float>(mCurrentFrame * mFrameWidth); 
+        ++mUpdating;
+        if (mUpdating > 0) {
+            mFrameTimer += GetFrameTime();
+            if (mFrameTimer >= 1.f / mFPS) {
+                mFrameTimer = 0.f;
+                mCurrentFrame = (mCurrentFrame + 1) % mFrameCount + mFrameZero;
+                mSourceRect.x = static_cast<float>(mCurrentFrame * mFrameWidth); 
+            }
+            --mUpdating;
         }
     }
 
@@ -59,6 +64,7 @@ private:
     int mFrameHeight;
     int mFrameWidth;
     int mFrameZero;
+    int mUpdating;
 
     Rectangle mSourceRect;
     Texture2D mTexture;

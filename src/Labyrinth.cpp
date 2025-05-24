@@ -4,13 +4,6 @@
 
 Labyrinth::Labyrinth() {}
 
-Labyrinth::Tile Labyrinth::at(Vector2 pos) const {
-    int col = (int) pos.x / LABYRINTH_COLS;
-    int row = (int) pos.y / LABYRINTH_ROWS; 
-
-    return at(row, col);
-}
-
 Labyrinth::Tile Labyrinth::at(int row, int col) const {
     if ((row < 0 || row >= LABYRINTH_ROWS) ||
         (col < 0 || col >= LABYRINTH_COLS)) {
