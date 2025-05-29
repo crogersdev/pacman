@@ -9,7 +9,7 @@
 
 class AnimatedSprite {
 public:
-    AnimatedSprite(const char* spriteFile, int fw, int fh, int fc, float fps)
+    AnimatedSprite(Texture2D sprite, int fw, int fh, int fc, float fps)
         : mFPS(fps),
           mCurrentFrame(0),
           mFrameCount(fc),
@@ -17,8 +17,8 @@ public:
           mFrameWidth(fw),
           mFrameTimer(0.), 
           mFrameZero(0),
+          mTexture(sprite),
           mUpdating(0) {
-        mTexture = LoadTexture(spriteFile);
         if (mTexture.id == 0) {
             std::cout << "unable to load the sprite texture\n";
         }
@@ -26,8 +26,6 @@ public:
     } 
 
     ~AnimatedSprite() {
-        // std::cout << "dtor unloading the texture\n";
-        UnloadTexture(mTexture);
     }
 
     void draw(Vector2 position) const {

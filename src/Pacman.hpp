@@ -8,11 +8,13 @@
 class Pacman {
 public:
     Pacman();
+    ~Pacman();
+
     void  draw();
     float lerp(float a, float b, float f) { return a + f * (b - a); }
     void  move(Vector2, Vector2);
-    void  moveOLD(Vector2, const Labyrinth &);  // NOLINT
 
+    Texture2D      mPacmanTexture;
     AnimatedSprite mPacmanSprite;
     Color          mColor;
     Color          mDebugTileColor;

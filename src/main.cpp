@@ -54,26 +54,36 @@ int main() {
             TILE_SIZE
         };
 
-        // this is our intended tile - it's the goal of where we'd move but it isn't the immediate next position
-        DrawRectangleLines(intendedCol * TILE_SIZE, intendedRow * TILE_SIZE, 26, 26, RED);
+        // DrawRectangleLines(intendedCol * TILE_SIZE, intendedRow * TILE_SIZE, 26, 26, RED);
 
         Vector2 intendedPosition = {
             pacman.mPosition.x + (intendedDirection.x * pacman.mSpeed * GetFrameTime()),
             pacman.mPosition.y + (intendedDirection.y * pacman.mSpeed * GetFrameTime())
         };
 
-        // this is where pacman will go
-        DrawCircleLines(intendedPosition.x, intendedPosition.y, pacman.mRadius, ORANGE);
+        // DrawCircleLines(intendedPosition.x, intendedPosition.y, pacman.mRadius, ORANGE);
 
+        float centerTileX, centerTileY;
         bool canMove = true;
+
         for (int row = currentRow-1; row <= currentRow+1; ++row) {
             for (int col = currentCol-1; col <= currentCol+1; ++col) {
+                centerTileX = col * TILE_SIZE + TILE_SIZE / 2;
+                centerTileY = row * TILE_SIZE + TILE_SIZE / 2;
                 if (labyrinth.at(row, col) == Labyrinth::Tile::WALL || labyrinth.at(row, col) == Labyrinth::Tile::GATE) {
                     Rectangle tmpRect = { static_cast<float>(col * TILE_SIZE), static_cast<float>(row * TILE_SIZE), TILE_SIZE, TILE_SIZE };
                     if (CheckCollisionCircleRec(intendedPosition, pacman.mRadius, tmpRect)) {
                         DrawRectangle(tmpRect.x, tmpRect.y, 26, 26, ORANGE);
                         canMove = false;
                     }
+                } else if (
+                    labyrinth.at(row, col) == Labyrinth::Tile::PELLET && labyrinth.mPellets.count(std::make_pair(col, row))) {
+                    if (CheckCollisionCircles(intendedPosition, pacman.mRadius - 6, {centerTileX, centerTileY}, 3)) {
+                        std::cout << "you ate a pellet.\n";
+                        labyrinth.mPellets.erase(std::make_pair(col, row)); 
+                    }
+                } else if (labyrinth.at(row, col) == Labyrinth::Tile::POWERUP) {
+                    // std::cout << "you ate a powerup.\n";
                 }
             }
         }

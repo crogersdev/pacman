@@ -8,11 +8,16 @@ Pacman::Pacman()
     : mColor(GetColor(0xFFFF00FF)),
       mDebugTileColor(GetColor(0x000000FF)),
       mDirection{0., 0.},
-      mPacmanSprite("res/pacman.png", 26, 26, 3, 10),
+      mPacmanTexture(LoadTexture("res/pacman.png")),
+      mPacmanSprite(mPacmanTexture, 26, 26, 3, 10),
       mRadius(12),
-      mPosition{11*TILE_SIZE + TILE_SIZE / 2, 14*TILE_SIZE + TILE_SIZE / 2},
+      mPosition{11*TILE_SIZE + TILE_SIZE / 2, 14 * TILE_SIZE + TILE_SIZE / 2},
       mSpeed(100.)
 {}
+
+Pacman::~Pacman() {
+    UnloadTexture(mPacmanTexture);
+}
 
 void Pacman::draw() {
     // #ifndef NDEBUG
@@ -29,59 +34,6 @@ void Pacman::draw() {
 }
 
 void Pacman::move(Vector2 newDirection, Vector2 newPosition) {
-
-    mPacmanSprite.update();
-    mDirection = newDirection;
-    mPosition = newPosition;
-
-    if (newDirection == (Vector2){1., 0.})  { mPacmanSprite.setZeroFrame(0); }
-    if (newDirection == (Vector2){0., 1.})  { mPacmanSprite.setZeroFrame(3); }
-    if (newDirection == (Vector2){-1., 0.}) { mPacmanSprite.setZeroFrame(6); }
-    if (newDirection == (Vector2){0., -1.}) { mPacmanSprite.setZeroFrame(9); }
-
-}
-
-void Pacman::moveOLD(Vector2 newDirection, const Labyrinth &rLabyrinth) {  // NOLINT
-    // std::cout << "direction you're trying to move: [" << newDirection.x << ", " << newDirection.y << "]\n";
-
-    int currentCol = static_cast<int>(mPosition.x / TILE_SIZE);
-    int currentRow = static_cast<int>(mPosition.y / TILE_SIZE);
-
-    Vector2 newPosition = {
-        mPosition.x + (newDirection.x * mSpeed * GetFrameTime()),
-        mPosition.y + (newDirection.y * mSpeed * GetFrameTime())
-    };
-
-    // int rgb = (ColorToInt(mDebugTileColor) & 0xFFFFFF00);
-    // int opacity = (ColorToInt(mDebugTileColor) & 0x000000FF);
-
-    for (int row = currentRow-1; row <= currentRow+1; ++row) {
-        for (int col = currentCol-1; col <= currentCol+1; ++col) {
-            // rgb += 0x000F0000;
-            // auto debugColor = (rgb & 0xFFFFFF00) | opacity;
-            // DrawRectangle(col*TILE_SIZE, row*TILE_SIZE, TILE_SIZE, TILE_SIZE, GetColor(debugColor));
-
-            if (row != TUNNEL_ROW && (row < 0 || col < 0 || col >= rLabyrinth.getWidth() || row >= rLabyrinth.getHeight())) {  // NOLINT
-                std::cout << "out of bounds\n";
-                continue;
-            }
-
-            if (rLabyrinth.at(row, col) == Labyrinth::Tile::WALL || rLabyrinth.at(row, col) == Labyrinth::Tile::GATE) {
-                Rectangle wallRect = {
-                    static_cast<float>(col * TILE_SIZE),
-                    static_cast<float>(row * TILE_SIZE),
-                    TILE_SIZE,
-                    TILE_SIZE
-                };
-
-                if (CheckCollisionCircleRec(newPosition, mRadius, wallRect)) {
-                    DrawRectangle(wallRect.x, wallRect.y, wallRect.width, wallRect.height, GetColor(0xFFAA11FF));
-                    return;
-                }
-            }
-            // std::cout << "checking row, col: " << row << ", " << col << " -- " << rLabyrinth.at(row, col) << "\n";
-        }
-    }
 
     mPacmanSprite.update();
     mDirection = newDirection;

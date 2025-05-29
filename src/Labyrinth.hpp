@@ -1,6 +1,9 @@
 #pragma once
 
+#include "helpers/AnimatedSprite.hpp"
+
 #include <iostream>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -14,6 +17,22 @@ const float TILE_SIZE      = 26.;
 class Labyrinth {
 public:
     Labyrinth();
+    ~Labyrinth();
+
+    struct LabyrinthObject { 
+        AnimatedSprite sprite;
+        Vector2 position;
+        int radius;
+
+        LabyrinthObject(AnimatedSprite s, Vector2 p, int r) 
+        : sprite(s),
+          position(p),
+          radius(r) {}
+        
+        void draw() const {
+            sprite.draw(position);
+        }
+    };
 
     enum class Tile {
         EMPTY   = ' ',
@@ -89,6 +108,14 @@ public:
         { -1.,  0. },  // LEFT
         {  1.,  0. }   // RIGHT
     }};
+
+    Texture2D mPelletSprite;
+    Texture2D mPowerupSprite;
+    // todo: add fruit
+
+    std::map<std::pair<int, int>, LabyrinthObject> mPellets;
+    std::vector<LabyrinthObject> mPowerups;
+    // todo: add fruit
 
     Tile at(int row, int col) const;
     void draw();
