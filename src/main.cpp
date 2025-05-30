@@ -23,22 +23,20 @@ int main() {
         ClearBackground(BLACK);
         labyrinth.draw();
 
-        Vector2 intendedDirection = { 0., 0. };
+        Vector2 intendedDirection = { 0.f, 0.f };
 
         // Handle inputs
-        // todo: how do we allow two directions at the same time if we end up
-        //       overwriting intendedDirection every time?
         if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) { 
-            intendedDirection = labyrinth.directionLut[static_cast<int>(Labyrinth::Direction::DOWN)];
+            intendedDirection = { intendedDirection.x, intendedDirection.y + 1.f };
         }
         if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) {
-            intendedDirection = labyrinth.directionLut[static_cast<int>(Labyrinth::Direction::UP)];
+            intendedDirection = { intendedDirection.x, intendedDirection.y - 1.f };
         }
         if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) {
-            intendedDirection = labyrinth.directionLut[static_cast<int>(Labyrinth::Direction::RIGHT)];
+            intendedDirection = { intendedDirection.x + 1.f, intendedDirection.y };
         }
         if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) {
-            intendedDirection = labyrinth.directionLut[static_cast<int>(Labyrinth::Direction::LEFT)];
+            intendedDirection = { intendedDirection.x - 1.f, intendedDirection.y };
         }
 
         int currentCol = static_cast<int>(pacman.mPosition.x / TILE_SIZE);
