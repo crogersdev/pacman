@@ -5,29 +5,40 @@
 Labyrinth::Labyrinth() {
     mPelletSprite = LoadTexture("res/pellet.png");
     mPowerupSprite = LoadTexture("res/powerup.png");
-    // why not range based?
-    // because we need pixel offset to know where the pellets and powerups will be
-    for (int row = 0; row < LABYRINTH_ROWS; ++row) {
-        for (int col = 0; col < LABYRINTH_COLS; ++col) {
-            Tile tile = this->at(row, col);
-            float centerTileX = col * TILE_SIZE + TILE_SIZE / 2;
-            float centerTileY = row * TILE_SIZE + TILE_SIZE / 2;
 
-            if (tile == Tile::PELLET) {
+    float centerTileY, centerTileX;
+    int c = 0, r = 0;
+
+    for (const auto& row : mLabyrinth) {
+        centerTileY = r + TILE_SIZE / 2;
+        for (const auto& col : row) {
+            centerTileX = c + TILE_SIZE / 2;
+            Tile tile = static_cast<Tile>(col);
+
+            switch (tile) {
+            case Tile::PELLET:
                 // std::cout << "adding a pellet at row: " << row << ", col: " << col << "\n";
-                mPellets.insert(std::make_pair(std::make_pair(col, row), LabyrinthObject(
+                mPellets.insert(std::make_pair(std::make_pair(c, r), LabyrinthObject(
                         AnimatedSprite(mPelletSprite, 26, 26, 2, 10),
                         {centerTileX, centerTileY},
                         3)));
-            } else if (tile == Tile::POWERUP) {
+                break;
+            case Tile::POWERUP:
                 mPowerups.push_back(
                     LabyrinthObject(
                         AnimatedSprite(mPowerupSprite, 26, 26, 2, 12),
                         {centerTileX, centerTileY},
                         8));
+                break;
+            default:
+                break;
             }
+
+            c += TILE_SIZE;
         }
-    }
+        r += TILE_SIZE;
+        c = 0;
+    } 
 }
 
 Labyrinth::~Labyrinth() {

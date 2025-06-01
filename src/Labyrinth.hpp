@@ -122,7 +122,6 @@ public:
     int getHeight() const { return mLabyrinth.size(); }
     int getWidth() const { return mLabyrinth.at(0).size(); }
 
-private:
     std::vector<std::string> mLabyrinth = {
         "#######################",  //  0
         "#..........#..........#",  //  1

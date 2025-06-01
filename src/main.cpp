@@ -63,25 +63,35 @@ int main() {
 
         float centerTileX, centerTileY;
         bool canMove = true;
+        Rectangle tmpRect;
 
         for (int row = currentRow-1; row <= currentRow+1; ++row) {
             for (int col = currentCol-1; col <= currentCol+1; ++col) {
                 centerTileX = col * TILE_SIZE + TILE_SIZE / 2;
                 centerTileY = row * TILE_SIZE + TILE_SIZE / 2;
-                if (labyrinth.at(row, col) == Labyrinth::Tile::WALL || labyrinth.at(row, col) == Labyrinth::Tile::GATE) {
-                    Rectangle tmpRect = { static_cast<float>(col * TILE_SIZE), static_cast<float>(row * TILE_SIZE), TILE_SIZE, TILE_SIZE };
+
+                Labyrinth::Tile tile = labyrinth.at(row, col);
+                switch (tile) {
+                case Labyrinth::Tile::WALL:
+                case Labyrinth::Tile::GATE:
+                    tmpRect = { static_cast<float>(col * TILE_SIZE), static_cast<float>(row * TILE_SIZE), TILE_SIZE, TILE_SIZE };
                     if (CheckCollisionCircleRec(intendedPosition, pacman.mRadius, tmpRect)) {
                         DrawRectangle(tmpRect.x, tmpRect.y, 26, 26, ORANGE);
                         canMove = false;
                     }
-                } else if (
-                    labyrinth.at(row, col) == Labyrinth::Tile::PELLET && labyrinth.mPellets.count(std::make_pair(col, row))) {
+                    break;
+                case Labyrinth::Tile::PELLET:
+                    if (!labyrinth.mPellets.count(std::make_pair(col * TILE_SIZE, row * TILE_SIZE))) break;
                     if (CheckCollisionCircles(intendedPosition, pacman.mRadius - 6, {centerTileX, centerTileY}, 3)) {
                         std::cout << "you ate a pellet.\n";
-                        labyrinth.mPellets.erase(std::make_pair(col, row)); 
+                        labyrinth.mPellets.erase(std::make_pair(col * TILE_SIZE, row * TILE_SIZE)); 
                     }
-                } else if (labyrinth.at(row, col) == Labyrinth::Tile::POWERUP) {
-                    // std::cout << "you ate a powerup.\n";
+                    break;
+                case Labyrinth::Tile::POWERUP:
+                    std::cout << "you ate a powerup.\n";
+                    break;
+                default:
+                    std::cout << "duh\n";
                 }
             }
         }
