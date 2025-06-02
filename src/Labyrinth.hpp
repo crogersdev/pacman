@@ -114,7 +114,7 @@ public:
     // todo: add fruit
 
     std::map<std::pair<int, int>, LabyrinthObject> mPellets;
-    std::vector<LabyrinthObject> mPowerups;
+    std::map<std::pair<int, int>, LabyrinthObject> mPowerups;
     // todo: add fruit
 
     Tile at(int row, int col) const;

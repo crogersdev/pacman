@@ -19,16 +19,15 @@ Labyrinth::Labyrinth() {
             case Tile::PELLET:
                 // std::cout << "adding a pellet at row: " << row << ", col: " << col << "\n";
                 mPellets.insert(std::make_pair(std::make_pair(c, r), LabyrinthObject(
-                        AnimatedSprite(mPelletSprite, 26, 26, 2, 10),
+                        AnimatedSprite(mPelletSprite, TILE_SIZE, TILE_SIZE, 2, 10),
                         {centerTileX, centerTileY},
                         3)));
                 break;
             case Tile::POWERUP:
-                mPowerups.push_back(
-                    LabyrinthObject(
-                        AnimatedSprite(mPowerupSprite, 26, 26, 2, 12),
+                mPowerups.insert(std::make_pair(std::make_pair(c, r), LabyrinthObject(
+                        AnimatedSprite(mPowerupSprite, TILE_SIZE, TILE_SIZE, 2, 12),
                         {centerTileX, centerTileY},
-                        8));
+                        8)));
                 break;
             default:
                 break;
@@ -64,7 +63,7 @@ void Labyrinth::draw() {
     }
 
     for (const auto &powerup: mPowerups) {
-        powerup.draw();
+        powerup.second.draw();
     }
 
     for (const auto &row : mLabyrinth) {

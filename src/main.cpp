@@ -82,13 +82,15 @@ int main() {
                     break;
                 case Labyrinth::Tile::PELLET:
                     if (!labyrinth.mPellets.count(std::make_pair(col * TILE_SIZE, row * TILE_SIZE))) break;
-                    if (CheckCollisionCircles(intendedPosition, pacman.mRadius - 6, {centerTileX, centerTileY}, 3)) {
-                        std::cout << "you ate a pellet.\n";
+                    if (CheckCollisionCircles(intendedPosition, pacman.mRadius - 6, { centerTileX, centerTileY }, 3)) {
                         labyrinth.mPellets.erase(std::make_pair(col * TILE_SIZE, row * TILE_SIZE)); 
                     }
                     break;
                 case Labyrinth::Tile::POWERUP:
-                    std::cout << "you ate a powerup.\n";
+                    if (!labyrinth.mPowerups.count(std::make_pair(col * TILE_SIZE, row * TILE_SIZE))) break;
+                    if (CheckCollisionCircles(intendedPosition, pacman.mRadius - 10, { centerTileX, centerTileY }, 8)) {
+                        labyrinth.mPowerups.erase(std::make_pair(col * TILE_SIZE, row * TILE_SIZE));
+                    }
                     break;
                 default:
                     std::cout << "duh\n";
