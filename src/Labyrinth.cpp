@@ -1,10 +1,11 @@
 #include <iostream> 
 
+#include "helpers/Movement.hpp"
 #include "Labyrinth.hpp"
 
 Labyrinth::Labyrinth() {
-    mPelletSprite = LoadTexture("res/pellet.png");
-    mPowerupSprite = LoadTexture("res/powerup.png");
+    mPelletSpritePath = "res/pellet.png";
+    mPowerupSpritePath = "res/powerup.png";
 
     float centerTileY, centerTileX;
     int c = 0, r = 0;
@@ -19,13 +20,13 @@ Labyrinth::Labyrinth() {
             case Tile::PELLET:
                 // std::cout << "adding a pellet at row: " << row << ", col: " << col << "\n";
                 mPellets.insert(std::make_pair(std::make_pair(c, r), LabyrinthObject(
-                        AnimatedSprite(mPelletSprite, TILE_SIZE, TILE_SIZE, 2, 10),
+                        AnimatedSprite(mPelletSpritePath, TILE_SIZE, TILE_SIZE, 2, 10),
                         {centerTileX, centerTileY},
                         3)));
                 break;
             case Tile::POWERUP:
                 mPowerups.insert(std::make_pair(std::make_pair(c, r), LabyrinthObject(
-                        AnimatedSprite(mPowerupSprite, TILE_SIZE, TILE_SIZE, 2, 12),
+                        AnimatedSprite(mPowerupSpritePath, TILE_SIZE, TILE_SIZE, 2, 12),
                         {centerTileX, centerTileY},
                         8)));
                 break;
@@ -40,10 +41,7 @@ Labyrinth::Labyrinth() {
     } 
 }
 
-Labyrinth::~Labyrinth() {
-    UnloadTexture(mPelletSprite);
-    UnloadTexture(mPowerupSprite);
-}
+Labyrinth::~Labyrinth() { }
 
 Labyrinth::Tile Labyrinth::at(int row, int col) const {
     if ((row < 0 || row >= LABYRINTH_ROWS) ||
@@ -52,6 +50,13 @@ Labyrinth::Tile Labyrinth::at(int row, int col) const {
     }
 
     return static_cast<Labyrinth::Tile>(mLabyrinth.at(row).at(col));
+}
+
+Labyrinth::Tile Labyrinth::at(Vector2 pos) const {
+    int row = static_cast<int>(pos.y / TILE_SIZE);
+    int col = static_cast<int>(pos.x / TILE_SIZE);
+
+    return at(row, col);
 }
 
 void Labyrinth::draw() {

@@ -9,7 +9,7 @@
 
 class AnimatedSprite {
 public:
-    AnimatedSprite(Texture2D sprite, int fw, int fh, int fc, float fps)
+    AnimatedSprite(std::string sp, int fw, int fh, int fc, float fps)
         : mFPS(fps),
           mCurrentFrame(0),
           mFrameCount(fc),
@@ -17,16 +17,15 @@ public:
           mFrameWidth(fw),
           mFrameTimer(0.), 
           mFrameZero(0),
-          mTexture(sprite),
+          mTexture(),
           mUpdating(0) {
         if (mTexture.id == 0) {
-            std::cout << "unable to load the sprite texture\n";
+            mTexture = LoadTexture(sp.c_str());
         }
         mSourceRect = { 0, 0, static_cast<float>(fw), static_cast<float>(fh) };
     } 
 
-    ~AnimatedSprite() {
-    }
+    ~AnimatedSprite() { }
 
     void draw(Vector2 position) const {
         auto halfX = mFrameWidth / 2;
@@ -34,12 +33,20 @@ public:
         DrawTextureRec(
             mTexture, 
             mSourceRect,
-            {position.x - halfX, position.y - halfY},
+            { position.x - halfX, position.y - halfY },
             WHITE
         );
     }
 
-    void setZeroFrame(int zf) { mFrameZero= zf; }
+    bool setTextureFile(std::string tf) {
+        if (mTexture.id != 0) {
+            UnloadTexture(mTexture);
+        }
+        mTexture = LoadTexture(tf.c_str());
+        return (mTexture.id == 0) ? false : true;
+    }
+
+    void setZeroFrame(int zf) { mFrameZero = zf; }
 
     void update() {
         ++mUpdating;

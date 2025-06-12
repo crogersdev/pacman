@@ -102,15 +102,8 @@ public:
         RIGHT
     };
 
-    const std::array<Vector2, 4> directionLut = {{
-        {  0., -1. },  // UP
-        {  0.,  1. },  // DOWN
-        { -1.,  0. },  // LEFT
-        {  1.,  0. }   // RIGHT
-    }};
-
-    Texture2D mPelletSprite;
-    Texture2D mPowerupSprite;
+    std::string mPelletSpritePath;
+    std::string mPowerupSpritePath;
     // todo: add fruit
 
     std::map<std::pair<int, int>, LabyrinthObject> mPellets;
@@ -118,6 +111,7 @@ public:
     // todo: add fruit
 
     Tile at(int row, int col) const;
+    Tile at(Vector2) const;
     void draw();
     int getHeight() const { return mLabyrinth.size(); }
     int getWidth() const { return mLabyrinth.at(0).size(); }

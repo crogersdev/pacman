@@ -2,6 +2,7 @@
 
 #include <raylib.h>
 
+#include "Ghost.hpp"
 #include "Labyrinth.hpp"
 #include "Pacman.hpp"
 #include "helpers/CollisionDetection.hpp"
@@ -17,6 +18,10 @@ int main() {
 
     Labyrinth labyrinth = Labyrinth();
     Pacman pacman = Pacman();
+    Ghost blinky = Ghost(
+        "res/blinky.png", 
+        { 10 * TILE_SIZE - TILE_SIZE / 2, 13 * TILE_SIZE - TILE_SIZE / 2 }
+    );
 
     while (WindowShouldClose() == false) {
         BeginDrawing();
@@ -102,6 +107,8 @@ int main() {
             pacman.move(intendedDirection, intendedPosition);
         }
 
+        blinky.act(labyrinth);
+        blinky.draw();
         pacman.draw();
         EndDrawing();
     }

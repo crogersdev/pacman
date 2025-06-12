@@ -7,17 +7,14 @@
 Pacman::Pacman()
     : mColor(GetColor(0xFFFF00FF)),
       mDebugTileColor(GetColor(0x000000FF)),
-      mDirection{0., 0.},
-      mPacmanTexture(LoadTexture("res/pacman.png")),
-      mPacmanSprite(mPacmanTexture, 26, 26, 3, 10),
+      mDirection{0.f, 0.f},
+      mPacmanSprite("res/pacman.png", 26, 26, 3, 10),
+      mPosition{ 11 * TILE_SIZE + TILE_SIZE / 2, 14 * TILE_SIZE + TILE_SIZE / 2 },
       mRadius(12),
-      mPosition{11*TILE_SIZE + TILE_SIZE / 2, 14 * TILE_SIZE + TILE_SIZE / 2},
-      mSpeed(100.)
+      mSpeed(100.f)
 {}
 
-Pacman::~Pacman() {
-    UnloadTexture(mPacmanTexture);
-}
+Pacman::~Pacman() { std::cout << "PACMAN DESTROYED\n"; }
 
 void Pacman::draw() {
     // #ifndef NDEBUG

@@ -6,7 +6,7 @@
 #include "../Labyrinth.hpp"
 #include "../Pacman.hpp"
 
-inline void CheckCollisions(Pacman pacman, Labyrinth labyrinth) {
+void CheckCollisions(Pacman pacman, Labyrinth labyrinth) {
     int windowRow = std::floor(pacman.mPosition.x);
     int windowCol = std::floor(pacman.mPosition.y);
 

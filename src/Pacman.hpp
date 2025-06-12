@@ -14,12 +14,11 @@ public:
     float lerp(float a, float b, float f) { return a + f * (b - a); }
     void  move(Vector2, Vector2);
 
-    Texture2D      mPacmanTexture;
-    AnimatedSprite mPacmanSprite;
     Color          mColor;
     Color          mDebugTileColor;
     Vector2        mDirection;
-    int            mRadius;
+    AnimatedSprite mPacmanSprite;
     Vector2        mPosition;  // this is registered in pixels
+    int            mRadius;
     float          mSpeed;
 };
