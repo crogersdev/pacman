@@ -36,9 +36,9 @@ void Pacman::move(Vector2 newDirection, Vector2 newPosition) {
     mDirection = newDirection;
     mPosition = newPosition;
 
-    if (newDirection == (Vector2){1., 0.})  { mPacmanSprite.setZeroFrame(0); }
-    if (newDirection == (Vector2){0., 1.})  { mPacmanSprite.setZeroFrame(3); }
-    if (newDirection == (Vector2){-1., 0.}) { mPacmanSprite.setZeroFrame(6); }
-    if (newDirection == (Vector2){0., -1.}) { mPacmanSprite.setZeroFrame(9); }
+    if (newDirection == Vector2{  1.,  0.}) { mPacmanSprite.setZeroFrame(0); }
+    if (newDirection == Vector2{  0.,  1.}) { mPacmanSprite.setZeroFrame(3); }
+    if (newDirection == Vector2{ -1.,  0.}) { mPacmanSprite.setZeroFrame(6); }
+    if (newDirection == Vector2{  0., -1.}) { mPacmanSprite.setZeroFrame(9); }
 
 }

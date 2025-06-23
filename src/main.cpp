@@ -20,7 +20,7 @@ int main() {
     Pacman pacman = Pacman();
     Ghost blinky = Ghost(
         "res/blinky.png", 
-        { 10 * TILE_SIZE - TILE_SIZE / 2, 13 * TILE_SIZE - TILE_SIZE / 2 }
+        { 8 * TILE_SIZE - TILE_SIZE / 2, 13 * TILE_SIZE - TILE_SIZE / 2 }
     );
 
     while (WindowShouldClose() == false) {

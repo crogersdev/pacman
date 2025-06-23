@@ -95,13 +95,6 @@ public:
         return os;
     }
 
-    enum class Direction {
-        UP,
-        DOWN,
-        LEFT,
-        RIGHT
-    };
-
     std::string mPelletSpritePath;
     std::string mPowerupSpritePath;
     // todo: add fruit
