@@ -108,6 +108,7 @@ public:
     void draw();
     int getHeight() const { return mLabyrinth.size(); }
     int getWidth() const { return mLabyrinth.at(0).size(); }
+    bool isLegalMove(Vector2) const;
 
     std::vector<std::string> mLabyrinth = {
         "#######################",  //  0

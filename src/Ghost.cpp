@@ -57,6 +57,8 @@ void Ghost::meander(const Labyrinth &rLabyrinth) {
     int tileY = static_cast<int>(mPosition.y / TILE_SIZE);
     Rectangle r;
     auto availableTurns(directionLut);
+    // what was i doing here
+    // availableTurns.erase()
     for (int i = 0; i < 4; ++i) {
         Direction d = static_cast<Direction>(i);
         auto potentialTileCol = directionLut.at(d).x + tileX;

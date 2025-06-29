@@ -73,7 +73,7 @@ void Labyrinth::draw() {
 
     for (const auto &row : mLabyrinth) {
         for (const auto &col : row) {
-            Tile t = (Tile) col;
+            Tile t = static_cast<Tile>(col);
             switch (t) {
             case Tile::WALL:
                 DrawRectangle(x, y, TILE_SIZE, TILE_SIZE, wallColor);
@@ -86,4 +86,19 @@ void Labyrinth::draw() {
         y += TILE_SIZE;
         x = 0;
     }
+}
+
+bool Labyrinth::isLegalMove(Vector2 pos) const {
+    bool isLegal = true;
+    DrawRectangle(pos.x, pos.y, TILE_SIZE, TILE_SIZE, PURPLE);
+
+    Tile t = at(pos);
+    switch (t) {
+    case Tile::WALL:
+    case Tile::GATE:
+        isLegal = false;
+        break;
+    }
+
+    return isLegal;
 }

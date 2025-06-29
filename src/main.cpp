@@ -6,6 +6,7 @@
 #include "Labyrinth.hpp"
 #include "Pacman.hpp"
 #include "helpers/CollisionDetection.hpp"
+#include "helpers/Movement.hpp"
 
 int main() {
     const int SCREEN_WIDTH = LABYRINTH_COLS * static_cast<int>(TILE_SIZE);
@@ -50,12 +51,12 @@ int main() {
         int intendedCol = static_cast<int>(currentCol + intendedDirection.x);
         int intendedRow = static_cast<int>(currentRow + intendedDirection.y);
 
-        Rectangle intendedTile = {
-            static_cast<float>(intendedCol * TILE_SIZE),
-            static_cast<float>(intendedRow * TILE_SIZE),
-            TILE_SIZE,
-            TILE_SIZE
-        };
+        // Rectangle intendedTileRect = {
+        //     static_cast<float>(intendedCol * TILE_SIZE),
+        //     static_cast<float>(intendedRow * TILE_SIZE),
+        //     TILE_SIZE,
+        //     TILE_SIZE
+        // };
 
         // DrawRectangleLines(intendedCol * TILE_SIZE, intendedRow * TILE_SIZE, 26, 26, RED);
 
@@ -64,48 +65,25 @@ int main() {
             pacman.mPosition.y + (intendedDirection.y * pacman.mSpeed * GetFrameTime())
         };
 
+        Vector2 intendedTile = {
+            intendedPosition.x - (TILE_SIZE / 2.f),
+            intendedPosition.y - (TILE_SIZE / 2.f)
+        };
+
         // DrawCircleLines(intendedPosition.x, intendedPosition.y, pacman.mRadius, ORANGE);
 
-        float centerTileX, centerTileY;
-        bool canMove = true;
-        Rectangle tmpRect;
-
-        for (int row = currentRow-1; row <= currentRow+1; ++row) {
-            for (int col = currentCol-1; col <= currentCol+1; ++col) {
-                centerTileX = col * TILE_SIZE + TILE_SIZE / 2;
-                centerTileY = row * TILE_SIZE + TILE_SIZE / 2;
-
-                Labyrinth::Tile tile = labyrinth.at(row, col);
-                switch (tile) {
-                case Labyrinth::Tile::WALL:
-                case Labyrinth::Tile::GATE:
-                    tmpRect = { static_cast<float>(col * TILE_SIZE), static_cast<float>(row * TILE_SIZE), TILE_SIZE, TILE_SIZE };
-                    if (CheckCollisionCircleRec(intendedPosition, pacman.mRadius, tmpRect)) {
-                        DrawRectangle(tmpRect.x, tmpRect.y, 26, 26, ORANGE);
-                        canMove = false;
-                    }
-                    break;
-                case Labyrinth::Tile::PELLET:
-                    if (!labyrinth.mPellets.count(std::make_pair(col * TILE_SIZE, row * TILE_SIZE))) break;
-                    if (CheckCollisionCircles(intendedPosition, pacman.mRadius - 6, { centerTileX, centerTileY }, 3)) {
-                        labyrinth.mPellets.erase(std::make_pair(col * TILE_SIZE, row * TILE_SIZE)); 
-                    }
-                    break;
-                case Labyrinth::Tile::POWERUP:
-                    if (!labyrinth.mPowerups.count(std::make_pair(col * TILE_SIZE, row * TILE_SIZE))) break;
-                    if (CheckCollisionCircles(intendedPosition, pacman.mRadius - 10, { centerTileX, centerTileY }, 8)) {
-                        labyrinth.mPowerups.erase(std::make_pair(col * TILE_SIZE, row * TILE_SIZE));
-                    }
-                    break;
-                default:
-                    std::cout << "duh\n";
-                }
+        if (pacman.isCentered()) {
+            if (labyrinth.isLegalMove(intendedTile)) {
+                pacman.move(intendedDirection, intendedPosition);
             }
+        } else {
+            Vector2 newPosition = {
+                pacman.mPosition.x + (pacman.mDirection.x * pacman.mSpeed * GetFrameTime()),
+                pacman.mPosition.y + (pacman.mDirection.y * pacman.mSpeed * GetFrameTime())
+            };
+            pacman.move(pacman.mDirection, newPosition);
         }
-
-        if (canMove) {
-            pacman.move(intendedDirection, intendedPosition);
-        }
+        
 
         blinky.act(labyrinth);
         blinky.draw();
