@@ -24,66 +24,68 @@ int main() {
         { 8 * TILE_SIZE - TILE_SIZE / 2, 13 * TILE_SIZE - TILE_SIZE / 2 }
     );
 
+    Vector2 intendedDirection = { 0.f, 0.f };
+
     while (WindowShouldClose() == false) {
         BeginDrawing();
         ClearBackground(BLACK);
         labyrinth.draw();
 
-        Vector2 intendedDirection = { 0.f, 0.f };
-
-        // Handle inputs
-        if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) { 
-            intendedDirection = { intendedDirection.x, intendedDirection.y + 1.f };
+        intendedDirection = { 0.f, 0.f };
+        if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) {
+            intendedDirection = { 0.f, 1.f };
         }
         if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) {
-            intendedDirection = { intendedDirection.x, intendedDirection.y - 1.f };
+            intendedDirection = { 0.f, -1.f };
         }
         if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) {
-            intendedDirection = { intendedDirection.x + 1.f, intendedDirection.y };
+            intendedDirection = { 1.f, 0.f };
         }
         if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) {
-            intendedDirection = { intendedDirection.x - 1.f, intendedDirection.y };
+            intendedDirection = { -1.f, 0.f };
         }
 
-        int currentCol = static_cast<int>(pacman.mPosition.x / TILE_SIZE);
-        int currentRow = static_cast<int>(pacman.mPosition.y / TILE_SIZE);
-
-        int intendedCol = static_cast<int>(currentCol + intendedDirection.x);
-        int intendedRow = static_cast<int>(currentRow + intendedDirection.y);
-
-        // Rectangle intendedTileRect = {
-        //     static_cast<float>(intendedCol * TILE_SIZE),
-        //     static_cast<float>(intendedRow * TILE_SIZE),
-        //     TILE_SIZE,
-        //     TILE_SIZE
-        // };
-
-        // DrawRectangleLines(intendedCol * TILE_SIZE, intendedRow * TILE_SIZE, 26, 26, RED);
+        // std::cout << "{ " << intendedDirection.x << ", " << intendedDirection.y << " }\n";
+        int currentTileX = static_cast<int>(pacman.mPosition.x / TILE_SIZE);
+        int currentTileY = static_cast<int>(pacman.mPosition.y / TILE_SIZE);
 
         Vector2 intendedPosition = {
-            pacman.mPosition.x + (intendedDirection.x * pacman.mSpeed * GetFrameTime()),
-            pacman.mPosition.y + (intendedDirection.y * pacman.mSpeed * GetFrameTime())
+            (currentTileX + intendedDirection.x) * TILE_SIZE + TILE_SIZE / 2,
+            (currentTileY + intendedDirection.y) * TILE_SIZE + TILE_SIZE / 2
         };
 
-        Vector2 intendedTile = {
-            intendedPosition.x - (TILE_SIZE / 2.f),
-            intendedPosition.y - (TILE_SIZE / 2.f)
-        };
+        // std::cout << "pacman's position: (" << pacman.mPosition.y << "," << pacman.mPosition.x << ")\n";
+        // std::cout << "pacman's intended position: (" << intendedPosition.y << ", " << intendedPosition.x << ")\n";
 
-        // DrawCircleLines(intendedPosition.x, intendedPosition.y, pacman.mRadius, ORANGE);
+        //std::cout << "Current tile: (" << currentTileX << "," << currentTileY << ")\n";
+        //std::cout << "Intended tile: (" << static_cast<int>(intendedPosition.x/TILE_SIZE) 
+        //          << "," << static_cast<int>(intendedPosition.y/TILE_SIZE) << ")\n";
+        //std::cout << "Is centered: " << (pacman.isCentered() ? "yes" : "no") << "\n";
 
         if (pacman.isCentered()) {
-            if (labyrinth.isLegalMove(intendedTile)) {
-                pacman.move(intendedDirection, intendedPosition);
+            if (intendedDirection.x != 0.f || intendedDirection.y != 0.f) {
+                if (labyrinth.isLegalMove(intendedPosition)) {
+                    pacman.mDirection = intendedDirection;
+                } else {
+                    std::cout << "move not legal\n";
+                }
+            } else {
+                pacman.mDirection = { 0.f, 0.f };
             }
-        } else {
-            Vector2 newPosition = {
-                pacman.mPosition.x + (pacman.mDirection.x * pacman.mSpeed * GetFrameTime()),
-                pacman.mPosition.y + (pacman.mDirection.y * pacman.mSpeed * GetFrameTime())
-            };
-            pacman.move(pacman.mDirection, newPosition);
+
+           Vector2 intendedDirectionFromMomentum = {
+            (currentTileX + pacman.mDirection.x) * TILE_SIZE + TILE_SIZE / 2,
+            (currentTileY + pacman.mDirection.y) * TILE_SIZE + TILE_SIZE / 2,
+           };
+
+           if (!labyrinth.isLegalMove(intendedDirectionFromMomentum)) {
+            pacman.mDirection = { 0.f, 0.f };
+           }
         }
-        
+
+        if (pacman.mDirection.x != 0.f || pacman.mDirection.y != 0.f) {
+            pacman.move();
+        }
 
         blinky.act(labyrinth);
         blinky.draw();

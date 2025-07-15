@@ -87,7 +87,7 @@ void Ghost::meander(const Labyrinth &rLabyrinth) {
         auto it = availableTurns.begin();
         std::advance(it, dis(gen) % availableTurns.size());
         mDirection = it->second;
-        std::cout << "changing direction to " << static_cast<int>(it->first) << "\n";
+        // std::cout << "changing direction to " << static_cast<int>(it->first) << "\n";
         float dt = GetFrameTime();
         mPosition = Vector2Add(mPosition, Vector2Scale(mDirection, mSpeed));
         return;
