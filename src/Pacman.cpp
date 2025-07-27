@@ -36,8 +36,12 @@ bool Pacman::isCentered() {
     const float ALIGNMENT_THRESHOLD = 1.5f;
     const float TILE_CENTER_OFFSET = TILE_SIZE / 2.f;
     
-    float distFromTileCenterX = fabs((mPosition.x - TILE_CENTER_OFFSET) - (static_cast<int>(mPosition.x / TILE_SIZE) * TILE_SIZE));
-    float distFromTileCenterY = fabs((mPosition.y - TILE_CENTER_OFFSET) - (static_cast<int>(mPosition.y / TILE_SIZE) * TILE_SIZE));
+    float distFromTileCenterX = fabs(
+        (mPosition.x - TILE_CENTER_OFFSET) -
+        (static_cast<int>(mPosition.x / TILE_SIZE) * TILE_SIZE));
+    float distFromTileCenterY = fabs(
+        (mPosition.y - TILE_CENTER_OFFSET) -
+        (static_cast<int>(mPosition.y / TILE_SIZE) * TILE_SIZE));
 
     return (distFromTileCenterX < ALIGNMENT_THRESHOLD &&
             distFromTileCenterY < ALIGNMENT_THRESHOLD);

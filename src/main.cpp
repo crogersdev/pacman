@@ -23,6 +23,7 @@ int main() {
         "res/blinky.png", 
         { 8 * TILE_SIZE - TILE_SIZE / 2, 13 * TILE_SIZE - TILE_SIZE / 2 }
     );
+    blinky.mState = Ghost::State::CHASE;
 
     Vector2 intendedDirection = { 0.f, 0.f };
 
@@ -73,12 +74,12 @@ int main() {
                 pacman.mDirection = { 0.f, 0.f };
             }
 
-           Vector2 intendedDirectionFromMomentum = {
+           Vector2 intendedTileFromMomentum = {
             (currentTileX + pacman.mDirection.x) * TILE_SIZE + TILE_SIZE / 2,
             (currentTileY + pacman.mDirection.y) * TILE_SIZE + TILE_SIZE / 2,
            };
 
-           if (!labyrinth.isLegalMove(intendedDirectionFromMomentum)) {
+           if (!labyrinth.isLegalMove(intendedTileFromMomentum)) {
             pacman.mDirection = { 0.f, 0.f };
            }
         }
@@ -87,7 +88,7 @@ int main() {
             pacman.move();
         }
 
-        blinky.act(labyrinth);
+        blinky.act(labyrinth, pacman.mPosition);
         blinky.draw();
         pacman.draw();
         EndDrawing();
