@@ -8,11 +8,11 @@ void chase() {
 
 Ghost::Ghost(std::string tp, Vector2 pos) 
     : mDirection{1.f, 0.f},
-      mPosition(pos),
       mGhostSprite(tp, 26, 26, 2, 4),
       mSpeed(.5f),
       mState(State::MEANDER) {
 
+    mPosition = { pos.x * TILE_SIZE - TILE_SIZE / 2.f, pos.y * TILE_SIZE - TILE_SIZE / 2.f };
     std::random_device rd;
     std::mt19937 mGen(rd());
 }

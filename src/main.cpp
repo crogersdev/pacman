@@ -19,11 +19,10 @@ int main() {
 
     Labyrinth labyrinth = Labyrinth();
     Pacman pacman = Pacman();
-    Ghost blinky = Ghost(
-        "res/blinky.png", 
-        { 8 * TILE_SIZE - TILE_SIZE / 2, 13 * TILE_SIZE - TILE_SIZE / 2 }
-    );
+    Ghost blinky = Ghost("res/blinky.png", Vector2{ 8, 13 }); 
     blinky.mState = Ghost::State::CHASE;
+    Ghost pinky = Ghost("res/pinky.png", Vector2{ 8, 12 });
+    pinky.mState = Ghost::State::MEANDER;
 
     Vector2 intendedDirection = { 0.f, 0.f };
 
@@ -90,6 +89,8 @@ int main() {
 
         blinky.act(labyrinth, pacman.mPosition);
         blinky.draw();
+        pinky.act(labyrinth, pacman.mPosition);
+        pinky.draw();
         pacman.draw();
         EndDrawing();
     }
