@@ -13,7 +13,7 @@ public:
     void  draw();
     float lerp(float a, float b, float f) { return a + f * (b - a); }
     bool  isCentered();
-    void  move();
+    void  move(Vector2, const Labyrinth &);
     void  snapToCenter();
 
     Color          mColor;

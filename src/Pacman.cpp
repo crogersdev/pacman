@@ -47,7 +47,43 @@ bool Pacman::isCentered() {
             distFromTileCenterY < ALIGNMENT_THRESHOLD);
 }
 
-void Pacman::move() {
+void Pacman::move(Vector2 intendedDirection, const Labyrinth &rLabyrinth) {
+
+    // std::cout << "{ " << intendedDirection.x << ", " << intendedDirection.y << " }\n";
+    int currentTileX = static_cast<int>(mPosition.x / TILE_SIZE);
+    int currentTileY = static_cast<int>(mPosition.y / TILE_SIZE);
+
+    Vector2 intendedPosition = {
+        (currentTileX + intendedDirection.x) * TILE_SIZE + TILE_SIZE / 2.f,
+        (currentTileY + intendedDirection.y) * TILE_SIZE + TILE_SIZE / 2.f
+    };
+
+    if (isCentered()) {
+        if (intendedDirection.x != 0.f || intendedDirection.y != 0.f) {
+            if (rLabyrinth.isLegalMove(intendedPosition)) {
+                mDirection = intendedDirection;
+            } else {
+                std::cout << "move not legal\n";
+            }
+        } else {
+            // no more input 
+            mDirection = { 0.f, 0.f };
+        }
+
+        Vector2 intendedTileFromMomentum = {
+            (currentTileX + mDirection.x) * TILE_SIZE + TILE_SIZE / 2.f,
+            (currentTileY + mDirection.y) * TILE_SIZE + TILE_SIZE / 2.f,
+        };
+
+        if (!rLabyrinth.isLegalMove(intendedTileFromMomentum)) {
+            // prevents hitting illegal tile
+            mDirection = { 0.f, 0.f };
+        }
+    }
+
+    if (mDirection.x == 0.f && mDirection.y == 0.f) {
+        return;
+    }
 
     mPacmanSprite.update();
 
