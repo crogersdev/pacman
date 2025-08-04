@@ -47,6 +47,10 @@ bool Pacman::isCentered() {
             distFromTileCenterY < ALIGNMENT_THRESHOLD);
 }
 
+Vector2 Pacman::getTilePosition() const {
+    return Vector2{ mPosition.x / TILE_SIZE, mPosition.y / TILE_SIZE };
+}
+
 void Pacman::move(Vector2 intendedDirection, const Labyrinth &rLabyrinth) {
 
     // std::cout << "{ " << intendedDirection.x << ", " << intendedDirection.y << " }\n";

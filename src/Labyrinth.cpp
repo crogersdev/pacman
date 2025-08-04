@@ -11,21 +11,21 @@ Labyrinth::Labyrinth() {
     int c = 0, r = 0;
 
     for (const auto& row : mLabyrinth) {
-        centerTileY = r + TILE_SIZE / 2;
+        centerTileY = r + TILE_SIZE / 2.f;
         for (const auto& col : row) {
-            centerTileX = c + TILE_SIZE / 2;
+            centerTileX = c + TILE_SIZE / 2.f;
             Tile tile = static_cast<Tile>(col);
 
             switch (tile) {
             case Tile::PELLET:
                 // std::cout << "adding a pellet at row: " << row << ", col: " << col << "\n";
-                mPellets.insert(std::make_pair(std::make_pair(c, r), LabyrinthObject(
+                mPellets.insert(std::make_pair(std::make_pair(c / TILE_SIZE, r / TILE_SIZE), LabyrinthObject(
                         AnimatedSprite(mPelletSpritePath, TILE_SIZE, TILE_SIZE, 2, 10),
                         {centerTileX, centerTileY},
                         3)));
                 break;
             case Tile::POWERUP:
-                mPowerups.insert(std::make_pair(std::make_pair(c, r), LabyrinthObject(
+                mPowerups.insert(std::make_pair(std::make_pair(c / TILE_SIZE, r / TILE_SIZE), LabyrinthObject(
                         AnimatedSprite(mPowerupSpritePath, TILE_SIZE, TILE_SIZE, 2, 12),
                         {centerTileX, centerTileY},
                         8)));

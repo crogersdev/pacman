@@ -96,6 +96,10 @@ std::map<Direction, Vector2> Ghost::getAvailableTurns(const Labyrinth &rLabyrint
     return availableTurns;
 }
 
+Vector2 Ghost::getTilePosition() const {
+    return Vector2{ mPosition.x / TILE_SIZE, mPosition.y / TILE_SIZE };
+}
+
 void Ghost::meander(const Labyrinth &rLabyrinth) {
 
     if (isCentered()) {

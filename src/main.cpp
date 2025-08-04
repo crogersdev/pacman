@@ -2,6 +2,7 @@
 
 #include <raylib.h>
 
+#include "GameManager.hpp"
 #include "Ghost.hpp"
 #include "Labyrinth.hpp"
 #include "Pacman.hpp"
@@ -17,6 +18,7 @@ int main() {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pacman!");
     SetTargetFPS(60);
 
+    GameManager gm = GameManager();
     Labyrinth labyrinth = Labyrinth();
     Pacman pacman = Pacman();
     Ghost blinky = Ghost("res/blinky.png", Vector2{ 8, 13 }); 
@@ -45,22 +47,47 @@ int main() {
             intendedDirection = { -1.f, 0.f };
         }
 
-        // std::cout << "pacman's position: (" << pacman.mPosition.y << "," << pacman.mPosition.x << ")\n";
-        // std::cout << "pacman's intended position: (" << intendedPosition.y << ", " << intendedPosition.x << ")\n";
-
-        //std::cout << "Current tile: (" << currentTileX << "," << currentTileY << ")\n";
-        //std::cout << "Intended tile: (" << static_cast<int>(intendedPosition.x/TILE_SIZE) 
-        //          << "," << static_cast<int>(intendedPosition.y/TILE_SIZE) << ")\n";
-        //std::cout << "Is centered: " << (pacman.isCentered() ? "yes" : "no") << "\n";
-
         pacman.move(intendedDirection, labyrinth);
-
-
         blinky.act(labyrinth, pacman.mPosition);
-        blinky.draw();
         pinky.act(labyrinth, pacman.mPosition);
-        pinky.draw();
+
+        std::vector<Ghost> ghosts = { blinky, pinky };
+
+        // collisions
+        Vector2 pacmanTilePosition = pacman.getTilePosition();
+        int pacmanTileX = static_cast<int>(pacmanTilePosition.x);
+        int pacmanTileY = static_cast<int>(pacmanTilePosition.y);
+
+        // pellet collisions
+        if (labyrinth.mPellets.find({ pacmanTileX, pacmanTileY }) != labyrinth.mPellets.end()) {
+            labyrinth.mPellets.erase({ pacmanTileX, pacmanTileY });
+            gm.onDotsEaten();
+            std::cout << "nomnomnom\n";
+        }
+
+        // powerup collisions
+        if (labyrinth.mPowerups.find({ pacmanTileX, pacmanTileY }) != labyrinth.mPowerups.end()) {
+            labyrinth.mPowerups.erase({ pacmanTileX, pacmanTileY });
+            gm.onPowerUpEaten();
+            for (Ghost& ghost : ghosts) {
+                ghost.mState = Ghost::State::FRIGHTENED;
+            }
+        }
+
+        // ghost collisions
+        for (const Ghost& ghost : ghosts) {
+            if (pacmanTilePosition.x == ghost.getTilePosition().x &&
+                pacmanTilePosition.y == ghost.getTilePosition().y) {
+                    // TODO: this is where pacman dies
+                    std::cout << "PACMAN DEAD YO\n";
+                }
+        }
+
+        std::cout << "score: " << gm.getScore() << "\n";
+
         pacman.draw();
+        blinky.draw();
+        pinky.draw();
         EndDrawing();
     }
 

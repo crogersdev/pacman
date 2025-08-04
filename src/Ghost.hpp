@@ -20,11 +20,12 @@ public:
     Ghost(std::string, Vector2);
     ~Ghost();
 
-    void act(const Labyrinth &, const Vector2);
-    void chase(const Labyrinth &, const Vector2);
-    void draw();
-    bool isCentered();
-    void meander(const Labyrinth &);
+    void    act(const Labyrinth &, const Vector2);
+    void    chase(const Labyrinth &, const Vector2);
+    void    draw();
+    bool    isCentered();
+    Vector2 getTilePosition() const;
+    void    meander(const Labyrinth &);
 
     Vector2        mDirection;
     std::mt19937   mGen;

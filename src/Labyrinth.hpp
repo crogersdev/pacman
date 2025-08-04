@@ -107,6 +107,8 @@ public:
     Tile at(Vector2) const;
     void draw();
     int  getHeight() const { return mLabyrinth.size(); }
+    int  getRemainingPellets() const { return mPellets.size(); }
+    int  getRemainingPowerups() const { return mPowerups.size(); }
     int  getWidth() const { return mLabyrinth.at(0).size(); }
     bool isLegalMove(Vector2) const;
 

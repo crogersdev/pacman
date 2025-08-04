@@ -10,11 +10,11 @@ public:
     Pacman();
     ~Pacman();
 
-    void  draw();
-    float lerp(float a, float b, float f) { return a + f * (b - a); }
-    bool  isCentered();
-    void  move(Vector2, const Labyrinth &);
-    void  snapToCenter();
+    void    draw();
+    bool    isCentered();
+    Vector2 getTilePosition() const;
+    float   lerp(float a, float b, float f) { return a + f * (b - a); }
+    void    move(Vector2, const Labyrinth &);
 
     Color          mColor;
     Color          mDebugTileColor;

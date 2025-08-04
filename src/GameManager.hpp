@@ -12,10 +12,13 @@ public:
         GAME_WON        = 4,
     };
 
-    GameManager();
-    ~GameManager();
+    inline GameManager() {};
+    inline ~GameManager() {};
 
-    void onDeath() {
+    inline int getScore() const { return mScore; }
+    inline int getLives() const { return mPacmanLives; }
+
+    inline void onDeath() {
         mPacmanLives--;
 
         if (mPacmanLives < 0) {
@@ -23,7 +26,7 @@ public:
         }
     };
 
-    void onDotsEaten() {
+    inline void onDotsEaten() {
         mScore += 10;
         mScoreExtraLife++;
         mDotsEaten++;
@@ -34,11 +37,15 @@ public:
         }
     };
 
-    void onPowerUpEaten() {
+    inline void onPowerUpEaten() {
         mState = State::PLAYING_POWERUP;
     };
 
-    void onStartGame() {
+    inline void onPowerUpWearsOff() {
+        mState = State::PLAYING;
+    }
+
+    inline void onStartGame() {
         mPacmanLives = 3;
         mScoreExtraLife = 0;
         mScore = 0;
