@@ -11,26 +11,59 @@
 class Ghost {
 public:
     enum class State {
-        CHASE      = 0,
-        FRIGHTENED = 1,
-        MEANDER    = 2,
-        SCATTER    = 3,
+        CHASE           = 0,
+        FRIGHTENED      = 1,
+        SCATTER         = 2,
+        GOING_TO_PRISON = 3,
+        MEANDER         = 4
     };
 
-    Ghost(std::string, Vector2);
+    friend std::ostream &operator<<(std::ostream &os, State s) {
+        switch(s) {
+        case State::CHASE:
+            os << "CHASE";
+            break;
+        case State::FRIGHTENED:
+            os << "FRIGHTENED";
+            break;
+        case State::SCATTER:
+            os << "SCATTER";
+            break;
+        case State::GOING_TO_PRISON:
+            os << "GOING_TO_PRISON";
+            break;
+        case State::MEANDER:
+            os << "MEANDER";
+            break;
+        default:
+            os << "duh";
+        }
+        return os;
+    }
+
+    Ghost(std::string, Vector2, Vector2);
     ~Ghost();
 
-    void    act(const Labyrinth &, const Vector2);
-    void    chase(const Labyrinth &, const Vector2);
+    void    act(const Labyrinth &);
+    void    chase(const Labyrinth &);
     void    draw();
     bool    isCentered();
     Vector2 getTilePosition() const;
     void    meander(const Labyrinth &);
+    void    setChaseTarget(const Vector2 &);
+    void    updateSprite();
 
+    float          mChaseSpeed;
+    Vector2        mChaseTarget;
     Vector2        mDirection;
+    float          mFrightenedSpeed;
     std::mt19937   mGen;
     AnimatedSprite mGhostSprite;
+    std::string    mGhostTexture;
     Vector2        mPosition;
+    float          mPrisonSpeed;
+    Vector2        mPrisonPosition;
+    Vector2        mScatterCorner;
     float          mSpeed;
     State          mState;
 

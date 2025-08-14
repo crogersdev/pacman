@@ -11,7 +11,7 @@
 
 const int   LABYRINTH_ROWS = 24;
 const int   LABYRINTH_COLS = 23;
-const int   TUNNEL_ROW     = LABYRINTH_ROWS / 2;
+const int   TUNNEL_ROW     = 11;
 const float TILE_SIZE      = 26.;
 
 class Labyrinth {
@@ -105,6 +105,7 @@ public:
 
     Tile at(int row, int col) const;
     Tile at(Vector2) const;
+    void createTileSpriteOffsets() const;
     void draw();
     int  getHeight() const { return mLabyrinth.size(); }
     int  getRemainingPellets() const { return mPellets.size(); }
@@ -137,5 +138,12 @@ public:
         "#.########.#.########.#",  // 21 
         "#.....................#",  // 22 
         "#######################"   // 23 
+    };
+
+    struct LabyrinthTileMap {
+        uint8_t   tiles[LABYRINTH_ROWS][LABYRINTH_COLS];
+        Texture2D spritesheet;
+        int       tileWidth;
+        int       tileHeight; 
     };
 };

@@ -9,7 +9,7 @@
 
 class AnimatedSprite {
 public:
-    AnimatedSprite(std::string sp, int fw, int fh, int fc, float fps)
+    inline AnimatedSprite(std::string sp, int fw, int fh, int fc, float fps)
         : mFPS(fps),
           mCurrentFrame(0),
           mFrameCount(fc),
@@ -25,9 +25,9 @@ public:
         mSourceRect = { 0, 0, static_cast<float>(fw), static_cast<float>(fh) };
     } 
 
-    ~AnimatedSprite() { }
+    inline ~AnimatedSprite() { }
 
-    void draw(Vector2 position) const {
+    inline void draw(Vector2 position) const {
         auto halfX = mFrameWidth / 2;
         auto halfY = mFrameHeight / 2;
         DrawTextureRec(
@@ -38,7 +38,7 @@ public:
         );
     }
 
-    bool setTextureFile(std::string tf) {
+    inline bool setTextureFile(std::string tf) {
         if (mTexture.id != 0) {
             UnloadTexture(mTexture);
         }
@@ -46,9 +46,9 @@ public:
         return (mTexture.id == 0) ? false : true;
     }
 
-    void setZeroFrame(int zf) { mFrameZero = zf; }
+    inline void setZeroFrame(int zf) { mFrameZero = zf; }
 
-    void update() {
+    inline void update() {
         ++mUpdating;
         if (mUpdating > 0) {
             mFrameTimer += GetFrameTime();
@@ -73,5 +73,4 @@ private:
 
     Rectangle mSourceRect;
     Texture2D mTexture;
-
 };

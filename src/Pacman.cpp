@@ -89,13 +89,28 @@ void Pacman::move(Vector2 intendedDirection, const Labyrinth &rLabyrinth) {
         return;
     }
 
-    mPacmanSprite.update();
-
     if (mDirection == Vector2{  1.,  0.}) { mPacmanSprite.setZeroFrame(0); }
     if (mDirection == Vector2{  0.,  1.}) { mPacmanSprite.setZeroFrame(3); }
     if (mDirection == Vector2{ -1.,  0.}) { mPacmanSprite.setZeroFrame(6); }
     if (mDirection == Vector2{  0., -1.}) { mPacmanSprite.setZeroFrame(9); }
 
-    mPosition.x += mDirection.x * mSpeed * GetFrameTime();
-    mPosition.y += mDirection.y * mSpeed * GetFrameTime();
+    Vector2 newPosition = {
+        mPosition.x + (mDirection.x * mSpeed * GetFrameTime()),
+        mPosition.y + (mDirection.y * mSpeed * GetFrameTime())
+    };
+
+    int newTileX = static_cast<int>(newPosition.x / TILE_SIZE);
+    int newTileY = static_cast<int>(newPosition.y / TILE_SIZE);
+
+    if (newTileY == TUNNEL_ROW) {
+        if (newTileX < 0) {
+            newPosition.x = (LABYRINTH_COLS * TILE_SIZE);
+        }
+        if (newTileX > LABYRINTH_COLS) {
+            newPosition.x = 0;
+        }
+    }
+
+    mPosition = newPosition;
+    mPacmanSprite.update();
 }

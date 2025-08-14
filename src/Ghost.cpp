@@ -2,15 +2,18 @@
 
 #include <raymath.h>
 
-void chase() {
-    
-} 
-
-Ghost::Ghost(std::string tp, Vector2 pos) 
-    : mDirection{1.f, 0.f},
+Ghost::Ghost(std::string tp, Vector2 pos, Vector2 scatterPosition) 
+    :
+      mChaseSpeed(40.f),
+      mDirection{1.f, 0.f},
+      mFrightenedSpeed(30.f),
       mGhostSprite(tp, 26, 26, 2, 4),
-      mSpeed(.5f),
-      mState(State::MEANDER) {
+      mGhostTexture(tp),
+      mPrisonSpeed(55.f),
+      mPrisonPosition(Vector2{ 10 * TILE_SIZE, 12 * TILE_SIZE }),
+      mScatterCorner(scatterPosition),
+      mSpeed(40.f),
+      mState(State::SCATTER) {
 
     mPosition = { pos.x * TILE_SIZE - TILE_SIZE / 2.f, pos.y * TILE_SIZE - TILE_SIZE / 2.f };
     std::random_device rd;
@@ -19,20 +22,40 @@ Ghost::Ghost(std::string tp, Vector2 pos)
 
 Ghost::~Ghost() {}
 
-void Ghost::act(const Labyrinth &rLabyrinth, const Vector2 targetPosition) {
+void Ghost::act(const Labyrinth &rLabyrinth) {
     switch (mState) {
+    case State::CHASE:
+        chase(rLabyrinth);
+        mSpeed = mChaseSpeed;
+        break;
+    case State::FRIGHTENED:
+        meander(rLabyrinth);
+        mSpeed = mFrightenedSpeed;
+        break;
+    case State::SCATTER:
+        chase(rLabyrinth);
+        mSpeed = mChaseSpeed;
+        break;
+    case State::GOING_TO_PRISON:
+        chase(rLabyrinth);
+        mSpeed = mPrisonSpeed;
+        break; 
     case State::MEANDER:
         meander(rLabyrinth);
         break;
-    case State::CHASE:
-        chase(rLabyrinth, targetPosition);
-        break; 
     default:
         break;
     }
 }
 
-void Ghost::chase(const Labyrinth &rLabyrinth, const Vector2 pacmanPosition) {
+void Ghost::chase(const Labyrinth &rLabyrinth) {
+    Vector2 target = mChaseTarget;
+    if (mState == State::SCATTER) {
+        target = mScatterCorner;
+    } else if (mState == State::GOING_TO_PRISON) {
+        target = mPrisonPosition;
+    }
+
     auto availableTurns = getAvailableTurns(rLabyrinth);
 
     if (isCentered()) {
@@ -41,7 +64,7 @@ void Ghost::chase(const Labyrinth &rLabyrinth, const Vector2 pacmanPosition) {
 
         for (const auto& t: availableTurns ) {
             Vector2 potentialPosition = { mPosition.x + t.second.x * TILE_SIZE, mPosition.y + t.second.y * TILE_SIZE };
-            int d = computeTileDistance(potentialPosition, pacmanPosition);
+            int d = computeTileDistance(potentialPosition, target);
             if (d < bestDistance) {
                 bestDistance = d;
                 turn = t.second;
@@ -133,17 +156,45 @@ void Ghost::meander(const Labyrinth &rLabyrinth) {
     }
 
     updateSpriteFrameAndMove();
+}
 
+void Ghost::setChaseTarget(const Vector2 &pos) {
+    mChaseTarget = pos;
+}
+
+void Ghost::updateSprite() {
+    if (mState == Ghost::State::FRIGHTENED) {
+        mGhostSprite.setTextureFile("res/frightened.png");
+    } else {
+        mGhostSprite.setTextureFile(mGhostTexture); 
+    }
 }
 
 void Ghost::updateSpriteFrameAndMove() {
-    if (mDirection == Vector2{  0.f, -1.f }) { mGhostSprite.setZeroFrame(0); }
-    if (mDirection == Vector2{  0.f,  1.f }) { mGhostSprite.setZeroFrame(6); }
-    if (mDirection == Vector2{ -1.f,  0.f }) { mGhostSprite.setZeroFrame(4); }
-    if (mDirection == Vector2{  1.f,  0.f }) { mGhostSprite.setZeroFrame(2); }
+    if (mState != Ghost::State::FRIGHTENED) {
+        if (mDirection == Vector2{  0.f, -1.f }) { mGhostSprite.setZeroFrame(0); }
+        if (mDirection == Vector2{  0.f,  1.f }) { mGhostSprite.setZeroFrame(6); }
+        if (mDirection == Vector2{ -1.f,  0.f }) { mGhostSprite.setZeroFrame(4); }
+        if (mDirection == Vector2{  1.f,  0.f }) { mGhostSprite.setZeroFrame(2); }
+    }
 
-    float dt = GetFrameTime();
-    mPosition = Vector2Add(mPosition, Vector2Scale(mDirection, mSpeed));
+    Vector2 newPosition = {
+        mPosition.x + (mDirection.x * mSpeed * GetFrameTime()),
+        mPosition.y + (mDirection.y * mSpeed * GetFrameTime())
+    };
+
+    int newTileX = static_cast<int>(newPosition.x / TILE_SIZE);
+    int newTileY = static_cast<int>(newPosition.y / TILE_SIZE);
+
+    if (newTileY == TUNNEL_ROW) {
+        if (newTileX < 0) {
+            newPosition.x = (LABYRINTH_COLS * TILE_SIZE);
+        }
+        if (newTileX > LABYRINTH_COLS) {
+            newPosition.x = 0;
+        }
+    }
+
+    mPosition = newPosition;
     mGhostSprite.update();
-
 }
