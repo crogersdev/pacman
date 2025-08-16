@@ -59,6 +59,7 @@ public:
         for (auto &g : mGhosts) {
             g->setChaseTarget(mPacman->mPosition);
             g->mState = Ghost::State::CHASE;
+            g->updateSprite();
         }
     }
 

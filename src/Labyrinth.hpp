@@ -95,6 +95,13 @@ public:
         return os;
     }
 
+    struct LabyrinthTileMap {
+        uint8_t   tiles[LABYRINTH_ROWS][LABYRINTH_COLS];
+        Texture2D spritesheet;
+        int       tileWidth;
+        int       tileHeight; 
+    };
+    
     std::string mPelletSpritePath;
     std::string mPowerupSpritePath;
     // todo: add fruit
@@ -105,13 +112,15 @@ public:
 
     Tile at(int row, int col) const;
     Tile at(Vector2) const;
-    void createTileSpriteOffsets() const;
+    void createTileSpriteOffsets();
     void draw();
     int  getHeight() const { return mLabyrinth.size(); }
     int  getRemainingPellets() const { return mPellets.size(); }
     int  getRemainingPowerups() const { return mPowerups.size(); }
     int  getWidth() const { return mLabyrinth.at(0).size(); }
     bool isLegalMove(Vector2) const;
+
+    LabyrinthTileMap mLabyrinthTileMap;
 
     std::vector<std::string> mLabyrinth = {
         "#######################",  //  0
@@ -140,10 +149,5 @@ public:
         "#######################"   // 23 
     };
 
-    struct LabyrinthTileMap {
-        uint8_t   tiles[LABYRINTH_ROWS][LABYRINTH_COLS];
-        Texture2D spritesheet;
-        int       tileWidth;
-        int       tileHeight; 
-    };
+
 };

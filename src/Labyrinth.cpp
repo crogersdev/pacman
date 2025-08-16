@@ -3,9 +3,11 @@
 #include "helpers/Movement.hpp"
 #include "Labyrinth.hpp"
 
-Labyrinth::Labyrinth() {
-    mPelletSpritePath = "res/pellet.png";
-    mPowerupSpritePath = "res/powerup.png";
+Labyrinth::Labyrinth()
+    :
+      mPelletSpritePath("res/pellet.png"),
+      mPowerupSpritePath("res/powerup.png"),
+      mLabyrinthTileMap{ {}, LoadTexture("res/labyrinth.png"), 26, 26 } {
 
     float centerTileY, centerTileX;
     int c = 0, r = 0;
@@ -19,16 +21,20 @@ Labyrinth::Labyrinth() {
             switch (tile) {
             case Tile::PELLET:
                 // std::cout << "adding a pellet at row: " << row << ", col: " << col << "\n";
-                mPellets.insert(std::make_pair(std::make_pair(c / TILE_SIZE, r / TILE_SIZE), LabyrinthObject(
+                mPellets.insert(std::make_pair(
+                    std::make_pair(c / TILE_SIZE, r / TILE_SIZE), LabyrinthObject(
                         AnimatedSprite(mPelletSpritePath, TILE_SIZE, TILE_SIZE, 2, 10),
-                        {centerTileX, centerTileY},
-                        3)));
+                        { centerTileX, centerTileY },
+                        3)
+                    ));
                 break;
             case Tile::POWERUP:
-                mPowerups.insert(std::make_pair(std::make_pair(c / TILE_SIZE, r / TILE_SIZE), LabyrinthObject(
+                mPowerups.insert(std::make_pair(
+                    std::make_pair(c / TILE_SIZE, r / TILE_SIZE), LabyrinthObject(
                         AnimatedSprite(mPowerupSpritePath, TILE_SIZE, TILE_SIZE, 2, 12),
-                        {centerTileX, centerTileY},
-                        8)));
+                        { centerTileX, centerTileY },
+                        8)
+                    ));
                 break;
             default:
                 break;
@@ -57,6 +63,26 @@ Labyrinth::Tile Labyrinth::at(Vector2 pos) const {
     int col = static_cast<int>(pos.x / TILE_SIZE);
 
     return at(row, col);
+}
+
+void Labyrinth::createTileSpriteOffsets() {
+    int spriteOffset = 0;
+
+    for (int row = 0; row < LABYRINTH_ROWS; row++) {
+        for (int col = 0; col < LABYRINTH_COLS; col++) {
+            // check up
+            if (row - 1 >= 0 && mLabyrinth.at(row - 1).at(col) == '#') { spriteOffset += 1; }
+            // check down
+            if (row + 1 < LABYRINTH_ROWS && mLabyrinth.at(row + 1).at(col) == '#') { spriteOffset += 2; }
+            // check left
+            if (col - 1 >= 0 && mLabyrinth.at(row).at(col - 1) == '#') { spriteOffset += 4; }
+            // check right
+            if (col + 1 < LABYRINTH_COLS && mLabyrinth.at(row).at(col + 1) == '#') { spriteOffset += 8; }
+
+            mLabyrinthTileMap.tiles[row][col] = spriteOffset;         
+        }
+    }
+    
 }
 
 void Labyrinth::draw() {
@@ -99,6 +125,8 @@ bool Labyrinth::isLegalMove(Vector2 pos) const {
     case Tile::GATE:
         isLegal = false;
         std::cout << "ILLEGAL!!!\n";
+        break;
+    default:
         break;
     }
 
