@@ -21,14 +21,78 @@ public:
         GAME_WON        = 4,
     };
 
-    inline GameManager(std::vector< std::shared_ptr<Ghost>> g, std::shared_ptr<Pacman> p)
+    inline GameManager(
+        std::vector< std::shared_ptr<Ghost>> g,
+        std::shared_ptr<Pacman> p,
+        std::shared_ptr<Labyrinth> l)
     : mGhosts(g),
-      mPacman(p)
+      mPacman(p),
+      mLabyrinth(l)
+
     {};
     inline ~GameManager() {};
 
+    inline void checkCollisions() {
+        Vector2 pacmanTilePosition = mPacman->getTilePosition();
+        int pacmanTileX = static_cast<int>(pacmanTilePosition.x);
+        int pacmanTileY = static_cast<int>(pacmanTilePosition.y);
+
+        // pellet collisions
+        if (mLabyrinth->mPellets.find({ pacmanTileX, pacmanTileY }) != mLabyrinth->mPellets.end()) {
+            mLabyrinth->mPellets.erase({ pacmanTileX, pacmanTileY });
+            onDotsEaten();
+            std::cout << "nomnomnom\n";
+        }
+
+        // powerup collisions
+        if (mLabyrinth->mPowerups.find({ pacmanTileX, pacmanTileY }) != mLabyrinth->mPowerups.end()) {
+            mLabyrinth->mPowerups.erase({ pacmanTileX, pacmanTileY });
+            onPowerUpEaten();
+        }
+
+        // ghost collisions
+        for (const auto& ghost : mGhosts) {
+            Vector2 ghostTile = ghost->getTilePosition();
+            if (pacmanTilePosition.x == ghostTile.x && pacmanTilePosition.y == ghostTile.y) {
+                onDeath();
+            }
+
+            if (ghostTile.x == 11 && ghostTile.y == 8 && ghost->mState == Ghost::State::LEAVING_PRISON) {
+                std::cout << "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n";
+                ghost->mSpeed = ghost->mChaseSpeed;
+                ghost->setChaseTarget(mPacman->mPosition);
+                ghost->setState(Ghost::State::CHASE);
+            } 
+        }
+    };
+
+    inline void drawStuff() {
+        mPacman->draw();
+        mLabyrinth->draw();
+        for (const auto& ghost : mGhosts) { ghost->draw(); }
+    }
+
     inline int getScore() const { return mScore; }
     inline int getLives() const { return mPacmanLives; }
+
+    inline void moveStuff() {
+        Vector2 intendedDirection = { 0.f, 0.f };
+        if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) {
+            intendedDirection = { 0.f, 1.f };
+        }
+        if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) {
+            intendedDirection = { 0.f, -1.f };
+        }
+        if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) {
+            intendedDirection = { 1.f, 0.f };
+        }
+        if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) {
+            intendedDirection = { -1.f, 0.f };
+        }
+
+        mPacman->move(intendedDirection, mLabyrinth);
+        for (const auto& ghost : mGhosts) { ghost->act(mLabyrinth); }
+    }
 
     inline void onDeath() {
         mPacmanLives--;
@@ -56,21 +120,21 @@ public:
     };
 
     inline void onGhostsStartChasing() {
-        for (auto &g : mGhosts) {
-            g->setChaseTarget(mPacman->mPosition);
-            g->mState = Ghost::State::CHASE;
-            g->updateSprite();
+        for (auto &ghost : mGhosts) {
+            ghost->setChaseTarget(mPacman->mPosition);
+            ghost->setState(Ghost::State::CHASE);
+            ghost->updateSprite();
         }
     }
 
     inline void onPowerUpEaten() {
         mState = State::PLAYING_POWERUP;
         mPowerUpTime = true;
-        for (auto &g : mGhosts) {
-            if (g->mState != Ghost::State::GOING_TO_PRISON) {
-                g->setChaseTarget(g->mScatterCorner);
-                g->mState = Ghost::State::FRIGHTENED;
-                g->updateSprite();
+        for (auto &ghost : mGhosts) {
+            if (ghost->mState != Ghost::State::GOING_TO_PRISON) {
+                ghost->setChaseTarget(ghost->mScatterCorner);
+                ghost->setState(Ghost::State::FRIGHTENED);
+                ghost->updateSprite();
             }
         }
     };
@@ -81,22 +145,28 @@ public:
         onGhostsStartChasing();
     }
 
-    inline void onStartGame() {
-        mPacmanLives = 3;
-        mScoreExtraLife = 0;
-        mScore = 0;
-    };
-
     inline void onToggleGhostMode() {
         for (auto &g : mGhosts) {
             if (g->mState == Ghost::State::CHASE) {
                 g->mState = Ghost::State::SCATTER;
             } else if (g->mState == Ghost::State::SCATTER) {
-                g->mState = Ghost::State::CHASE;
                 g->setChaseTarget(mPacman->mPosition);
+                g->setState(Ghost::State::CHASE);
             }
         }
     }
+
+    inline void startGame() {
+        mPacmanLives = 3;
+        mScoreExtraLife = 0;
+        mScore = 0;
+        for (auto &ghost : mGhosts) {
+            if (ghost->mName == "Blinky") { 
+                ghost->setChaseTarget({ 11.f * TILE_SIZE, 8.f * TILE_SIZE });
+                ghost->setState(Ghost::State::LEAVING_PRISON);
+            }
+        }
+    };
 
     inline void updateTimers() {
         mTimerChase += GetFrameTime();
@@ -133,5 +203,6 @@ private:
     float  mTimerScatter = 0.;
 
     std::shared_ptr<Pacman>             mPacman;
+    std::shared_ptr<Labyrinth>          mLabyrinth;
     std::vector<std::shared_ptr<Ghost>> mGhosts;
 };

@@ -2,7 +2,7 @@
 
 #include <raymath.h>
 
-Ghost::Ghost(std::string tp, Vector2 pos, Vector2 scatterPosition) 
+Ghost::Ghost(std::string n, std::string tp, Vector2 pos, Vector2 scatterPosition) 
     :
       mChaseSpeed(40.f),
       mChaseTarget({}),
@@ -11,6 +11,7 @@ Ghost::Ghost(std::string tp, Vector2 pos, Vector2 scatterPosition)
       mGen(std::random_device{}()),
       mGhostSprite(tp, 26, 26, 2, 4),
       mGhostTexture(tp),
+      mName(n),
       mPrisonSpeed(55.f),
       mPrisonPosition(Vector2{ 10 * TILE_SIZE, 12 * TILE_SIZE }),
       mPosition({ pos.x * TILE_SIZE - TILE_SIZE / 2.f, pos.y * TILE_SIZE - TILE_SIZE / 2.f }),
@@ -21,33 +22,31 @@ Ghost::Ghost(std::string tp, Vector2 pos, Vector2 scatterPosition)
 
 Ghost::~Ghost() {}
 
-void Ghost::act(const Labyrinth &rLabyrinth) {
+void Ghost::act(std::shared_ptr<Labyrinth> labyrinth) {
     switch (mState) {
     case State::CHASE:
-        chase(rLabyrinth);
-        mSpeed = mChaseSpeed;
-        break;
-    case State::FRIGHTENED:
-        meander(rLabyrinth);
-        mSpeed = mFrightenedSpeed;
-        break;
     case State::SCATTER:
-        chase(rLabyrinth);
+    case State::LEAVING_PRISON:
         mSpeed = mChaseSpeed;
+        chase(labyrinth);
+    case State::FRIGHTENED:
+        mSpeed = mFrightenedSpeed;
+        meander(labyrinth);
         break;
     case State::GOING_TO_PRISON:
-        chase(rLabyrinth);
         mSpeed = mPrisonSpeed;
+        chase(labyrinth);
         break; 
     case State::MEANDER:
-        meander(rLabyrinth);
+    case State::IN_PRISON:
+        meander(labyrinth);
         break;
     default:
         break;
     }
 }
 
-void Ghost::chase(const Labyrinth &rLabyrinth) {
+void Ghost::chase(std::shared_ptr<Labyrinth> labyrinth) {
     Vector2 target = mChaseTarget;
     if (mState == State::SCATTER) {
         target = mScatterCorner;
@@ -55,7 +54,7 @@ void Ghost::chase(const Labyrinth &rLabyrinth) {
         target = mPrisonPosition;
     }
 
-    auto availableTurns = getAvailableTurns(rLabyrinth);
+    auto availableTurns = getAvailableTurns(labyrinth);
 
     if (isCentered()) {
         Vector2 turn = { 0.f , 0.f };
@@ -95,7 +94,7 @@ bool Ghost::isCentered() {
             distFromTileCenterY < ALIGNMENT_THRESHOLD);
 }
 
-std::map<Direction, Vector2> Ghost::getAvailableTurns(const Labyrinth &rLabyrinth) {
+std::map<Direction, Vector2> Ghost::getAvailableTurns(std::shared_ptr<Labyrinth> labyrinth) {
     int currentTileX = static_cast<int>(mPosition.x / TILE_SIZE);
     int currentTileY = static_cast<int>(mPosition.y / TILE_SIZE);
 
@@ -106,11 +105,15 @@ std::map<Direction, Vector2> Ghost::getAvailableTurns(const Labyrinth &rLabyrint
             currentTileX + directionLut.at(d).x,
             currentTileY + directionLut.at(d).y
         };
-        Labyrinth::Tile tile = rLabyrinth.at(intendedTile.y, intendedTile.x);
+        Labyrinth::Tile tile = labyrinth->at(intendedTile.y, intendedTile.x);
         switch (tile) {
         case Labyrinth::Tile::WALL:
-        case Labyrinth::Tile::GATE:
             availableTurns.erase(d);
+            break;
+        case Labyrinth::Tile::GATE:
+            if (mState != State::LEAVING_PRISON && mState != State::GOING_TO_PRISON) {
+                availableTurns.erase(d);
+            }
             break;
         default:
             break;
@@ -120,13 +123,16 @@ std::map<Direction, Vector2> Ghost::getAvailableTurns(const Labyrinth &rLabyrint
 }
 
 Vector2 Ghost::getTilePosition() const {
-    return Vector2{ mPosition.x / TILE_SIZE, mPosition.y / TILE_SIZE };
+    return Vector2{ 
+        std::round(mPosition.x / TILE_SIZE),
+        std::round(mPosition.y / TILE_SIZE)
+    };
 }
 
-void Ghost::meander(const Labyrinth &rLabyrinth) {
+void Ghost::meander(std::shared_ptr<Labyrinth> labyrinth) {
 
     if (isCentered()) {
-        auto availableTurns = getAvailableTurns(rLabyrinth);
+        auto availableTurns = getAvailableTurns(labyrinth);
 
         if (availableTurns.size() == 1) {
             mDirection = availableTurns.begin()->second;
@@ -156,10 +162,6 @@ void Ghost::meander(const Labyrinth &rLabyrinth) {
     }
 
     updateSpriteFrameAndMove();
-}
-
-void Ghost::setChaseTarget(const Vector2 &pos) {
-    mChaseTarget = pos;
 }
 
 void Ghost::updateSprite() {

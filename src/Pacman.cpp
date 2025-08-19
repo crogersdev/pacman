@@ -51,7 +51,7 @@ Vector2 Pacman::getTilePosition() const {
     return Vector2{ mPosition.x / TILE_SIZE, mPosition.y / TILE_SIZE };
 }
 
-void Pacman::move(Vector2 intendedDirection, const Labyrinth &rLabyrinth) {
+void Pacman::move(Vector2 intendedDirection, std::shared_ptr<Labyrinth> labyrinth) {
 
     // std::cout << "{ " << intendedDirection.x << ", " << intendedDirection.y << " }\n";
     int currentTileX = static_cast<int>(mPosition.x / TILE_SIZE);
@@ -64,7 +64,7 @@ void Pacman::move(Vector2 intendedDirection, const Labyrinth &rLabyrinth) {
 
     if (isCentered()) {
         if (intendedDirection.x != 0.f || intendedDirection.y != 0.f) {
-            if (rLabyrinth.isLegalMove(intendedPosition)) {
+            if (labyrinth->isLegalMove(intendedPosition)) {
                 mDirection = intendedDirection;
             } else {
                 std::cout << "move not legal\n";
@@ -79,7 +79,7 @@ void Pacman::move(Vector2 intendedDirection, const Labyrinth &rLabyrinth) {
             (currentTileY + mDirection.y) * TILE_SIZE + TILE_SIZE / 2.f,
         };
 
-        if (!rLabyrinth.isLegalMove(intendedTileFromMomentum)) {
+        if (!labyrinth->isLegalMove(intendedTileFromMomentum)) {
             // prevents hitting illegal tile
             mDirection = { 0.f, 0.f };
         }

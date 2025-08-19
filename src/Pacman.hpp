@@ -14,7 +14,7 @@ public:
     bool    isCentered();
     Vector2 getTilePosition() const;
     float   lerp(float a, float b, float f) { return a + f * (b - a); }
-    void    move(Vector2, const Labyrinth &);
+    void    move(Vector2, std::shared_ptr<Labyrinth>);
 
     Color          mColor;
     Color          mDebugTileColor;
