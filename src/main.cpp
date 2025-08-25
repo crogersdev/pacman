@@ -30,6 +30,7 @@ int main() {
     gm.startGame();
 
     while (WindowShouldClose() == false) {
+        /*
         std::cout << 
             "blinky state: " <<
             blinky->mState <<
@@ -42,6 +43,7 @@ int main() {
             ", " <<
             static_cast<int>(blinky->mPosition.x / TILE_SIZE) <<
             "\n";
+            */
 
         BeginDrawing();
         ClearBackground(BLACK);

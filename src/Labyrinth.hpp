@@ -148,6 +148,28 @@ public:
         "#.....................#",  // 22 
         "#######################"   // 23 
     };
-
-
 };
+
+/*
+
+0  -- no neighbors, empty
+1  -- neighbor above only,        U
+2  -- neighbor below only,        upside down U
+3  -- neighbor above and below,   vertical pipe 
+
+4  -- neighbor left only,         side U opening right
+5  -- neighbor left  (4)          
+      neighbor above (1)          bottom right hand curve
+6  -- neighbor left  (4)
+      neighbor below (2)          top right hand curve
+7  -- neighbor left  (4)
+      neighbor below (2)
+      neighbor above (1)          right hand side 
+
+8  -- neighbor right only,        side U opening left
+9  -- 
+10 -- neighbor right (8)
+      neighbor left  (2)          top left hand curve
+
+
+*/

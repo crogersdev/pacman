@@ -12,6 +12,8 @@ Labyrinth::Labyrinth()
     float centerTileY, centerTileX;
     int c = 0, r = 0;
 
+    createTileSpriteOffsets();
+
     for (const auto& row : mLabyrinth) {
         centerTileY = r + TILE_SIZE / 2.f;
         for (const auto& col : row) {
@@ -20,7 +22,6 @@ Labyrinth::Labyrinth()
 
             switch (tile) {
             case Tile::PELLET:
-                // std::cout << "adding a pellet at row: " << row << ", col: " << col << "\n";
                 mPellets.insert(std::make_pair(
                     std::make_pair(c / TILE_SIZE, r / TILE_SIZE), LabyrinthObject(
                         AnimatedSprite(mPelletSpritePath, TILE_SIZE, TILE_SIZE, 2, 10),
@@ -82,27 +83,37 @@ void Labyrinth::createTileSpriteOffsets() {
             mLabyrinthTileMap.tiles[row][col] = spriteOffset;         
         }
     }
-    
 }
 
 void Labyrinth::draw() {
     int x = 0, y = 0;
     Color wallColor = { 33, 33, 255, 255 };
 
-    for (const auto &pellet: mPellets) {
-        pellet.second.draw();
-    }
+    for (const auto &pellet: mPellets) { pellet.second.draw(); }
 
-    for (const auto &powerup: mPowerups) {
-        powerup.second.draw();
-    }
+    for (const auto &powerup: mPowerups) { powerup.second.draw(); }
+
+    int labyrinthSpritesheetCols = 4;
+
+    int frame;
+
+    Rectangle src;
+    Rectangle dst;
 
     for (const auto &row : mLabyrinth) {
         for (const auto &col : row) {
             Tile t = static_cast<Tile>(col);
             switch (t) {
             case Tile::WALL:
-                DrawRectangle(x, y, TILE_SIZE, TILE_SIZE, wallColor);
+                frame = mLabyrinthTileMap.tiles[y][x];
+                src = {
+                    (frame % labyrinthSpritesheetCols) * TILE_SIZE,
+                    (frame / labyrinthSpritesheetCols) * TILE_SIZE,
+                    TILE_SIZE,
+                    TILE_SIZE
+                };
+                dst = { static_cast<float>(x), static_cast<float>(y), TILE_SIZE, TILE_SIZE };
+                DrawTexturePro(mLabyrinthTileMap.spritesheet, src, dst, { 0, 0 }, 0.f, WHITE);
                 break;
             default:
                 break;
