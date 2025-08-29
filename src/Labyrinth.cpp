@@ -81,21 +81,19 @@ void Labyrinth::createTileSpriteOffsets() {
             if (col + 1 < LABYRINTH_COLS && mLabyrinth.at(row).at(col + 1) == '#') { spriteOffset += 8; }
 
             mLabyrinthTileMap.tiles[row][col] = spriteOffset;         
+            spriteOffset = 0;
         }
     }
 }
 
 void Labyrinth::draw() {
-    int x = 0, y = 0;
-    Color wallColor = { 33, 33, 255, 255 };
 
-    for (const auto &pellet: mPellets) { pellet.second.draw(); }
-
+    for (const auto &pellet:  mPellets)  { pellet.second.draw(); }
     for (const auto &powerup: mPowerups) { powerup.second.draw(); }
 
     int labyrinthSpritesheetCols = 4;
-
     int frame;
+    int x = 0, y = 0;
 
     Rectangle src;
     Rectangle dst;
@@ -112,15 +110,15 @@ void Labyrinth::draw() {
                     TILE_SIZE,
                     TILE_SIZE
                 };
-                dst = { static_cast<float>(x), static_cast<float>(y), TILE_SIZE, TILE_SIZE };
+                dst = { static_cast<float>(x * TILE_SIZE), static_cast<float>(y * TILE_SIZE), TILE_SIZE, TILE_SIZE };
                 DrawTexturePro(mLabyrinthTileMap.spritesheet, src, dst, { 0, 0 }, 0.f, WHITE);
                 break;
             default:
                 break;
             }
-            x += TILE_SIZE;
+            x++;
         }
-        y += TILE_SIZE;
+        y++;
         x = 0;
     }
 }

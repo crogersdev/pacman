@@ -167,9 +167,21 @@ public:
       neighbor above (1)          right hand side 
 
 8  -- neighbor right only,        side U opening left
-9  -- 
-10 -- neighbor right (8)
-      neighbor left  (2)          top left hand curve
-
+9  -- neighbor right (8)
+      neighbor above (1)          bottom left hand curve
+10 -- neighbor below (8)
+      neighbor below (2)          top left hand curve
+11 -- neighbor right (8)
+      neighbor below (2)
+      neighbor above (1)          sideways T pointing right
+12 -- neighbor right (8)
+   -- neighbor left  (4)          horizontal band
+13 -- neighbor right (8)
+      neighbor left  (4)
+      neighbor above (1)          T pointing up
+14 -- neighbor below (2)
+      neighbor left  (4)
+      neighbor right (8)          T pointing down
+15 -- all neighbors               plus sign
 
 */
