@@ -167,6 +167,8 @@ void Ghost::meander(std::shared_ptr<Labyrinth> labyrinth) {
 void Ghost::updateSprite() {
     if (mState == Ghost::State::FRIGHTENED) {
         mGhostSprite.setTextureFile("res/frightened.png");
+    } else if (mState == Ghost::State::GOING_TO_PRISON) {
+        mGhostSprite.setTextureFile("res/going-to-prison.png");
     } else {
         mGhostSprite.setTextureFile(mGhostTexture); 
     }

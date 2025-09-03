@@ -52,15 +52,18 @@ public:
     Ghost(std::string, std::string, Vector2, Vector2);
     ~Ghost();
 
-    void    act(std::shared_ptr<Labyrinth>);
-    void    chase(std::shared_ptr<Labyrinth>);
-    void    draw();
-    bool    isCentered();
-    Vector2 getTilePosition() const;
-    void    meander(std::shared_ptr<Labyrinth>);
-    void    setChaseTarget(const Vector2 &t) { mChaseTarget = t; }
-    void    setState(State s) { mState = s; }
-    void    updateSprite();
+    void         act(std::shared_ptr<Labyrinth>);
+    void         chase(std::shared_ptr<Labyrinth>);
+    void         draw();
+    bool         isCentered();
+    Ghost::State getState() const { return mState; }
+    std::string  getName() const { return mName; }
+    Vector2      getTilePosition() const;
+    void         meander(std::shared_ptr<Labyrinth>);
+    void         setChaseTarget(const Vector2 &t) { mChaseTarget = t; }
+    void         setName(const std::string s) { mName = s; }
+    void         setState(const State s) { mState = s; }
+    void         updateSprite();
 
     float          mChaseSpeed;
     Vector2        mChaseTarget;
