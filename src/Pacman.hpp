@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "helpers/AnimatedSprite.hpp"
 #include "Labyrinth.hpp"
 

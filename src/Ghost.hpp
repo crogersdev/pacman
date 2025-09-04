@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <random>
 
 #include "helpers/AnimatedSprite.hpp"
