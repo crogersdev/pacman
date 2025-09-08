@@ -20,12 +20,17 @@ int main() {
 
     std::shared_ptr<Labyrinth> labyrinth = std::make_shared<Labyrinth>();
     std::shared_ptr<Pacman>    pacman = std::make_shared<Pacman>();
+    std::shared_ptr<Ghost>     inky = std::make_shared<Ghost>("Inky", "res/inky.png", Vector2{ 8, 10 }, Vector2{14, 1 });
     std::shared_ptr<Ghost>     pinky = std::make_shared<Ghost>("Pinky", "res/pinky.png", Vector2{ 10, 11 }, Vector2{ 1, 14 });
     std::shared_ptr<Ghost>     blinky = std::make_shared<Ghost>("Blinky", "res/blinky.png", Vector2{ 10, 13 }, Vector2{ 1, 1 }); 
-    blinky->mState = Ghost::State::IN_PRISON;
-    pinky->mState = Ghost::State::IN_PRISON;
+    std::shared_ptr<Ghost>     clyde = std::make_shared<Ghost>("Clyde", "res/clyde.png", Vector2{ 12, 13 }, Vector2{ 14, 22 });
 
-    std::vector< std::shared_ptr<Ghost>> ghosts = { blinky, pinky };
+    inky->setState(Ghost::State::CHASE);
+    pinky->setState(Ghost::State::IN_PRISON);
+    blinky->setState(Ghost::State::IN_PRISON);
+    clyde->setState(Ghost::State::IN_PRISON);
+
+    std::vector< std::shared_ptr<Ghost>> ghosts = { inky, pinky, blinky, clyde };
     GameManager gm = GameManager(ghosts, pacman, labyrinth);
 
     gm.startGame();
