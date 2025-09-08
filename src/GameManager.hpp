@@ -119,12 +119,17 @@ public:
         std::cout << "dots eaten: " << mDotsEaten << "\n";
         std::cout << "score: " << mScore << "\n";
 
-        if (mDotsEaten > 10) { 
-            for (auto &ghost : mGhosts) {
-                if (ghost->getState() == Ghost::State::IN_PRISON) {
-                    ghost->setChaseTarget({ 11.f * TILE_SIZE, 8.f * TILE_SIZE });
-                    ghost->setState(Ghost::State::LEAVING_PRISON);
-                }
+        for (auto &ghost : mGhosts) {
+            auto gs = ghost->getState();
+            auto gn = ghost->getName();
+
+            if (mDotsEaten > 30 && gs == Ghost::State::IN_PRISON && gn == "Inky" ) {
+                ghost->setChaseTarget({ 11.f * TILE_SIZE, 8.f * TILE_SIZE });
+                ghost->setState(Ghost::State::LEAVING_PRISON);
+            }
+            if (mDotsEaten > 60 && gs == Ghost::State::IN_PRISON && gn == "Clyde") {
+                ghost->setChaseTarget({ 11.f * TILE_SIZE, 8.f * TILE_SIZE });
+                ghost->setState(Ghost::State::LEAVING_PRISON);
             }
         }
 
