@@ -7,9 +7,10 @@
 #include "Ghost.hpp"
 #include "Pacman.hpp"
 
-const float CHASE_TIME = 12.f;
+const float CHASE_TIME = 2.f;
 const float POWERUP_TIME = 15.f;
-const float SCATTER_TIME = 3.f;
+const float SCATTER_TIME = 2.f;
+const float MAX_PRISON_TIME = 8;
 
 class GameManager {
 public:
@@ -165,17 +166,6 @@ public:
         onGhostsStartChasing();
     }
 
-    inline void onToggleGhostMode() {
-        for (auto &ghost : mGhosts) {
-            if (ghost->getState() == Ghost::State::CHASE) {
-                ghost->setState(Ghost::State::SCATTER);
-            } else if (ghost->getState() == Ghost::State::SCATTER) {
-                ghost->setChaseTarget(mPacman->mPosition);
-                ghost->setState(Ghost::State::CHASE);
-            }
-        }
-    }
-
     inline void startGame() {
         mPacmanLives = 3;
         mScoreExtraLife = 0;
@@ -189,21 +179,30 @@ public:
     };
 
     inline void updateTimers() {
-        mTimerChase += GetFrameTime();
         if (mPowerUpTime) { mTimerPowerUp += GetFrameTime(); }
-        mTimerScatter += GetFrameTime();
 
-        if (mTimerChase >= CHASE_TIME) { 
-            onToggleGhostMode();
-            mTimerChase = 0.f;
-        }
         if (mTimerPowerUp >= POWERUP_TIME) { 
             onPowerUpWearsOff();
             mTimerPowerUp = 0.f;
-        }
-        if (mTimerScatter >= SCATTER_TIME) { 
-            onToggleGhostMode();
-            mTimerScatter = 0.f;
+        }        mTimerLeavePrison += GetFrameTime();
+
+        mTimerChaseMode += GetFrameTime();
+
+        for (auto &ghost : mGhosts) {
+            if (ghost->getState() == Ghost::State::CHASE) {
+                std::cout << "chasing\n";
+                if (mTimerChaseMode >= CHASE_TIME) {
+                    ghost->setState(Ghost::State::SCATTER);
+                    mTimerChaseMode = 0.f;
+                }
+            }
+            if (ghost->getState() == Ghost::State::SCATTER) {
+                std::cout << "chasing\n";
+                if (mTimerChaseMode >= SCATTER_TIME) {
+                    ghost->setState(Ghost::State::CHASE);
+                    mTimerChaseMode = 0.f;
+                }
+            }
         }
     }
 
@@ -218,9 +217,9 @@ private:
     int    mScore = 0;
     int    mScoreExtraLife = 0;
     State  mState = State::MENU;
-    float  mTimerChase = 0.;
+    float  mTimerChaseMode = 0.;
     float  mTimerPowerUp = 0.;
-    float  mTimerScatter = 0.;
+    float  mTimerLeavePrison = 0.;
 
     std::shared_ptr<Pacman>             mPacman;
     std::shared_ptr<Labyrinth>          mLabyrinth;

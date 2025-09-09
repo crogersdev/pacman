@@ -2,20 +2,20 @@
 
 #include <raymath.h>
 
-Ghost::Ghost(std::string n, std::string tp, Vector2 pos, Vector2 scatterPosition) 
+Ghost::Ghost(std::string n, std::string texture, Vector2 pos, Vector2 scatterTilePos) 
     :
       mChaseSpeed(40.f),
       mChaseTarget({}),
       mDirection{1.f, 0.f},
       mFrightenedSpeed(30.f),
       mGen(std::random_device{}()),
-      mGhostSprite(tp, 26, 26, 2, 4),
-      mGhostTexture(tp),
+      mGhostSprite(texture, 26, 26, 2, 4),
+      mGhostTexture(texture),
       mName(n),
       mPrisonSpeed(55.f),
       mPrisonPosition(Vector2{ 10 * TILE_SIZE, 12 * TILE_SIZE }),
       mPosition({ pos.x * TILE_SIZE - TILE_SIZE / 2.f, pos.y * TILE_SIZE - TILE_SIZE / 2.f }),
-      mScatterCorner(scatterPosition),
+      mScatterCorner(scatterTilePos),
       mSpeed(40.f),
       mState(State::SCATTER) {
 }
