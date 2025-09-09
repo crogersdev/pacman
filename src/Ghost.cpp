@@ -2,7 +2,7 @@
 
 #include <raymath.h>
 
-Ghost::Ghost(std::string n, std::string texture, Vector2 pos, Vector2 scatterTilePos) 
+Ghost::Ghost(std::string name, std::string texture, Vector2 initTilePos, Vector2 scatterTilePos) 
     :
       mChaseSpeed(40.f),
       mChaseTarget({}),
@@ -11,11 +11,11 @@ Ghost::Ghost(std::string n, std::string texture, Vector2 pos, Vector2 scatterTil
       mGen(std::random_device{}()),
       mGhostSprite(texture, 26, 26, 2, 4),
       mGhostTexture(texture),
-      mName(n),
+      mName(name),
       mPrisonSpeed(55.f),
-      mPrisonPosition(Vector2{ 10 * TILE_SIZE, 12 * TILE_SIZE }),
-      mPosition({ pos.x * TILE_SIZE - TILE_SIZE / 2.f, pos.y * TILE_SIZE - TILE_SIZE / 2.f }),
-      mScatterCorner(scatterTilePos),
+      mPrisonPosition(Vector2{ 12 * TILE_SIZE - TILE_SIZE / 2, 12 * TILE_SIZE - TILE_SIZE / 2}),
+      mPosition({ initTilePos.x * TILE_SIZE - TILE_SIZE / 2.f, initTilePos.y * TILE_SIZE - TILE_SIZE / 2.f }),
+      mScatterCornerPosition({ scatterTilePos.x * TILE_SIZE - TILE_SIZE / 2.f, scatterTilePos.y * TILE_SIZE - TILE_SIZE / 2 }),
       mSpeed(40.f),
       mState(State::SCATTER) {
 }
@@ -23,12 +23,28 @@ Ghost::Ghost(std::string n, std::string texture, Vector2 pos, Vector2 scatterTil
 Ghost::~Ghost() {}
 
 void Ghost::act(std::shared_ptr<Labyrinth> labyrinth) {
+    /*
+    if (mName == "Inky") {
+        std::cout << "Inky's state: " << mState << "\n";
+        std::cout << "Inky's tile target (x, y): (" << 
+            mChaseTarget.x / TILE_SIZE << ", " <<
+            mChaseTarget.y / TILE_SIZE << ")\n";
+    }
+    */
+
     switch (mState) {
     case State::CHASE:
+        mSpeed = mChaseSpeed;
+        chase(labyrinth);
+        break;
     case State::SCATTER:
+        mSpeed = mChaseSpeed;
+        chase(labyrinth);
+        break;
     case State::LEAVING_PRISON:
         mSpeed = mChaseSpeed;
         chase(labyrinth);
+        break;
     case State::FRIGHTENED:
         mSpeed = mFrightenedSpeed;
         meander(labyrinth);
@@ -49,7 +65,7 @@ void Ghost::act(std::shared_ptr<Labyrinth> labyrinth) {
 void Ghost::chase(std::shared_ptr<Labyrinth> labyrinth) {
     Vector2 target = mChaseTarget;
     if (mState == State::SCATTER) {
-        target = mScatterCorner;
+        target = mScatterCornerPosition;
     } else if (mState == State::GOING_TO_PRISON) {
         target = mPrisonPosition;
     }
@@ -130,7 +146,6 @@ Vector2 Ghost::getTilePosition() const {
 }
 
 void Ghost::meander(std::shared_ptr<Labyrinth> labyrinth) {
-
     if (isCentered()) {
         auto availableTurns = getAvailableTurns(labyrinth);
 
@@ -186,6 +201,12 @@ void Ghost::updateSpriteFrameAndMove() {
         mPosition.x + (mDirection.x * mSpeed * GetFrameTime()),
         mPosition.y + (mDirection.y * mSpeed * GetFrameTime())
     };
+
+    /*
+    std::cout << mName << " position (x, y)\t(" <<
+        static_cast<int>(mPosition.x / TILE_SIZE) << ", " <<
+        static_cast<int>(mPosition.y / TILE_SIZE) << ")\n";
+    */
 
     int newTileX = static_cast<int>(newPosition.x / TILE_SIZE);
     int newTileY = static_cast<int>(newPosition.y / TILE_SIZE);

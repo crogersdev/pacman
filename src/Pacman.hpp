@@ -15,6 +15,7 @@ public:
     void    draw();
     bool    isCentered();
     Vector2 getTilePosition() const;
+    Vector2 getPosition() const { return mPosition; }
     float   lerp(float a, float b, float f) { return a + f * (b - a); }
     void    move(Vector2, std::shared_ptr<Labyrinth>);
 

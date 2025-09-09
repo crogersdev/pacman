@@ -57,6 +57,8 @@ void Pacman::move(Vector2 intendedDirection, std::shared_ptr<Labyrinth> labyrint
     int currentTileX = static_cast<int>(mPosition.x / TILE_SIZE);
     int currentTileY = static_cast<int>(mPosition.y / TILE_SIZE);
 
+    std::cout << "pacman current tile: (x, y)\t" << currentTileX << ", " << currentTileY << ")\n";
+
     Vector2 intendedPosition = {
         (currentTileX + intendedDirection.x) * TILE_SIZE + TILE_SIZE / 2.f,
         (currentTileY + intendedDirection.y) * TILE_SIZE + TILE_SIZE / 2.f

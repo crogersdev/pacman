@@ -77,7 +77,7 @@ public:
     Vector2        mPosition;
     float          mPrisonSpeed;
     Vector2        mPrisonPosition;
-    Vector2        mScatterCorner;
+    Vector2        mScatterCornerPosition;
     float          mSpeed;
     State          mState;
 
