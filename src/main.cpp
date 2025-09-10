@@ -31,7 +31,7 @@ int main() {
 
     gm.startGame();
 
-    bool paused = true;
+    bool paused = false;
 
     while (WindowShouldClose() == false) {
         if (IsKeyPressed(KEY_P)) {

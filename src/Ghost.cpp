@@ -30,7 +30,6 @@ void Ghost::act(std::shared_ptr<Labyrinth> labyrinth) {
             mChaseTarget.x / TILE_SIZE << ", " <<
             mChaseTarget.y / TILE_SIZE << ")\n";
     }
-    
 
     switch (mState) {
     case State::CHASE:

@@ -75,9 +75,10 @@ public:
             if (ghostTile.x >= 10 && ghostTile.x <= 14 &&
                 ghostTile.y >= 11 && ghostTile.y <= 13 &&
                 ghost->getState() == Ghost::State::GOING_TO_PRISON) {
+                
+                std::cout << "oh no!\n";
                 ghost->setState(Ghost::State::LEAVING_PRISON);
                 ghost->updateSprite();
-                
             } 
         }
     };
@@ -107,7 +108,10 @@ public:
         }
 
         mPacman->move(intendedDirection, mLabyrinth);
-        for (const auto& ghost : mGhosts) { ghost->act(mLabyrinth); }
+        for (const auto& ghost : mGhosts) {
+            if (ghost->getState() == Ghost::State::CHASE) { ghost->setChaseTarget(mPacman->getPosition()); }
+            ghost->act(mLabyrinth);
+        }
     }
 
     inline void onDeath() {
@@ -206,8 +210,8 @@ public:
         for (auto &ghost : mGhosts) {
             if (ghost->getState() == Ghost::State::CHASE) {
                 if (mTimerChaseMode >= CHASE_TIME) {
-                    std::cout << "chase timer: " << std::fixed << std::setprecision(2) << mTimerChaseMode << std::endl;
-                    std::cout << "toggling " << ghost->getName() << " to chasing\n";
+                    // std::cout << "chase timer: " << std::fixed << std::setprecision(2) << mTimerChaseMode << std::endl;
+                    // std::cout << "toggling " << ghost->getName() << " to chasing\n";
                     ghost->setChaseTarget(ghost->mScatterCornerPosition);
                     ghost->setState(Ghost::State::SCATTER);
                     mTimerChaseMode = 0.f;
@@ -215,8 +219,8 @@ public:
             }
             if (ghost->getState() == Ghost::State::SCATTER) {
                 if (mTimerChaseMode >= SCATTER_TIME) {
-                    std::cout << "chase timer: " << std::fixed << std::setprecision(2) << mTimerChaseMode << std::endl;
-                    std::cout << "toggling " << ghost->getName() << " to scatter\n";
+                    // std::cout << "chase timer: " << std::fixed << std::setprecision(2) << mTimerChaseMode << std::endl;
+                    // std::cout << "toggling " << ghost->getName() << " to scatter\n";
                     ghost->setChaseTarget(mPacman->getPosition());
                     ghost->setState(Ghost::State::CHASE);
                     mTimerChaseMode = 0.f;
