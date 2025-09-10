@@ -24,11 +24,14 @@ Ghost::~Ghost() {}
 
 void Ghost::act(std::shared_ptr<Labyrinth> labyrinth) {
     
-    if (mName == "Blinky") {
-        std::cout << "Blinky's state: " << mState << "\n";
-        std::cout << "Blinky's tile target (x, y): (" << 
+    std::string debugGhost = "Pinky";
+    if (mName == debugGhost) {
+        std::cout << mName << "'s state: " << mState;
+        std::cout << " -- tile target (x, y): (" << 
             mChaseTarget.x / TILE_SIZE << ", " <<
-            mChaseTarget.y / TILE_SIZE << ")\n";
+            mChaseTarget.y / TILE_SIZE << ")";
+        std::cout << "-- tile pos (x, y): (" <<
+            )
     }
 
     switch (mState) {

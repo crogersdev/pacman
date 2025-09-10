@@ -26,7 +26,7 @@ int main() {
     std::shared_ptr<Ghost>     clyde = std::make_shared<Ghost>("Clyde", "res/clyde.png", Vector2{ 14, 13 }, Vector2{ 2, 23 });
 
     // std::vector< std::shared_ptr<Ghost>> ghosts = { inky, pinky, blinky, clyde };
-    std::vector< std::shared_ptr<Ghost>> ghosts = { blinky };
+    std::vector<std::shared_ptr<Ghost>> ghosts = { pinky };
     GameManager gm = GameManager(ghosts, pacman, labyrinth);
 
     gm.startGame();
