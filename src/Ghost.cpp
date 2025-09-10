@@ -23,14 +23,14 @@ Ghost::Ghost(std::string name, std::string texture, Vector2 initTilePos, Vector2
 Ghost::~Ghost() {}
 
 void Ghost::act(std::shared_ptr<Labyrinth> labyrinth) {
-    /*
-    if (mName == "Inky") {
-        std::cout << "Inky's state: " << mState << "\n";
-        std::cout << "Inky's tile target (x, y): (" << 
+    
+    if (mName == "Blinky") {
+        std::cout << "Blinky's state: " << mState << "\n";
+        std::cout << "Blinky's tile target (x, y): (" << 
             mChaseTarget.x / TILE_SIZE << ", " <<
             mChaseTarget.y / TILE_SIZE << ")\n";
     }
-    */
+    
 
     switch (mState) {
     case State::CHASE:
