@@ -91,6 +91,12 @@ public:
 
     inline int getScore() const { return mScore; }
     inline int getLives() const { return mPacmanLives; }
+    
+    inline bool isGhostInPrison(std::shared_ptr<Ghost> ghost) {
+        if (ghostTile.x >= 10 && ghostTile.x <= 14 &&
+            ghostTile.y >= 11 && ghostTile.y <= 13 &&
+            ghost->getState() == Ghost::State::GOING_TO_PRISON) {
+    }
 
     inline void moveStuff() {
         Vector2 intendedDirection = { 0.f, 0.f };
@@ -183,7 +189,6 @@ public:
         mScore = 0;
 
         for (auto &ghost : mGhosts) {
-
             if (ghost->getName() == "Blinky") {
                 ghost->setChaseTarget(mPacman->getPosition());
                 ghost->setState(Ghost::State::CHASE);
@@ -208,7 +213,7 @@ public:
         mTimerLeavePrison += GetFrameTime();
 
         for (auto &ghost : mGhosts) {
-            if (ghost->getState() == Ghost::State::CHASE) {
+            if (ghost->getState() == Ghost::State::CHASE && ghost->) {
                 if (mTimerChaseMode >= CHASE_TIME) {
                     // std::cout << "chase timer: " << std::fixed << std::setprecision(2) << mTimerChaseMode << std::endl;
                     // std::cout << "toggling " << ghost->getName() << " to chasing\n";

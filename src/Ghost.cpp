@@ -28,10 +28,11 @@ void Ghost::act(std::shared_ptr<Labyrinth> labyrinth) {
     if (mName == debugGhost) {
         std::cout << mName << "'s state: " << mState;
         std::cout << " -- tile target (x, y): (" << 
-            mChaseTarget.x / TILE_SIZE << ", " <<
-            mChaseTarget.y / TILE_SIZE << ")";
+            static_cast<int>(mChaseTarget.x / TILE_SIZE) << ", " <<
+            static_cast<int>(mChaseTarget.y / TILE_SIZE) << ")";
         std::cout << "-- tile pos (x, y): (" <<
-            )
+            static_cast<int>(mPosition.x / TILE_SIZE) << ", " <<
+            static_cast<int>(mPosition.y / TILE_SIZE) << ")\n";
     }
 
     switch (mState) {
