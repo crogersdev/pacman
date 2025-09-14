@@ -30,7 +30,7 @@ public:
     : mGhosts(g),
       mPacman(p),
       mLabyrinth(l)
-
+      mGhostStartingPoint({11.f * TILE_SIZE, 8})
     {};
     inline ~GameManager() {};
 
@@ -67,15 +67,12 @@ public:
                 }
             }
             
-            if (ghostTile.x == 12 && ghostTile.y == 9 && ghost->mState == Ghost::State::LEAVING_PRISON) {
+            if (ghostTile.x == 11 && ghostTile.y == 8 && ghost->mState == Ghost::State::LEAVING_PRISON) {
                 ghost->setState(Ghost::State::CHASE);
                 ghost->setChaseTarget(mPacman->getPosition());
             } 
 
-            if (ghostTile.x >= 10 && ghostTile.x <= 14 &&
-                ghostTile.y >= 11 && ghostTile.y <= 13 &&
-                ghost->getState() == Ghost::State::GOING_TO_PRISON) {
-                
+            if (isGhostInPrison(ghost) && ghost->getState() == Ghost::State::GOING_TO_PRISON) {
                 std::cout << "oh no!\n";
                 ghost->setState(Ghost::State::LEAVING_PRISON);
                 ghost->updateSprite();
@@ -93,9 +90,9 @@ public:
     inline int getLives() const { return mPacmanLives; }
     
     inline bool isGhostInPrison(std::shared_ptr<Ghost> ghost) {
-        if (ghostTile.x >= 10 && ghostTile.x <= 14 &&
-            ghostTile.y >= 11 && ghostTile.y <= 13 &&
-            ghost->getState() == Ghost::State::GOING_TO_PRISON) {
+        int ghostTileX = static_cast<int>(ghost->mPosition.x / TILE_SIZE);
+        int ghostTileY = static_cast<int>(ghost->mPosition.y / TILE_SIZE);
+        return ghostTileX >= 8 && ghostTileX <= 14 && ghostTileY >= 9 && ghostTileY <= 13;
     }
 
     inline void moveStuff() {
@@ -213,7 +210,7 @@ public:
         mTimerLeavePrison += GetFrameTime();
 
         for (auto &ghost : mGhosts) {
-            if (ghost->getState() == Ghost::State::CHASE && ghost->) {
+            if (ghost->getState() == Ghost::State::CHASE && !isGhostInPrison(ghost)) {
                 if (mTimerChaseMode >= CHASE_TIME) {
                     // std::cout << "chase timer: " << std::fixed << std::setprecision(2) << mTimerChaseMode << std::endl;
                     // std::cout << "toggling " << ghost->getName() << " to chasing\n";
@@ -222,7 +219,7 @@ public:
                     mTimerChaseMode = 0.f;
                 }
             }
-            if (ghost->getState() == Ghost::State::SCATTER) {
+            if (ghost->getState() == Ghost::State::SCATTER && !isGhostInPrison(ghost)) {
                 if (mTimerChaseMode >= SCATTER_TIME) {
                     // std::cout << "chase timer: " << std::fixed << std::setprecision(2) << mTimerChaseMode << std::endl;
                     // std::cout << "toggling " << ghost->getName() << " to scatter\n";
