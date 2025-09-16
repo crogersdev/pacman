@@ -68,6 +68,7 @@ public:
             }
             
             if (ghostTile.x == 11 && ghostTile.y == 8 && ghost->mState == Ghost::State::LEAVING_PRISON) {
+                std::cout << "LEAVE\n";
                 ghost->setState(Ghost::State::CHASE);
                 ghost->setChaseTarget(mPacman->getPosition());
             } 
