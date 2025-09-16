@@ -23,7 +23,7 @@ Ghost::Ghost(std::string name, std::string texture, Vector2 initTilePos, Vector2
 Ghost::~Ghost() {}
 
 void Ghost::act(std::shared_ptr<Labyrinth> labyrinth) {
-    
+  /*/ 
     std::string debugGhost = "Pinky";
     if (mName == debugGhost) {
         std::cout << mName << "'s state: " << mState;
@@ -34,6 +34,7 @@ void Ghost::act(std::shared_ptr<Labyrinth> labyrinth) {
             static_cast<int>(mPosition.x / TILE_SIZE) << ", " <<
             static_cast<int>(mPosition.y / TILE_SIZE) << ")\n";
     }
+            */
 
     switch (mState) {
     case State::CHASE:
@@ -77,17 +78,31 @@ void Ghost::chase(std::shared_ptr<Labyrinth> labyrinth) {
 
     if (isCentered()) {
         Vector2 turn = { 0.f , 0.f };
-        int bestDistance = 1000;
+        int bestDistance = 1000, distance;
+        int tilePositionX = static_cast<int>(mPosition.x / TILE_SIZE);
+        int tilePositionY = static_cast<int>(mPosition.y / TILE_SIZE);
 
         for (const auto& t: availableTurns ) {
             Vector2 potentialPosition = { mPosition.x + t.second.x * TILE_SIZE, mPosition.y + t.second.y * TILE_SIZE };
-            int d = computeTileDistance(potentialPosition, target);
-            if (d < bestDistance) {
-                bestDistance = d;
+            if (tilePositionY == TUNNEL_ROW || static_cast<int>(target.y / TILE_SIZE) == TUNNEL_ROW) {
+                Vector2 leftTunnelExit = Vector2({ 0.f, TUNNEL_ROW * TILE_SIZE });
+                int leftTunnelDistance = computeTileDistance(potentialPosition, leftTunnelExit);
+                leftTunnelDistance += computeTileDistance(leftTunnelExit, target);
+
+                Vector2 rightTunnelExit = Vector2({ LABYRINTH_COLS * TILE_SIZE, TUNNEL_ROW * TILE_SIZE });
+                int rightTunnelDistance = computeTileDistance(potentialPosition, rightTunnelExit);
+                rightTunnelDistance += computeTileDistance(rightTunnelExit, target);
+
+                distance = std::min(leftTunnelDistance, rightTunnelDistance);
+            } else {
+                distance = computeTileDistance(potentialPosition, target);
+            }
+
+            if (distance < bestDistance) {
+                bestDistance = distance;
                 turn = t.second;
             }
         }
-
         mDirection = turn;
     }
 

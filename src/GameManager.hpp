@@ -29,8 +29,8 @@ public:
         std::shared_ptr<Labyrinth> l)
     : mGhosts(g),
       mPacman(p),
-      mLabyrinth(l)
-      mGhostStartingPoint({11.f * TILE_SIZE, 8})
+      mLabyrinth(l),
+      mGhostStartingPoint({ 11.f * TILE_SIZE, 8.f * TILE_SIZE })
     {};
     inline ~GameManager() {};
 
@@ -137,11 +137,11 @@ public:
             auto gn = ghost->getName();
 
             if (mDotsEaten > 30 && gs == Ghost::State::IN_PRISON && gn == "Blinky" ) {
-                ghost->setChaseTarget({ 12.f * TILE_SIZE, 9.f * TILE_SIZE });
+                ghost->setChaseTarget(mGhostStartingPoint);
                 ghost->setState(Ghost::State::LEAVING_PRISON);
             }
             if (mDotsEaten > 60 && gs == Ghost::State::IN_PRISON && gn == "Clyde") {
-                ghost->setChaseTarget({ 12.f * TILE_SIZE, 9.f * TILE_SIZE });
+                ghost->setChaseTarget(mGhostStartingPoint);
                 ghost->setState(Ghost::State::LEAVING_PRISON);
             }
         }
@@ -190,7 +190,7 @@ public:
                 ghost->setChaseTarget(mPacman->getPosition());
                 ghost->setState(Ghost::State::CHASE);
             } else if (ghost->getName() == "Pinky") { 
-                ghost->setChaseTarget({ 12.f * TILE_SIZE, 9.f * TILE_SIZE });
+                ghost->setChaseTarget(mGhostStartingPoint);
                 ghost->setState(Ghost::State::LEAVING_PRISON);
             } else {
                 ghost->setState(Ghost::State::IN_PRISON);
@@ -230,11 +230,11 @@ public:
             }
             if (ghost->getState() == Ghost::State::IN_PRISON) {
                 if (ghost->getName() == "Inky" && mTimerLeavePrison >= MAX_PRISON_TIME) {
-                    ghost->setChaseTarget({ 12.f * TILE_SIZE, 9.f * TILE_SIZE });
+                    ghost->setChaseTarget(mGhostStartingPoint);
                     ghost->setState(Ghost::State::LEAVING_PRISON);
                 }
                 if (ghost->getName() == "Clyde" && mTimerLeavePrison >= MAX_PRISON_TIME + 2.f) {
-                    ghost->setChaseTarget({ 12.f * TILE_SIZE, 9.f * TILE_SIZE });
+                    ghost->setChaseTarget(mGhostStartingPoint);
                     ghost->setState(Ghost::State::LEAVING_PRISON);
                 }
 
@@ -244,18 +244,19 @@ public:
 
 private:
     // things to keep track of
-    int    mDotsEaten = 0;
-    int    mPowerUpsEaten = 0;
-    bool   mPowerUpTime = false;
-    int    mPacmanLives = 3;
-    float  mPacmanSpeed = 50.f;
-    bool   mPaused = false;
-    int    mScore = 0;
-    int    mScoreExtraLife = 0;
-    State  mState = State::MENU;
-    float  mTimerChaseMode = 0.;
-    float  mTimerPowerUp = 0.;
-    float  mTimerLeavePrison = 0.;
+    int     mDotsEaten = 0;
+    Vector2 mGhostStartingPoint;
+    int     mPowerUpsEaten = 0;
+    bool    mPowerUpTime = false;
+    int     mPacmanLives = 3;
+    float   mPacmanSpeed = 50.f;
+    bool    mPaused = false;
+    int     mScore = 0;
+    int     mScoreExtraLife = 0;
+    State   mState = State::MENU;
+    float   mTimerChaseMode = 0.;
+    float   mTimerPowerUp = 0.;
+    float   mTimerLeavePrison = 0.;
 
     std::shared_ptr<Pacman>             mPacman;
     std::shared_ptr<Labyrinth>          mLabyrinth;
