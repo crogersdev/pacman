@@ -6,66 +6,72 @@ Ghost::Ghost(std::string name, std::string texture, Vector2 initTilePos, Vector2
     :
       mChaseSpeed(40.f),
       mChaseTarget({}),
-      mDirection{1.f, 0.f},
+      mDirection{ 1.f, 0.f },
       mFrightenedSpeed(30.f),
       mGen(std::random_device{}()),
       mGhostSprite(texture, 26, 26, 2, 4),
       mGhostTexture(texture),
+      mLastDecisionTile(initTilePos),
       mName(name),
       mPrisonSpeed(55.f),
       mPrisonPosition(Vector2{ 12 * TILE_SIZE - TILE_SIZE / 2, 12 * TILE_SIZE - TILE_SIZE / 2}),
       mPosition({ initTilePos.x * TILE_SIZE - TILE_SIZE / 2.f, initTilePos.y * TILE_SIZE - TILE_SIZE / 2.f }),
       mScatterCornerPosition({ scatterTilePos.x * TILE_SIZE - TILE_SIZE / 2.f, scatterTilePos.y * TILE_SIZE - TILE_SIZE / 2 }),
       mSpeed(40.f),
-      mState(State::SCATTER) {
+      mState(State::SCATTER),
+      mTurns({}) {
 }
 
 Ghost::~Ghost() {}
 
 void Ghost::act(std::shared_ptr<Labyrinth> labyrinth) {
-   
-    std::string debugGhost = "Pinky";
-    if (mName == debugGhost) {
-        std::cout << mName << "'s state: " << mState;
-        std::cout << " -- tile target (x, y): (" << 
-            static_cast<int>(mChaseTarget.x / TILE_SIZE) << ", " <<
-            static_cast<int>(mChaseTarget.y / TILE_SIZE) << ")";
-        std::cout << "-- tile pos (x, y): (" <<
-            static_cast<int>(mPosition.x / TILE_SIZE) << ", " <<
-            static_cast<int>(mPosition.y / TILE_SIZE) << ")\n";
-    }
+    // i hate how the ints and floats don't mix this sucks
+    int tilePositionX = static_cast<int>(mPosition.x / TILE_SIZE);
+    int tilePositionY = static_cast<int>(mPosition.y / TILE_SIZE);
 
-    switch (mState) {
-    case State::CHASE:
-        mSpeed = mChaseSpeed;
-        chase(labyrinth);
-        break;
-    case State::SCATTER:
-        mSpeed = mChaseSpeed;
-        chase(labyrinth);
-        break;
-    case State::LEAVING_PRISON:
-        mSpeed = mChaseSpeed;
-        chase(labyrinth);
-        break;
-    case State::FRIGHTENED:
-        mSpeed = mFrightenedSpeed;
-        meander(labyrinth);
-        break;
-    case State::GOING_TO_PRISON:
-        mSpeed = mPrisonSpeed;
-        chase(labyrinth);
-        break; 
-    case State::MEANDER:
-    case State::IN_PRISON:
-        meander(labyrinth);
-        break;
-    default:
-        break;
+    if (isCentered() && (tilePositionX != mLastDecisionTile.x || tilePositionY != mLastDecisionTile.y)) {
+        std::cout << "let's have some fun\n";
+        std::cout << "centered: " << isCentered() << "\n";
+        mLastDecisionTile = Vector2({ tilePositionX * 1.f, tilePositionY * 1.f });
+        
+        switch (mState) {
+        case State::CHASE:
+            mSpeed = mChaseSpeed;
+            chase(labyrinth);
+            break;
+        case State::SCATTER:
+            mSpeed = mChaseSpeed;
+            chase(labyrinth);
+            break;
+        case State::LEAVING_PRISON:
+            mSpeed = mChaseSpeed;
+            chase(labyrinth);
+            break;
+        case State::FRIGHTENED:
+            mSpeed = mFrightenedSpeed;
+            meander(labyrinth);
+            break;
+        case State::GOING_TO_PRISON:
+            mSpeed = mPrisonSpeed;
+            chase(labyrinth);
+            break; 
+        case State::MEANDER:
+        case State::IN_PRISON:
+            meander(labyrinth);
+            break;
+        default:
+            break;
+        }
     }
+    
+    updateSpriteFrameAndMove();
 }
 
 void Ghost::chase(std::shared_ptr<Labyrinth> labyrinth) {
+    if (!isCentered()) {
+        return;
+    }
+
     Vector2 target = mChaseTarget;
     if (mState == State::SCATTER) {
         target = mScatterCornerPosition;
@@ -74,48 +80,60 @@ void Ghost::chase(std::shared_ptr<Labyrinth> labyrinth) {
     }
 
     auto availableTurns = getAvailableTurns(labyrinth);
+    Vector2 turn = { 0.f , 0.f };
+    int bestDistance = 1000, distance;
+    int tilePositionX = static_cast<int>(mPosition.x / TILE_SIZE);
+    int tilePositionY = static_cast<int>(mPosition.y / TILE_SIZE);
 
-    if (isCentered()) {
-        Vector2 turn = { 0.f , 0.f };
-        int bestDistance = 1000, distance;
-        int tilePositionX = static_cast<int>(mPosition.x / TILE_SIZE);
-        int tilePositionY = static_cast<int>(mPosition.y / TILE_SIZE);
+    for (const auto& t: availableTurns ) {
+        Vector2 potentialPosition = { mPosition.x + t.second.x * TILE_SIZE, mPosition.y + t.second.y * TILE_SIZE };
 
-        for (const auto& t: availableTurns ) {
-            std::cout << "considering turning {" << t.second.x << ", " << t.second.y << "}\n";
-            Vector2 potentialPosition = { mPosition.x + t.second.x * TILE_SIZE, mPosition.y + t.second.y * TILE_SIZE };
-            if (tilePositionY == TUNNEL_ROW || static_cast<int>(target.y / TILE_SIZE) == TUNNEL_ROW) {
-                Vector2 leftTunnelExit = Vector2({ 0.f, TUNNEL_ROW * TILE_SIZE });
-                int leftTunnelDistance = computeTileDistance(potentialPosition, leftTunnelExit);
-                leftTunnelDistance += computeTileDistance(leftTunnelExit, target);
+        if (tilePositionY == TUNNEL_ROW || static_cast<int>(target.y / TILE_SIZE) == TUNNEL_ROW) {
+            Vector2 leftTunnelExit = Vector2({ 0.f, TUNNEL_ROW * TILE_SIZE });
+            int leftTunnelDistance = computeTileDistance(potentialPosition, leftTunnelExit);
+            leftTunnelDistance += computeTileDistance(leftTunnelExit, target);
 
-                Vector2 rightTunnelExit = Vector2({ LABYRINTH_COLS * TILE_SIZE, TUNNEL_ROW * TILE_SIZE });
-                int rightTunnelDistance = computeTileDistance(potentialPosition, rightTunnelExit);
-                rightTunnelDistance += computeTileDistance(rightTunnelExit, target);
+            Vector2 rightTunnelExit = Vector2({ LABYRINTH_COLS * TILE_SIZE, TUNNEL_ROW * TILE_SIZE });
+            int rightTunnelDistance = computeTileDistance(potentialPosition, rightTunnelExit);
+            rightTunnelDistance += computeTileDistance(rightTunnelExit, target);
 
-                distance = std::min(leftTunnelDistance, rightTunnelDistance);
-            } else {
-                distance = computeTileDistance(potentialPosition, target);
-            }
-
-            if (distance < bestDistance) {
-                std::cout << "our distance is: " << distance << "\n";
-                bestDistance = distance;
-                turn = t.second;
-            }
+            distance = std::min(leftTunnelDistance, rightTunnelDistance);
+            distance = computeTileDistance(potentialPosition, target);
+        } else {
+            distance = computeTileDistance(potentialPosition, target);
         }
-        mDirection = turn;
-    }
 
-    updateSpriteFrameAndMove();
+        if (distance < bestDistance) {
+            bestDistance = distance;
+            turn = t.second;
+        }
+    }
+    mDirection = turn;
+
 }
 
 void Ghost::draw() {
     mGhostSprite.draw(mPosition);
+    for (const auto& turn : mTurns) {
+        DrawRectangle(turn.first, turn.second, 5, 12, Color{255, 128, 128, 255});
+    }
+    DrawRectangle(mPosition.x+(mDirection.x * 26)-13, mPosition.y+(mDirection.y * 26)-13, 26, 26, Color{0, 128, 64, 212});
+
+    std::string debugGhost = "Ponky";
+    if (mName == debugGhost) {
+        std::cout << mName << "'s state: " << mState;
+        std::cout << " -- tile target (x, y): (" << 
+            static_cast<int>(mChaseTarget.x / TILE_SIZE) << ", " <<
+            static_cast<int>(mChaseTarget.y / TILE_SIZE) << ")";
+        std::cout << " -- tile pos (x, y): (" <<
+            static_cast<int>(mPosition.x / TILE_SIZE) << ", " <<
+            static_cast<int>(mPosition.y / TILE_SIZE) << ")\n";
+    }
 }
 
 bool Ghost::isCentered() {
-    const float ALIGNMENT_THRESHOLD = 1.5f;
+    const float ALIGNMENT_THRESHOLD = 1.5f; // for 60fps
+    // const float ALIGNMENT_THRESHOLD = 6.f; // for 10fps
     const float TILE_CENTER_OFFSET = TILE_SIZE / 2.f;
 
     float distFromTileCenterX = fabs(
@@ -134,8 +152,14 @@ std::map<Direction, Vector2> Ghost::getAvailableTurns(std::shared_ptr<Labyrinth>
     int currentTileY = static_cast<int>(mPosition.y / TILE_SIZE);
 
     auto availableTurns(directionLut);
+
     for (int i = 0; i < 4; ++i) {
         Direction d = static_cast<Direction>(i);
+
+        if (directionLut.at(d).x == mDirection.x && directionLut.at(d).y == mDirection.y) {
+            availableTurns.erase(static_cast<Direction>(i ^ 1));
+        }
+
         Vector2 intendedTile = {
             currentTileX + directionLut.at(d).x,
             currentTileY + directionLut.at(d).y
@@ -154,6 +178,14 @@ std::map<Direction, Vector2> Ghost::getAvailableTurns(std::shared_ptr<Labyrinth>
             break;
         }
     }
+
+    mTurns.clear();
+    for (const auto& turn : availableTurns) {
+        auto x = mPosition.x + (turn.second.x * 20);
+        auto y = mPosition.y + (turn.second.y * 20);
+        mTurns.push_back(std::make_pair<int, int>(x, y));
+    }
+
     return availableTurns;
 }
 
@@ -165,37 +197,35 @@ Vector2 Ghost::getTilePosition() const {
 }
 
 void Ghost::meander(std::shared_ptr<Labyrinth> labyrinth) {
-    if (isCentered()) {
-        auto availableTurns = getAvailableTurns(labyrinth);
+    if (!isCentered()) { return; }
 
-        if (availableTurns.size() == 1) {
-            mDirection = availableTurns.begin()->second;
+    auto availableTurns = getAvailableTurns(labyrinth);
 
-        } else if (availableTurns.size() == 2) {
-            bool currentDirectionAvailable = false;
-            for (const auto& turn : availableTurns) {
-                if (turn.second.x == mDirection.x && turn.second.y == mDirection.y) {
-                    currentDirectionAvailable = true;
-                    break;
-                }
+    if (availableTurns.size() == 1) {
+        mDirection = availableTurns.begin()->second;
+
+    } else if (availableTurns.size() == 2) {
+        bool currentDirectionAvailable = false;
+        for (const auto& turn : availableTurns) {
+            if (turn.second.x == mDirection.x && turn.second.y == mDirection.y) {
+                currentDirectionAvailable = true;
+                break;
             }
-            if (!currentDirectionAvailable) {
-                std::uniform_int_distribution<> dis(0, 1);
-                auto it = availableTurns.begin();
-                std::advance(it, dis(mGen));
-                mDirection = it->second;
-            }
-
-        } else if (availableTurns.size() >= 3) {
-            std::uniform_int_distribution<> dis(0, 3);
-            auto it = availableTurns.begin();
-            std::advance(it, dis(mGen) % availableTurns.size());
-            mDirection = it->second;
-            // std::cout << "changing direction to " << static_cast<int>(it->first) << "\n";
         }
-    }
+        if (!currentDirectionAvailable) {
+            std::uniform_int_distribution<> dis(0, 1);
+            auto it = availableTurns.begin();
+            std::advance(it, dis(mGen));
+            mDirection = it->second;
+        }
 
-    updateSpriteFrameAndMove();
+    } else if (availableTurns.size() >= 3) {
+        std::uniform_int_distribution<> dis(0, 3);
+        auto it = availableTurns.begin();
+        std::advance(it, dis(mGen) % availableTurns.size());
+        mDirection = it->second;
+        // std::cout << "changing direction to " << static_cast<int>(it->first) << "\n";
+    }
 }
 
 void Ghost::updateSprite() {

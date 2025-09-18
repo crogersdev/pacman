@@ -11,6 +11,8 @@ enum class Direction {
     RIGHT
 };
 
+// order here of consecutive opposite directions lets us
+// use direction XOR 1 to get the opposite
 const std::map<Direction, Vector2> directionLut = {
     { Direction::UP,    {  0.f, -1.f } },
     { Direction::DOWN,  {  0.f,  1.f } },

@@ -8,9 +8,9 @@
 #include "Ghost.hpp"
 #include "Pacman.hpp"
 
-const float CHASE_TIME = 8.f;
+const float CHASE_TIME = 45.f;
 const float POWERUP_TIME = 15.f;
-const float SCATTER_TIME = 2.f;
+const float SCATTER_TIME = 5.f;
 const float MAX_PRISON_TIME = 8.f;
 
 class GameManager {

@@ -73,6 +73,7 @@ public:
     std::mt19937   mGen;
     AnimatedSprite mGhostSprite;
     std::string    mGhostTexture;
+    Vector2        mLastDecisionTile;
     std::string    mName;
     Vector2        mPosition;
     float          mPrisonSpeed;
@@ -80,6 +81,8 @@ public:
     Vector2        mScatterCornerPosition;
     float          mSpeed;
     State          mState;
+
+    std::vector<std::pair<int, int>> mTurns;
 
 private:
     std::map<Direction, Vector2> getAvailableTurns(std::shared_ptr<Labyrinth>);
