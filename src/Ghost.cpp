@@ -29,9 +29,7 @@ void Ghost::act(std::shared_ptr<Labyrinth> labyrinth) {
     int tilePositionX = static_cast<int>(mPosition.x / TILE_SIZE);
     int tilePositionY = static_cast<int>(mPosition.y / TILE_SIZE);
 
-    if (isCentered() && (tilePositionX != mLastDecisionTile.x || tilePositionY != mLastDecisionTile.y)) {
-        std::cout << "let's have some fun\n";
-        std::cout << "centered: " << isCentered() << "\n";
+    if (isCentered()) { // && (tilePositionX != mLastDecisionTile.x || tilePositionY != mLastDecisionTile.y)) {
         mLastDecisionTile = Vector2({ tilePositionX * 1.f, tilePositionY * 1.f });
         
         switch (mState) {
@@ -68,10 +66,6 @@ void Ghost::act(std::shared_ptr<Labyrinth> labyrinth) {
 }
 
 void Ghost::chase(std::shared_ptr<Labyrinth> labyrinth) {
-    if (!isCentered()) {
-        return;
-    }
-
     Vector2 target = mChaseTarget;
     if (mState == State::SCATTER) {
         target = mScatterCornerPosition;
@@ -98,7 +92,6 @@ void Ghost::chase(std::shared_ptr<Labyrinth> labyrinth) {
             rightTunnelDistance += computeTileDistance(rightTunnelExit, target);
 
             distance = std::min(leftTunnelDistance, rightTunnelDistance);
-            distance = computeTileDistance(potentialPosition, target);
         } else {
             distance = computeTileDistance(potentialPosition, target);
         }
@@ -114,17 +107,20 @@ void Ghost::chase(std::shared_ptr<Labyrinth> labyrinth) {
 
 void Ghost::draw() {
     mGhostSprite.draw(mPosition);
+    
+    /*
     for (const auto& turn : mTurns) {
         DrawRectangle(turn.first, turn.second, 5, 12, Color{255, 128, 128, 255});
     }
     DrawRectangle(mPosition.x+(mDirection.x * 26)-13, mPosition.y+(mDirection.y * 26)-13, 26, 26, Color{0, 128, 64, 212});
+    */
 
-    std::string debugGhost = "Ponky";
+    std::string debugGhost = "Pinky";
     if (mName == debugGhost) {
         std::cout << mName << "'s state: " << mState;
-        std::cout << " -- tile target (x, y): (" << 
-            static_cast<int>(mChaseTarget.x / TILE_SIZE) << ", " <<
-            static_cast<int>(mChaseTarget.y / TILE_SIZE) << ")";
+        // std::cout << " -- tile target (x, y): (" << 
+        //    static_cast<int>(mChaseTarget.x / TILE_SIZE) << ", " <<
+        //    static_cast<int>(mChaseTarget.y / TILE_SIZE) << ")";
         std::cout << " -- tile pos (x, y): (" <<
             static_cast<int>(mPosition.x / TILE_SIZE) << ", " <<
             static_cast<int>(mPosition.y / TILE_SIZE) << ")\n";
@@ -197,7 +193,6 @@ Vector2 Ghost::getTilePosition() const {
 }
 
 void Ghost::meander(std::shared_ptr<Labyrinth> labyrinth) {
-    if (!isCentered()) { return; }
 
     auto availableTurns = getAvailableTurns(labyrinth);
 
