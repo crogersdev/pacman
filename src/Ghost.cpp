@@ -107,17 +107,20 @@ void Ghost::chase(std::shared_ptr<Labyrinth> labyrinth) {
 
 void Ghost::draw() {
     mGhostSprite.draw(mPosition);
+    
+    /*
     for (const auto& turn : mTurns) {
         DrawRectangle(turn.first, turn.second, 5, 12, Color{255, 128, 128, 255});
     }
     DrawRectangle(mPosition.x+(mDirection.x * 26)-13, mPosition.y+(mDirection.y * 26)-13, 26, 26, Color{0, 128, 64, 212});
+    */
 
     std::string debugGhost = "Pinky";
     if (mName == debugGhost) {
         std::cout << mName << "'s state: " << mState;
-        std::cout << " -- tile target (x, y): (" << 
-            static_cast<int>(mChaseTarget.x / TILE_SIZE) << ", " <<
-            static_cast<int>(mChaseTarget.y / TILE_SIZE) << ")";
+        // std::cout << " -- tile target (x, y): (" << 
+        //    static_cast<int>(mChaseTarget.x / TILE_SIZE) << ", " <<
+        //    static_cast<int>(mChaseTarget.y / TILE_SIZE) << ")";
         std::cout << " -- tile pos (x, y): (" <<
             static_cast<int>(mPosition.x / TILE_SIZE) << ", " <<
             static_cast<int>(mPosition.y / TILE_SIZE) << ")";
