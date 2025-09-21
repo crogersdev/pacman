@@ -4,33 +4,33 @@
 
 Ghost::Ghost(std::string name, std::string texture, Vector2 initTilePos, Vector2 scatterTilePos) 
     :
-      mChaseSpeed(40.f),
-      mChaseTarget({}),
-      mDirection{ 1.f, 0.f },
-      mFrightenedSpeed(30.f),
+      mChaseSpeed(40.),
+      mChaseTarget{},
+      mDirection{ 1., 0. },
+      mFrightenedSpeed(30.),
       mGen(std::random_device{}()),
       mGhostSprite(texture, 26, 26, 2, 4),
       mGhostTexture(texture),
       mLastDecisionTile(initTilePos),
       mName(name),
-      mPrisonSpeed(55.f),
-      mPrisonPosition(Vector2{ 12 * TILE_SIZE - TILE_SIZE / 2, 12 * TILE_SIZE - TILE_SIZE / 2}),
-      mPosition({ initTilePos.x * TILE_SIZE - TILE_SIZE / 2.f, initTilePos.y * TILE_SIZE - TILE_SIZE / 2.f }),
-      mScatterCornerPosition({ scatterTilePos.x * TILE_SIZE - TILE_SIZE / 2.f, scatterTilePos.y * TILE_SIZE - TILE_SIZE / 2 }),
-      mSpeed(40.f),
+      mPrisonSpeed(55.),
+      mPrisonPosition{ 12. * TILE_SIZE - TILE_SIZE / 2., 12. * TILE_SIZE - TILE_SIZE / 2. },
+      mPosition{ initTilePos.x * TILE_SIZE - TILE_SIZE / 2., initTilePos.y * TILE_SIZE - TILE_SIZE / 2. },
+      mScatterCornerPosition{ scatterTilePos.x * TILE_SIZE - TILE_SIZE / 2., scatterTilePos.y * TILE_SIZE - TILE_SIZE / 2. },
+      mSpeed(40.),
       mState(State::SCATTER),
-      mTurns({}) {
+      mTurns{} {
 }
 
 Ghost::~Ghost() {}
 
 void Ghost::act(std::shared_ptr<Labyrinth> labyrinth) {
     // i hate how the ints and floats don't mix this sucks
-    int tilePositionX = static_cast<int>(mPosition.x / TILE_SIZE);
-    int tilePositionY = static_cast<int>(mPosition.y / TILE_SIZE);
+    float tilePositionX = static_cast<int>(mPosition.x / TILE_SIZE);
+    float tilePositionY = static_cast<int>(mPosition.y / TILE_SIZE);
 
-    if (isCentered()) { // && (tilePositionX != mLastDecisionTile.x || tilePositionY != mLastDecisionTile.y)) {
-        mLastDecisionTile = Vector2({ tilePositionX * 1.f, tilePositionY * 1.f });
+    if (isCentered() && (tilePositionX != mLastDecisionTile.x || tilePositionY != mLastDecisionTile.y)) {
+        mLastDecisionTile = Vector2{ tilePositionX, tilePositionY };
         
         switch (mState) {
         case State::CHASE:
@@ -74,7 +74,7 @@ void Ghost::chase(std::shared_ptr<Labyrinth> labyrinth) {
     }
 
     auto availableTurns = getAvailableTurns(labyrinth);
-    Vector2 turn = { 0.f , 0.f };
+    Vector2 turn = Vector2{ 0. , 0. };
     int bestDistance = 1000, distance;
     int tilePositionX = static_cast<int>(mPosition.x / TILE_SIZE);
     int tilePositionY = static_cast<int>(mPosition.y / TILE_SIZE);
@@ -83,11 +83,11 @@ void Ghost::chase(std::shared_ptr<Labyrinth> labyrinth) {
         Vector2 potentialPosition = { mPosition.x + t.second.x * TILE_SIZE, mPosition.y + t.second.y * TILE_SIZE };
 
         if (tilePositionY == TUNNEL_ROW || static_cast<int>(target.y / TILE_SIZE) == TUNNEL_ROW) {
-            Vector2 leftTunnelExit = Vector2({ 0.f, TUNNEL_ROW * TILE_SIZE });
+            Vector2 leftTunnelExit = Vector2{ 0.f, TUNNEL_ROW * TILE_SIZE };
             int leftTunnelDistance = computeTileDistance(potentialPosition, leftTunnelExit);
             leftTunnelDistance += computeTileDistance(leftTunnelExit, target);
 
-            Vector2 rightTunnelExit = Vector2({ LABYRINTH_COLS * TILE_SIZE, TUNNEL_ROW * TILE_SIZE });
+            Vector2 rightTunnelExit = Vector2{ LABYRINTH_COLS * TILE_SIZE, TUNNEL_ROW * TILE_SIZE };
             int rightTunnelDistance = computeTileDistance(potentialPosition, rightTunnelExit);
             rightTunnelDistance += computeTileDistance(rightTunnelExit, target);
 
@@ -123,7 +123,8 @@ void Ghost::draw() {
         //    static_cast<int>(mChaseTarget.y / TILE_SIZE) << ")";
         std::cout << " -- tile pos (x, y): (" <<
             static_cast<int>(mPosition.x / TILE_SIZE) << ", " <<
-            static_cast<int>(mPosition.y / TILE_SIZE) << ")\n";
+            static_cast<int>(mPosition.y / TILE_SIZE) << ")";
+        std::cout << " -- headed <" << mDirection.x << ", " << mDirection.y << ">\n";
     }
 }
 
@@ -193,7 +194,6 @@ Vector2 Ghost::getTilePosition() const {
 }
 
 void Ghost::meander(std::shared_ptr<Labyrinth> labyrinth) {
-
     auto availableTurns = getAvailableTurns(labyrinth);
 
     if (availableTurns.size() == 1) {
@@ -235,10 +235,10 @@ void Ghost::updateSprite() {
 
 void Ghost::updateSpriteFrameAndMove() {
     if (mState != Ghost::State::FRIGHTENED) {
-        if (mDirection == Vector2{  0.f, -1.f }) { mGhostSprite.setZeroFrame(0); }
-        if (mDirection == Vector2{  0.f,  1.f }) { mGhostSprite.setZeroFrame(6); }
-        if (mDirection == Vector2{ -1.f,  0.f }) { mGhostSprite.setZeroFrame(4); }
-        if (mDirection == Vector2{  1.f,  0.f }) { mGhostSprite.setZeroFrame(2); }
+        if (mDirection == Vector2{  0., -1. }) { mGhostSprite.setZeroFrame(0); }
+        if (mDirection == Vector2{  0.,  1. }) { mGhostSprite.setZeroFrame(6); }
+        if (mDirection == Vector2{ -1.,  0. }) { mGhostSprite.setZeroFrame(4); }
+        if (mDirection == Vector2{  1.,  0. }) { mGhostSprite.setZeroFrame(2); }
     }
 
     Vector2 newPosition = {

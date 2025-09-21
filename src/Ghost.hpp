@@ -61,6 +61,7 @@ public:
     std::string  getName() const { return mName; }
     Vector2      getTilePosition() const;
     void         meander(std::shared_ptr<Labyrinth>);
+    void         resetDecisionTile() { mLastDecisionTile = Vector2{ -1., -1. }; }
     void         setChaseTarget(const Vector2 &t) { mChaseTarget = t; }
     void         setName(const std::string s) { mName = s; }
     void         setState(const State s) { mState = s; }
