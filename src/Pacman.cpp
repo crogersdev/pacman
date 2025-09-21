@@ -9,9 +9,9 @@
 Pacman::Pacman()
     : mColor(GetColor(0xFFFF00FF)),
       mDebugTileColor(GetColor(0x000000FF)),
-      mDirection{ 0.f, 0.f },
+      mDirection{ 0., 0. },
       mPacmanSprite("res/pacman.png", 26, 26, 3, 10),
-      mPosition{ 11 * TILE_SIZE + TILE_SIZE / 2, 14 * TILE_SIZE + TILE_SIZE / 2 },
+      mPosition{ 11. * TILE_SIZE + TILE_SIZE / 2., 14. * TILE_SIZE + TILE_SIZE / 2. },
       mRadius(12),
       mSpeed(50.f)
 {}
@@ -33,8 +33,8 @@ void Pacman::draw() {
 }
 
 bool Pacman::isCentered() {
-    const float ALIGNMENT_THRESHOLD = 1.5f;
-    const float TILE_CENTER_OFFSET = TILE_SIZE / 2.f;
+    const float ALIGNMENT_THRESHOLD = 1.5;
+    const float TILE_CENTER_OFFSET = TILE_SIZE / 2.;
     
     float distFromTileCenterX = fabs(
         (mPosition.x - TILE_CENTER_OFFSET) -
@@ -73,7 +73,7 @@ void Pacman::move(Vector2 intendedDirection, std::shared_ptr<Labyrinth> labyrint
             }
         } else {
             // no more input 
-            mDirection = { 0.f, 0.f };
+            mDirection = { 0., 0. };
         }
 
         Vector2 intendedTileFromMomentum = {
@@ -83,11 +83,11 @@ void Pacman::move(Vector2 intendedDirection, std::shared_ptr<Labyrinth> labyrint
 
         if (!labyrinth->isLegalMove(intendedTileFromMomentum)) {
             // prevents hitting illegal tile
-            mDirection = { 0.f, 0.f };
+            mDirection = { 0., 0. };
         }
     }
 
-    if (mDirection.x == 0.f && mDirection.y == 0.f) {
+    if (mDirection.x == 0. && mDirection.y == 0.) {
         return;
     }
 

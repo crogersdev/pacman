@@ -71,11 +71,13 @@ public:
                 std::cout << "LEAVE\n";
                 ghost->setState(Ghost::State::CHASE);
                 ghost->setChaseTarget(mPacman->getPosition());
+                ghost->resetDecisionTile();
             } 
 
             if (isGhostInPrison(ghost) && ghost->getState() == Ghost::State::GOING_TO_PRISON) {
                 std::cout << "oh no!\n";
                 ghost->setState(Ghost::State::LEAVING_PRISON);
+                ghost->resetDecisionTile();
                 ghost->updateSprite();
             } 
         }
@@ -97,18 +99,18 @@ public:
     }
 
     inline void moveStuff() {
-        Vector2 intendedDirection = { 0.f, 0.f };
+        Vector2 intendedDirection = Vector2{ 0., 0. };
         if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) {
-            intendedDirection = { 0.f, 1.f };
+            intendedDirection = Vector2{ 0., 1. };
         }
         if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) {
-            intendedDirection = { 0.f, -1.f };
+            intendedDirection = Vector2{ 0., -1. };
         }
         if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) {
-            intendedDirection = { 1.f, 0.f };
+            intendedDirection = Vector2{ 1., 0. };
         }
         if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) {
-            intendedDirection = { -1.f, 0.f };
+            intendedDirection = Vector2{ -1., 0. };
         }
 
         mPacman->move(intendedDirection, mLabyrinth);
@@ -250,7 +252,7 @@ private:
     int     mPowerUpsEaten = 0;
     bool    mPowerUpTime = false;
     int     mPacmanLives = 3;
-    float   mPacmanSpeed = 50.f;
+    float   mPacmanSpeed = 50.;
     bool    mPaused = false;
     int     mScore = 0;
     int     mScoreExtraLife = 0;
