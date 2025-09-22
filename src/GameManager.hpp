@@ -30,11 +30,12 @@ public:
     : mGhosts(g),
       mPacman(p),
       mLabyrinth(l),
-      mGhostStartingPoint({ 11.f * TILE_SIZE, 8.f * TILE_SIZE })
+      mGhostStartingPoint({ 11.f * TILE_SIZE, 9.f * TILE_SIZE })
     {};
     inline ~GameManager() {};
 
     inline void checkCollisions() {
+        
         Vector2 pacmanTilePosition = mPacman->getTilePosition();
         int pacmanTileX = static_cast<int>(pacmanTilePosition.x);
         int pacmanTileY = static_cast<int>(pacmanTilePosition.y);
@@ -52,9 +53,18 @@ public:
             onPowerUpEaten();
         }
 
+        std::string debugGhost = "Poinky";
         // ghost collisions
         for (const auto& ghost : mGhosts) {
             Vector2 ghostTile = ghost->getTilePosition();
+
+            if (ghost->getName() == debugGhost) {
+                std::cout << debugGhost << "'s state: " << ghost->getState();
+                // std::cout << " -- tile target (x, y): (" << 
+                //    static_cast<int>(mChaseTarget.x / TILE_SIZE) << ", " <<
+                //    static_cast<int>(mChaseTarget.y / TILE_SIZE) << ")";
+                std::cout << " -- tile pos (x, y): (" << ghostTile.x << ", " << ghostTile.y << ")\n";
+            } 
 
             if (pacmanTilePosition.x == ghostTile.x && pacmanTilePosition.y == ghostTile.y) {
                 if (ghost->getState() == Ghost::State::FRIGHTENED) {
@@ -67,7 +77,10 @@ public:
                 }
             }
             
-            if (ghostTile.x == 11 && ghostTile.y == 8 && ghost->mState == Ghost::State::LEAVING_PRISON) {
+            float ghostStartingTileX = static_cast<int>(mGhostStartingPoint.x / TILE_SIZE);
+            float ghostStartingTileY = static_cast<int>(mGhostStartingPoint.y / TILE_SIZE);
+
+            if (ghostTile.x == ghostStartingTileX && ghostTile.y == ghostStartingTileY && ghost->mState == Ghost::State::LEAVING_PRISON) {
                 std::cout << "LEAVE\n";
                 ghost->setState(Ghost::State::CHASE);
                 ghost->setChaseTarget(mPacman->getPosition());
@@ -99,18 +112,18 @@ public:
     }
 
     inline void moveStuff() {
-        Vector2 intendedDirection = Vector2{ 0., 0. };
+        Vector2 intendedDirection = Vector2{ 0.f, 0.f };
         if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) {
-            intendedDirection = Vector2{ 0., 1. };
+            intendedDirection = Vector2{ 0.f, 1.f };
         }
         if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) {
-            intendedDirection = Vector2{ 0., -1. };
+            intendedDirection = Vector2{ 0.f, -1.f };
         }
         if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) {
-            intendedDirection = Vector2{ 1., 0. };
+            intendedDirection = Vector2{ 1.f, 0.f };
         }
         if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) {
-            intendedDirection = Vector2{ -1., 0. };
+            intendedDirection = Vector2{ -1.f, 0.f };
         }
 
         mPacman->move(intendedDirection, mLabyrinth);
@@ -252,14 +265,14 @@ private:
     int     mPowerUpsEaten = 0;
     bool    mPowerUpTime = false;
     int     mPacmanLives = 3;
-    float   mPacmanSpeed = 50.;
+    float   mPacmanSpeed = 50.f;
     bool    mPaused = false;
     int     mScore = 0;
     int     mScoreExtraLife = 0;
     State   mState = State::MENU;
-    float   mTimerChaseMode = 0.;
-    float   mTimerPowerUp = 0.;
-    float   mTimerLeavePrison = 0.;
+    float   mTimerChaseMode = 0.f;
+    float   mTimerPowerUp = 0.f;
+    float   mTimerLeavePrison = 0.f;
 
     std::shared_ptr<Pacman>             mPacman;
     std::shared_ptr<Labyrinth>          mLabyrinth;

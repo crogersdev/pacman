@@ -61,7 +61,7 @@ public:
     std::string  getName() const { return mName; }
     Vector2      getTilePosition() const;
     void         meander(std::shared_ptr<Labyrinth>);
-    void         resetDecisionTile() { mLastDecisionTile = Vector2{ -1., -1. }; }
+    void         resetDecisionTile() { mLastDecisionTile = Vector2{ -1.f, -1.f }; }
     void         setChaseTarget(const Vector2 &t) { mChaseTarget = t; }
     void         setName(const std::string s) { mName = s; }
     void         setState(const State s) { mState = s; }
@@ -87,6 +87,6 @@ public:
 
 private:
     std::map<Direction, Vector2> getAvailableTurns(std::shared_ptr<Labyrinth>);
-    int  computeTileDistance(Vector2 start, Vector2 end) { return static_cast<int>((std::abs(end.y - start.y) + std::abs(end.x - start.x )) / TILE_SIZE); }
-    void updateSpriteFrameAndMove(); 
+    float computeTileDistance(Vector2 start, Vector2 end) { return (std::abs(end.y - start.y) + std::abs(end.x - start.x )); }
+    void  updateSpriteFrameAndMove(); 
 };

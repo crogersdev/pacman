@@ -4,20 +4,20 @@
 
 Ghost::Ghost(std::string name, std::string texture, Vector2 initTilePos, Vector2 scatterTilePos) 
     :
-      mChaseSpeed(40.),
+      mChaseSpeed(40.f),
       mChaseTarget{},
-      mDirection{ 1., 0. },
-      mFrightenedSpeed(30.),
+      mDirection{ 1.f, 0.f },
+      mFrightenedSpeed(30.f),
       mGen(std::random_device{}()),
       mGhostSprite(texture, 26, 26, 2, 4),
       mGhostTexture(texture),
       mLastDecisionTile(initTilePos),
       mName(name),
-      mPrisonSpeed(55.),
-      mPrisonPosition{ 12. * TILE_SIZE - TILE_SIZE / 2., 12. * TILE_SIZE - TILE_SIZE / 2. },
-      mPosition{ initTilePos.x * TILE_SIZE - TILE_SIZE / 2., initTilePos.y * TILE_SIZE - TILE_SIZE / 2. },
-      mScatterCornerPosition{ scatterTilePos.x * TILE_SIZE - TILE_SIZE / 2., scatterTilePos.y * TILE_SIZE - TILE_SIZE / 2. },
-      mSpeed(40.),
+      mPrisonSpeed(55.f),
+      mPrisonPosition{ 12.f * TILE_SIZE - TILE_SIZE / 2.f, 12.f * TILE_SIZE - TILE_SIZE / 2.f },
+      mPosition{ initTilePos.x * TILE_SIZE - TILE_SIZE / 2.f, initTilePos.y * TILE_SIZE - TILE_SIZE / 2.f },
+      mScatterCornerPosition{ scatterTilePos.x * TILE_SIZE - TILE_SIZE / 2.f, scatterTilePos.y * TILE_SIZE - TILE_SIZE / 2.f },
+      mSpeed(40.f),
       mState(State::SCATTER),
       mTurns{} {
 }
@@ -74,7 +74,7 @@ void Ghost::chase(std::shared_ptr<Labyrinth> labyrinth) {
     }
 
     auto availableTurns = getAvailableTurns(labyrinth);
-    Vector2 turn = Vector2{ 0. , 0. };
+    Vector2 turn = Vector2{ 0.f , 0.f };
     int bestDistance = 1000, distance;
     int tilePositionX = static_cast<int>(mPosition.x / TILE_SIZE);
     int tilePositionY = static_cast<int>(mPosition.y / TILE_SIZE);
@@ -101,6 +101,7 @@ void Ghost::chase(std::shared_ptr<Labyrinth> labyrinth) {
             turn = t.second;
         }
     }
+    std::cout << "picking turn direction <" << turn.x << ", " << turn.y << ">\n";
     mDirection = turn;
 
 }
@@ -115,17 +116,17 @@ void Ghost::draw() {
     DrawRectangle(mPosition.x+(mDirection.x * 26)-13, mPosition.y+(mDirection.y * 26)-13, 26, 26, Color{0, 128, 64, 212});
     */
 
-    std::string debugGhost = "Pinky";
-    if (mName == debugGhost) {
-        std::cout << mName << "'s state: " << mState;
-        // std::cout << " -- tile target (x, y): (" << 
-        //    static_cast<int>(mChaseTarget.x / TILE_SIZE) << ", " <<
-        //    static_cast<int>(mChaseTarget.y / TILE_SIZE) << ")";
-        std::cout << " -- tile pos (x, y): (" <<
-            static_cast<int>(mPosition.x / TILE_SIZE) << ", " <<
-            static_cast<int>(mPosition.y / TILE_SIZE) << ")";
-        std::cout << " -- headed <" << mDirection.x << ", " << mDirection.y << ">\n";
-    }
+    // std::string debugGhost = "Pinky";
+    // if (mName == debugGhost) {
+    //     std::cout << mName << "'s state: " << mState;
+    //     // std::cout << " -- tile target (x, y): (" << 
+    //     //    static_cast<int>(mChaseTarget.x / TILE_SIZE) << ", " <<
+    //     //    static_cast<int>(mChaseTarget.y / TILE_SIZE) << ")";
+    //     std::cout << " -- tile pos (x, y): (" <<
+    //         static_cast<int>(mPosition.x / TILE_SIZE) << ", " <<
+    //         static_cast<int>(mPosition.y / TILE_SIZE) << ")";
+    //     std::cout << " -- headed <" << mDirection.x << ", " << mDirection.y << ">\n";
+    // }
 }
 
 bool Ghost::isCentered() {
@@ -188,8 +189,8 @@ std::map<Direction, Vector2> Ghost::getAvailableTurns(std::shared_ptr<Labyrinth>
 
 Vector2 Ghost::getTilePosition() const {
     return Vector2{ 
-        std::round(mPosition.x / TILE_SIZE),
-        std::round(mPosition.y / TILE_SIZE)
+        std::floor(mPosition.x / TILE_SIZE),
+        std::floor(mPosition.y / TILE_SIZE)
     };
 }
 
@@ -235,10 +236,10 @@ void Ghost::updateSprite() {
 
 void Ghost::updateSpriteFrameAndMove() {
     if (mState != Ghost::State::FRIGHTENED) {
-        if (mDirection == Vector2{  0., -1. }) { mGhostSprite.setZeroFrame(0); }
-        if (mDirection == Vector2{  0.,  1. }) { mGhostSprite.setZeroFrame(6); }
-        if (mDirection == Vector2{ -1.,  0. }) { mGhostSprite.setZeroFrame(4); }
-        if (mDirection == Vector2{  1.,  0. }) { mGhostSprite.setZeroFrame(2); }
+        if (mDirection == Vector2{  0.f, -1.f }) { mGhostSprite.setZeroFrame(0); }
+        if (mDirection == Vector2{  0.f,  1.f }) { mGhostSprite.setZeroFrame(6); }
+        if (mDirection == Vector2{ -1.f,  0.f }) { mGhostSprite.setZeroFrame(4); }
+        if (mDirection == Vector2{  1.f,  0.f }) { mGhostSprite.setZeroFrame(2); }
     }
 
     Vector2 newPosition = {

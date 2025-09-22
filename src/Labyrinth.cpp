@@ -111,7 +111,7 @@ void Labyrinth::draw() {
                     TILE_SIZE
                 };
                 dst = { static_cast<float>(x * TILE_SIZE), static_cast<float>(y * TILE_SIZE), TILE_SIZE, TILE_SIZE };
-                DrawTexturePro(mLabyrinthTileMap.spritesheet, src, dst, Vector2{ 0., 0. }, 0., WHITE);
+                DrawTexturePro(mLabyrinthTileMap.spritesheet, src, dst, Vector2{ 0.f, 0.f }, 0.f, WHITE);
                 break;
             default:
                 break;

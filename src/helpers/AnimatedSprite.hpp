@@ -15,7 +15,7 @@ public:
           mFrameCount(fc),
           mFrameHeight(fh),
           mFrameWidth(fw),
-          mFrameTimer(0.), 
+          mFrameTimer(0.f), 
           mFrameZero(0),
           mTexture(),
           mUpdating(0) {

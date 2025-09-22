@@ -9,9 +9,9 @@
 Pacman::Pacman()
     : mColor(GetColor(0xFFFF00FF)),
       mDebugTileColor(GetColor(0x000000FF)),
-      mDirection{ 0., 0. },
+      mDirection{ 0.f, 0.f },
       mPacmanSprite("res/pacman.png", 26, 26, 3, 10),
-      mPosition{ 11. * TILE_SIZE + TILE_SIZE / 2., 14. * TILE_SIZE + TILE_SIZE / 2. },
+      mPosition{ 11.f * TILE_SIZE + TILE_SIZE / 2.f, 14.f * TILE_SIZE + TILE_SIZE / 2.f },
       mRadius(12),
       mSpeed(50.f)
 {}
@@ -33,8 +33,8 @@ void Pacman::draw() {
 }
 
 bool Pacman::isCentered() {
-    const float ALIGNMENT_THRESHOLD = 1.5;
-    const float TILE_CENTER_OFFSET = TILE_SIZE / 2.;
+    const float ALIGNMENT_THRESHOLD = 1.5f;
+    const float TILE_CENTER_OFFSET = TILE_SIZE / 2.f;
     
     float distFromTileCenterX = fabs(
         (mPosition.x - TILE_CENTER_OFFSET) -
@@ -73,7 +73,7 @@ void Pacman::move(Vector2 intendedDirection, std::shared_ptr<Labyrinth> labyrint
             }
         } else {
             // no more input 
-            mDirection = { 0., 0. };
+            mDirection = { 0.f, 0.f };
         }
 
         Vector2 intendedTileFromMomentum = {
@@ -83,18 +83,18 @@ void Pacman::move(Vector2 intendedDirection, std::shared_ptr<Labyrinth> labyrint
 
         if (!labyrinth->isLegalMove(intendedTileFromMomentum)) {
             // prevents hitting illegal tile
-            mDirection = { 0., 0. };
+            mDirection = { 0.f, 0.f };
         }
     }
 
-    if (mDirection.x == 0. && mDirection.y == 0.) {
+    if (mDirection.x == 0.f && mDirection.y == 0.f) {
         return;
     }
 
-    if (mDirection == Vector2{  1.,  0.}) { mPacmanSprite.setZeroFrame(0); }
-    if (mDirection == Vector2{  0.,  1.}) { mPacmanSprite.setZeroFrame(3); }
-    if (mDirection == Vector2{ -1.,  0.}) { mPacmanSprite.setZeroFrame(6); }
-    if (mDirection == Vector2{  0., -1.}) { mPacmanSprite.setZeroFrame(9); }
+    if (mDirection == Vector2{  1.f,  0.f}) { mPacmanSprite.setZeroFrame(0); }
+    if (mDirection == Vector2{  0.f,  1.f}) { mPacmanSprite.setZeroFrame(3); }
+    if (mDirection == Vector2{ -1.f,  0.f}) { mPacmanSprite.setZeroFrame(6); }
+    if (mDirection == Vector2{  0.f, -1.f}) { mPacmanSprite.setZeroFrame(9); }
 
     Vector2 newPosition = {
         mPosition.x + (mDirection.x * mSpeed * GetFrameTime()),
