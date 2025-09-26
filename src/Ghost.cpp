@@ -1,5 +1,8 @@
 #include "Ghost.hpp"
 
+#include <iomanip>
+#include <sstream>
+
 #include <raymath.h>
 
 Ghost::Ghost(std::string name, std::string texture, Vector2 initTilePos, Vector2 scatterTilePos) 
@@ -7,6 +10,7 @@ Ghost::Ghost(std::string name, std::string texture, Vector2 initTilePos, Vector2
       mChaseSpeed(40.f),
       mChaseTarget{},
       mDirection{ 1.f, 0.f },
+      mDistanceToTarget(),
       mFrightenedSpeed(30.f),
       mGen(std::random_device{}()),
       mGhostSprite(texture, 26, 26, 2, 4),
@@ -66,6 +70,8 @@ void Ghost::act(std::shared_ptr<Labyrinth> labyrinth) {
 }
 
 void Ghost::chase(std::shared_ptr<Labyrinth> labyrinth) {
+    mDistanceToTarget.clear();
+
     Vector2 target = mChaseTarget;
     if (mState == State::SCATTER) {
         target = mScatterCornerPosition;
@@ -75,7 +81,7 @@ void Ghost::chase(std::shared_ptr<Labyrinth> labyrinth) {
 
     auto availableTurns = getAvailableTurns(labyrinth);
     Vector2 turn = Vector2{ 0.f , 0.f };
-    int bestDistance = 1000, distance;
+    float bestDistance = 1000.f, distance;
     int tilePositionX = static_cast<int>(mPosition.x / TILE_SIZE);
     int tilePositionY = static_cast<int>(mPosition.y / TILE_SIZE);
 
@@ -92,18 +98,35 @@ void Ghost::chase(std::shared_ptr<Labyrinth> labyrinth) {
             rightTunnelDistance += computeTileDistance(rightTunnelExit, target);
 
             distance = std::min(leftTunnelDistance, rightTunnelDistance);
+
         } else {
             distance = computeTileDistance(potentialPosition, target);
+            std::cout << "tile pos (x, y): (" <<
+                static_cast<int>(mPosition.x / TILE_SIZE) << ", " <<
+                static_cast<int>(mPosition.y / TILE_SIZE) << ")";
+            
+            std::cout << "\tdistance from " <<
+                static_cast<int>(potentialPosition.x / TILE_SIZE) << ", " <<
+                static_cast<int>(potentialPosition.y / TILE_SIZE) << " to " <<
+                static_cast<int>(target.x / TILE_SIZE) << ", " << 
+                static_cast<int>(target.y / TILE_SIZE) << " is " << 
+                std::round(distance) << "\n";
         }
 
-        if (distance < bestDistance) {
+        mDistanceToTarget.push_back(
+            std::make_pair(
+                Vector2{ potentialPosition.x + (TILE_SIZE * t.second.x), potentialPosition.y + (TILE_SIZE * t.second.y) },
+                static_cast<int>(std::round(distance))
+            )
+        );
+
+        if (std::round(distance) < bestDistance) {
             bestDistance = distance;
             turn = t.second;
         }
     }
-    std::cout << "picking turn direction <" << turn.x << ", " << turn.y << ">\n";
+    // std::cout << "picking turn direction <" << turn.x << ", " << turn.y << ">\n";
     mDirection = turn;
-
 }
 
 void Ghost::draw() {
@@ -113,20 +136,30 @@ void Ghost::draw() {
     for (const auto& turn : mTurns) {
         DrawRectangle(turn.first, turn.second, 5, 12, Color{255, 128, 128, 255});
     }
+    
     DrawRectangle(mPosition.x+(mDirection.x * 26)-13, mPosition.y+(mDirection.y * 26)-13, 26, 26, Color{0, 128, 64, 212});
     */
+    DrawRectangle((mPosition.x / 26)-13, (mPosition.y / 26)-13, 26, 26, Color{0, 128, 64, 212});
 
-    // std::string debugGhost = "Pinky";
-    // if (mName == debugGhost) {
-    //     std::cout << mName << "'s state: " << mState;
-    //     // std::cout << " -- tile target (x, y): (" << 
-    //     //    static_cast<int>(mChaseTarget.x / TILE_SIZE) << ", " <<
-    //     //    static_cast<int>(mChaseTarget.y / TILE_SIZE) << ")";
-    //     std::cout << " -- tile pos (x, y): (" <<
-    //         static_cast<int>(mPosition.x / TILE_SIZE) << ", " <<
-    //         static_cast<int>(mPosition.y / TILE_SIZE) << ")";
-    //     std::cout << " -- headed <" << mDirection.x << ", " << mDirection.y << ">\n";
-    // }
+    std::stringstream ss;
+    for (const auto distance : mDistanceToTarget) {
+        ss << std::fixed << std::setprecision(2) << distance.second;
+        DrawText(ss.str().c_str(), distance.first.x, distance.first.y, 15, GOLD);
+        ss.str("");
+        ss.clear();
+    }
+
+    std::string debugGhost = "Poinky";
+    if (mName == debugGhost) {
+        std::cout << mName << "'s state: " << mState;
+        std::cout << " -- tile target (x, y): (" << 
+           static_cast<int>(mChaseTarget.x / TILE_SIZE) << ", " <<
+           static_cast<int>(mChaseTarget.y / TILE_SIZE) << ")";
+        std::cout << " -- tile pos (x, y): (" <<
+            static_cast<int>(mPosition.x / TILE_SIZE) << ", " <<
+            static_cast<int>(mPosition.y / TILE_SIZE) << ")";
+        std::cout << " -- headed <" << mDirection.x << ", " << mDirection.y << ">\n";
+    }
 }
 
 bool Ghost::isCentered() {

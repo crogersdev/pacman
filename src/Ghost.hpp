@@ -83,7 +83,8 @@ public:
     float          mSpeed;
     State          mState;
 
-    std::vector<std::pair<int, int>> mTurns;
+    std::vector<std::pair<int, int>>     mTurns;
+    std::vector<std::pair<Vector2, int>> mDistanceToTarget;
 
 private:
     std::map<Direction, Vector2> getAvailableTurns(std::shared_ptr<Labyrinth>);
