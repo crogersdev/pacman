@@ -1,9 +1,8 @@
-#include "Ghost.hpp"
-
 #include <iomanip>
 #include <sstream>
 
-#include <raymath.h>
+#include "Ghost.hpp"
+#include "DebugUtils.hpp"
 
 Ghost::Ghost(std::string name, std::string texture, Vector2 initTilePos, Vector2 scatterTilePos) 
     :
@@ -86,68 +85,57 @@ void Ghost::chase(std::shared_ptr<Labyrinth> labyrinth) {
     int tilePositionY = static_cast<int>(mPosition.y / TILE_SIZE);
 
     for (const auto& t: availableTurns ) {
-        Vector2 potentialPosition = { mPosition.x + t.second.x * TILE_SIZE, mPosition.y + t.second.y * TILE_SIZE };
+        Vector2 potentialPosition = Vector2Add(mPosition, Vector2Scale(t.second, TILE_SIZE));
 
         if (tilePositionY == TUNNEL_ROW || static_cast<int>(target.y / TILE_SIZE) == TUNNEL_ROW) {
             Vector2 leftTunnelExit = Vector2{ 0.f, TUNNEL_ROW * TILE_SIZE };
-            int leftTunnelDistance = computeTileDistance(potentialPosition, leftTunnelExit);
-            leftTunnelDistance += computeTileDistance(leftTunnelExit, target);
+            float leftTunnelDistance = Vector2Distance(potentialPosition, leftTunnelExit);
+            leftTunnelDistance += Vector2Distance(leftTunnelExit, target);
 
             Vector2 rightTunnelExit = Vector2{ LABYRINTH_COLS * TILE_SIZE, TUNNEL_ROW * TILE_SIZE };
-            int rightTunnelDistance = computeTileDistance(potentialPosition, rightTunnelExit);
-            rightTunnelDistance += computeTileDistance(rightTunnelExit, target);
+            float rightTunnelDistance = Vector2Distance(potentialPosition, rightTunnelExit);
+            rightTunnelDistance += Vector2Distance(rightTunnelExit, target);
 
-            distance = std::min(leftTunnelDistance, rightTunnelDistance);
-
+            float tunnelDistance = std::min(leftTunnelDistance, rightTunnelDistance);
+            distance = std::min(tunnelDistance, Vector2Distance(potentialPosition, target));
         } else {
-            distance = computeTileDistance(potentialPosition, target);
-            std::cout << "tile pos (x, y): (" <<
-                static_cast<int>(mPosition.x / TILE_SIZE) << ", " <<
-                static_cast<int>(mPosition.y / TILE_SIZE) << ")";
-            
-            std::cout << "\tdistance from " <<
-                static_cast<int>(potentialPosition.x / TILE_SIZE) << ", " <<
-                static_cast<int>(potentialPosition.y / TILE_SIZE) << " to " <<
-                static_cast<int>(target.x / TILE_SIZE) << ", " << 
-                static_cast<int>(target.y / TILE_SIZE) << " is " << 
-                std::round(distance) << "\n";
+            distance = Vector2Distance(potentialPosition, target);
         }
 
-        mDistanceToTarget.push_back(
-            std::make_pair(
-                Vector2{ potentialPosition.x + (TILE_SIZE * t.second.x), potentialPosition.y + (TILE_SIZE * t.second.y) },
-                static_cast<int>(std::round(distance))
-            )
-        );
+        mDistanceToTarget.push_back(std::make_pair(potentialPosition, distance));
 
-        if (std::round(distance) < bestDistance) {
+        if (distance < bestDistance) {
             bestDistance = distance;
             turn = t.second;
+        } else if (distance == bestDistance) {
+            Vector2 directionToTarget = Vector2{ target.x - mPosition.x, target.y - mPosition.y };
+
+            // this should help us pick the direction most likely to 
+            // get us closer to our target if we've got two equal distances
+            // to choose from.  higher is better.
+            float potentialDotProd = Vector2DotProduct(t.second, directionToTarget);
+            float currentDotProd = Vector2DotProduct(turn, directionToTarget);
+            if (potentialDotProd > currentDotProd) {
+                turn = t.second;
+            } 
         }
     }
-    // std::cout << "picking turn direction <" << turn.x << ", " << turn.y << ">\n";
     mDirection = turn;
 }
 
 void Ghost::draw() {
     mGhostSprite.draw(mPosition);
-    
-    /*
-    for (const auto& turn : mTurns) {
-        DrawRectangle(turn.first, turn.second, 5, 12, Color{255, 128, 128, 255});
-    }
-    
-    DrawRectangle(mPosition.x+(mDirection.x * 26)-13, mPosition.y+(mDirection.y * 26)-13, 26, 26, Color{0, 128, 64, 212});
-    */
-    DrawRectangle((mPosition.x / 26)-13, (mPosition.y / 26)-13, 26, 26, Color{0, 128, 64, 212});
+   
+    // draws green square where next position will be
+    // DrawRectangle(mPosition.x+(mDirection.x * 26)-13, mPosition.y+(mDirection.y * 26)-13, 26, 26, Color{0, 128, 64, 212});
 
-    std::stringstream ss;
-    for (const auto distance : mDistanceToTarget) {
-        ss << std::fixed << std::setprecision(2) << distance.second;
-        DrawText(ss.str().c_str(), distance.first.x, distance.first.y, 15, GOLD);
-        ss.str("");
-        ss.clear();
-    }
+    // std::stringstream ss;
+    // for (const auto distance : mDistanceToTarget) {
+    //     ss << std::fixed << std::setprecision(2) << distance.second;
+    //     DrawText(ss.str().c_str(), distance.first.x, distance.first.y, 15, GOLD);
+    //     ss.str("");
+    //     ss.clear();
+    // }
 
     std::string debugGhost = "Poinky";
     if (mName == debugGhost) {
@@ -253,7 +241,6 @@ void Ghost::meander(std::shared_ptr<Labyrinth> labyrinth) {
         auto it = availableTurns.begin();
         std::advance(it, dis(mGen) % availableTurns.size());
         mDirection = it->second;
-        // std::cout << "changing direction to " << static_cast<int>(it->first) << "\n";
     }
 }
 
@@ -275,16 +262,7 @@ void Ghost::updateSpriteFrameAndMove() {
         if (mDirection == Vector2{  1.f,  0.f }) { mGhostSprite.setZeroFrame(2); }
     }
 
-    Vector2 newPosition = {
-        mPosition.x + (mDirection.x * mSpeed * GetFrameTime()),
-        mPosition.y + (mDirection.y * mSpeed * GetFrameTime())
-    };
-
-    /*
-    std::cout << mName << " position (x, y)\t(" <<
-        static_cast<int>(mPosition.x / TILE_SIZE) << ", " <<
-        static_cast<int>(mPosition.y / TILE_SIZE) << ")\n";
-    */
+    Vector2 newPosition = Vector2Add(mPosition, Vector2Scale(mDirection, mSpeed * GetFrameTime()));
 
     int newTileX = static_cast<int>(newPosition.x / TILE_SIZE);
     int newTileY = static_cast<int>(newPosition.y / TILE_SIZE);

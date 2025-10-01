@@ -8,6 +8,7 @@
 #include "Labyrinth.hpp"
 
 #include <raylib.h>
+#include <raymath.h>
 
 class Ghost {
 public:
@@ -20,35 +21,6 @@ public:
         LEAVING_PRISON  = 5,
         GOING_TO_PRISON = 6
     };
-
-    friend std::ostream &operator<<(std::ostream &os, State s) {
-        switch(s) {
-        case State::CHASE:
-            os << "CHASE";
-            break;
-        case State::FRIGHTENED:
-            os << "FRIGHTENED";
-            break;
-        case State::SCATTER:
-            os << "SCATTER";
-            break;
-        case State::MEANDER:
-            os << "MEANDER";
-            break;
-        case State::IN_PRISON:
-            os << "IN_PRISON";
-            break;
-        case State::LEAVING_PRISON:
-            os << "LEAVING_PRISON";
-            break;
-        case State::GOING_TO_PRISON:
-            os << "GOING_TO_PRISON";
-            break;
-        default:
-            os << "duh";
-        }
-        return os;
-    }
 
     Ghost(std::string, std::string, Vector2, Vector2);
     ~Ghost();
@@ -64,6 +36,7 @@ public:
     void         resetDecisionTile() { mLastDecisionTile = Vector2{ -1.f, -1.f }; }
     void         setChaseTarget(const Vector2 &t) { mChaseTarget = t; }
     void         setName(const std::string s) { mName = s; }
+    void         setSpeed(const float s) { mSpeed = s; }
     void         setState(const State s) { mState = s; }
     void         updateSprite();
 
@@ -88,6 +61,6 @@ public:
 
 private:
     std::map<Direction, Vector2> getAvailableTurns(std::shared_ptr<Labyrinth>);
-    float computeTileDistance(Vector2 start, Vector2 end) { return (std::abs(end.y - start.y) + std::abs(end.x - start.x )); }
-    void  updateSpriteFrameAndMove(); 
+    void updateSpriteFrameAndMove(); 
 };
+

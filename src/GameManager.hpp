@@ -5,6 +5,7 @@
 
 #include <raylib.h>
 
+#include "DebugUtils.hpp"
 #include "Ghost.hpp"
 #include "Pacman.hpp"
 
