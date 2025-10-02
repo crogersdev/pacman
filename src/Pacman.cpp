@@ -19,16 +19,6 @@ Pacman::Pacman()
 Pacman::~Pacman() { std::cout << "PACMAN DESTROYED\n"; }
 
 void Pacman::draw() {
-    // #ifndef NDEBUG
-    // std::cout << "\t rendering pacman at row,  col: "
-    //           << static_cast<int>(mPosition.y / TILE_SIZE)
-    //           << ", "
-    //           << static_cast<int>(mPosition.x / TILE_SIZE)
-    //           << "\n";
-    // #endif
-
-    // DrawCircle(mPosition.x, mPosition.y, mRadius, mColor);
-    // DrawRectangle(mPosition.x, mPosition.y, TILE_SIZE, TILE_SIZE, GetColor(0x882200FF));
     mPacmanSprite.draw(mPosition);
 }
 
@@ -53,11 +43,8 @@ Vector2 Pacman::getTilePosition() const {
 
 void Pacman::move(Vector2 intendedDirection, std::shared_ptr<Labyrinth> labyrinth) {
 
-    // std::cout << "{ " << intendedDirection.x << ", " << intendedDirection.y << " }\n";
     int currentTileX = static_cast<int>(mPosition.x / TILE_SIZE);
     int currentTileY = static_cast<int>(mPosition.y / TILE_SIZE);
-
-    // std::cout << "pacman current tile: (x, y)\t" << currentTileX << ", " << currentTileY << ")\n";
 
     Vector2 intendedPosition = {
         (currentTileX + intendedDirection.x) * TILE_SIZE + TILE_SIZE / 2.f,
@@ -68,8 +55,6 @@ void Pacman::move(Vector2 intendedDirection, std::shared_ptr<Labyrinth> labyrint
         if (intendedDirection.x != 0.f || intendedDirection.y != 0.f) {
             if (labyrinth->isLegalMove(intendedPosition)) {
                 mDirection = intendedDirection;
-            } else {
-                std::cout << "move not legal\n";
             }
         } else {
             // no more input 

@@ -126,14 +126,12 @@ void Labyrinth::draw() {
 bool Labyrinth::isLegalMove(Vector2 pos) const {
     bool isLegal = true;
     auto halfTile = TILE_SIZE / 2;
-    DrawRectangle(pos.x - halfTile, pos.y - halfTile, TILE_SIZE, TILE_SIZE, PURPLE);
 
     Tile t = at(pos);
     switch (t) {
     case Tile::WALL:
     case Tile::GATE:
         isLegal = false;
-        std::cout << "ILLEGAL!!!\n";
         break;
     default:
         break;

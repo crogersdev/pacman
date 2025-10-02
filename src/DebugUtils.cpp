@@ -28,3 +28,48 @@ std::ostream &operator<<(std::ostream &os, Ghost::State s) {
     }
     return os;
 }
+
+// NOTE: use a switch statement so you can make your enums any number value
+std::ostream &operator<<(std::ostream &os, Labyrinth::Labyrinth::Tile t) {
+    switch (t) {
+    case Labyrinth::Tile::EMPTY:
+        os << "EMPTY";
+        break;
+    case Labyrinth::Tile::GATE:
+        os << "GATE";
+        break;
+    case Labyrinth::Tile::WALL:
+        os << "WALL";
+        break;
+    case Labyrinth::Tile::PELLET:
+        os << "PELLET";
+        break;
+    case Labyrinth::Tile::POWERUP:
+        os << "POWERUP";
+        break;
+    case Labyrinth::Tile::PACMAN:
+        os << "PACMAN";
+        break;
+    case Labyrinth::Tile::BLINKY:
+        os << "BLINKY";
+        break;
+    case Labyrinth::Tile::PINKY:
+        os << "PINKY";
+        break;
+    case Labyrinth::Tile::INKY:
+        os << "INKY";
+        break;
+    case Labyrinth::Tile::CLYDE:
+        os << "CLYDE";
+        break;
+    case Labyrinth::Tile::PATH:
+        os << "PATH";
+        break;
+    case Labyrinth::Tile::ERROR:
+        os << "ERROR";
+        break;
+    default:
+        os << "DUH";
+    }
+    return os;
+}

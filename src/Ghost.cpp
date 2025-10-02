@@ -125,29 +125,6 @@ void Ghost::chase(std::shared_ptr<Labyrinth> labyrinth) {
 
 void Ghost::draw() {
     mGhostSprite.draw(mPosition);
-   
-    // draws green square where next position will be
-    // DrawRectangle(mPosition.x+(mDirection.x * 26)-13, mPosition.y+(mDirection.y * 26)-13, 26, 26, Color{0, 128, 64, 212});
-
-    // std::stringstream ss;
-    // for (const auto distance : mDistanceToTarget) {
-    //     ss << std::fixed << std::setprecision(2) << distance.second;
-    //     DrawText(ss.str().c_str(), distance.first.x, distance.first.y, 15, GOLD);
-    //     ss.str("");
-    //     ss.clear();
-    // }
-
-    std::string debugGhost = "Poinky";
-    if (mName == debugGhost) {
-        std::cout << mName << "'s state: " << mState;
-        std::cout << " -- tile target (x, y): (" << 
-           static_cast<int>(mChaseTarget.x / TILE_SIZE) << ", " <<
-           static_cast<int>(mChaseTarget.y / TILE_SIZE) << ")";
-        std::cout << " -- tile pos (x, y): (" <<
-            static_cast<int>(mPosition.x / TILE_SIZE) << ", " <<
-            static_cast<int>(mPosition.y / TILE_SIZE) << ")";
-        std::cout << " -- headed <" << mDirection.x << ", " << mDirection.y << ">\n";
-    }
 }
 
 bool Ghost::isCentered() {

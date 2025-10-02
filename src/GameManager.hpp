@@ -45,7 +45,6 @@ public:
         if (mLabyrinth->mPellets.find({ pacmanTileX, pacmanTileY }) != mLabyrinth->mPellets.end()) {
             mLabyrinth->mPellets.erase({ pacmanTileX, pacmanTileY });
             onDotsEaten();
-            std::cout << "nomnomnom\n";
         }
 
         // powerup collisions
