@@ -92,7 +92,7 @@ void Ghost::chase(std::shared_ptr<Labyrinth> labyrinth) {
             float leftTunnelDistance = Vector2Distance(potentialPosition, leftTunnelExit);
             leftTunnelDistance += Vector2Distance(leftTunnelExit, target);
 
-            Vector2 rightTunnelExit = Vector2{ LABYRINTH_COLS * TILE_SIZE, TUNNEL_ROW * TILE_SIZE };
+            Vector2 rightTunnelExit = Vector2{ (LABYRINTH_COLS - 1) * TILE_SIZE, TUNNEL_ROW * TILE_SIZE };
             float rightTunnelDistance = Vector2Distance(potentialPosition, rightTunnelExit);
             rightTunnelDistance += Vector2Distance(rightTunnelExit, target);
 

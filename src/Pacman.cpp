@@ -18,6 +18,18 @@ Pacman::Pacman()
 
 Pacman::~Pacman() { std::cout << "PACMAN DESTROYED\n"; }
 
+void Pacman::checkMomentumCollision(int currentTileX, int currentTileY, shared_ptr<Labyrinth> labyrinth) {
+    Vector2 intendedTileFromMomentum = {
+        (currentTileX + mDirection.x) * TILE_SIZE + TILE_SIZE / 2.f,
+        (currentTileY + mDirection.y) * TILE_SIZE + TILE_SIZE / 2.f,
+    };
+
+    if (!labyrinth->isLegalMove(intendedTileFromMomentum)) {
+        // prevents hitting illegal tile
+        mDirection = Vector2Zero();
+    }
+}
+
 void Pacman::draw() {
     mPacmanSprite.draw(mPosition);
 }
@@ -41,8 +53,7 @@ Vector2 Pacman::getTilePosition() const {
     return Vector2{ mPosition.x / TILE_SIZE, mPosition.y / TILE_SIZE };
 }
 
-void Pacman::move(Vector2 intendedDirection, std::shared_ptr<Labyrinth> labyrinth) {
-
+void Pacman::move(Vector2 intendedDirection, shared_ptr<Labyrinth> labyrinth) {
     int currentTileX = static_cast<int>(mPosition.x / TILE_SIZE);
     int currentTileY = static_cast<int>(mPosition.y / TILE_SIZE);
 
@@ -51,27 +62,29 @@ void Pacman::move(Vector2 intendedDirection, std::shared_ptr<Labyrinth> labyrint
         (currentTileY + intendedDirection.y) * TILE_SIZE + TILE_SIZE / 2.f
     };
 
-    if (isCentered()) {
-        if (intendedDirection.x != 0.f || intendedDirection.y != 0.f) {
-            if (labyrinth->isLegalMove(intendedPosition)) {
-                mDirection = intendedDirection;
-            }
-        } else {
-            // no more input 
-            mDirection = { 0.f, 0.f };
-        }
-
-        Vector2 intendedTileFromMomentum = {
-            (currentTileX + mDirection.x) * TILE_SIZE + TILE_SIZE / 2.f,
-            (currentTileY + mDirection.y) * TILE_SIZE + TILE_SIZE / 2.f,
-        };
-
-        if (!labyrinth->isLegalMove(intendedTileFromMomentum)) {
-            // prevents hitting illegal tile
-            mDirection = { 0.f, 0.f };
-        }
+    if (!isCentered()) {
+        updateSpriteFrameAndMove();
+        return;
     }
 
+    mDirection = handleDirectionInput(intendedDirection, intendedPosition, labyrinth);
+    checkMomentumCollision(currentTileX, currentTileY, labyrinth);
+    updateSpriteFrameAndMove();
+}
+
+Vector2 Pacman::handleDirectionInput(Vector2 intendedDirection, Vector2 intendedPosition, shared_ptr<Labyrinth> labyrinth) {
+    if (intendedDirection.x == 0.f && intendedDirection.y == 0.f) {
+        return Vector2Zero();
+    }
+
+    if (labyrinth->isLegalMove(intendedPosition)) {
+        return intendedDirection;
+    }
+
+    return mDirection;
+}
+
+void Pacman::updateSpriteFrameAndMove() {
     if (mDirection.x == 0.f && mDirection.y == 0.f) {
         return;
     }
