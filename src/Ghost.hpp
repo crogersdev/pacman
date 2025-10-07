@@ -10,6 +10,8 @@
 #include <raylib.h>
 #include <raymath.h>
 
+using std::shared_ptr;
+
 class Ghost {
 public:
     enum class State {
@@ -25,14 +27,14 @@ public:
     Ghost(std::string, std::string, Vector2, Vector2);
     ~Ghost();
 
-    void         act(std::shared_ptr<Labyrinth>);
-    void         chase(std::shared_ptr<Labyrinth>);
+    void         act(shared_ptr<Labyrinth>);
+    void         chase(shared_ptr<Labyrinth>);
     void         draw();
     bool         isCentered();
     Ghost::State getState() const { return mState; }
     std::string  getName() const { return mName; }
     Vector2      getTilePosition() const;
-    void         meander(std::shared_ptr<Labyrinth>);
+    void         meander(shared_ptr<Labyrinth>);
     void         resetDecisionTile() { mLastDecisionTile = Vector2{ -1.f, -1.f }; }
     void         setChaseTarget(const Vector2 &t) { mChaseTarget = t; }
     void         setName(const std::string s) { mName = s; }
@@ -60,7 +62,7 @@ public:
     std::vector<std::pair<Vector2, int>> mDistanceToTarget;
 
 private:
-    std::map<Direction, Vector2> getAvailableTurns(std::shared_ptr<Labyrinth>);
+    std::map<Direction, Vector2> getAvailableTurns(shared_ptr<Labyrinth>);
     void updateSpriteFrameAndMove(); 
 };
 

@@ -27,7 +27,7 @@ Ghost::Ghost(std::string name, std::string texture, Vector2 initTilePos, Vector2
 
 Ghost::~Ghost() {}
 
-void Ghost::act(std::shared_ptr<Labyrinth> labyrinth) {
+void Ghost::act(shared_ptr<Labyrinth> labyrinth) {
     // i hate how the ints and floats don't mix this sucks
     float tilePositionX = static_cast<int>(mPosition.x / TILE_SIZE);
     float tilePositionY = static_cast<int>(mPosition.y / TILE_SIZE);
@@ -68,7 +68,7 @@ void Ghost::act(std::shared_ptr<Labyrinth> labyrinth) {
     updateSpriteFrameAndMove();
 }
 
-void Ghost::chase(std::shared_ptr<Labyrinth> labyrinth) {
+void Ghost::chase(shared_ptr<Labyrinth> labyrinth) {
     mDistanceToTarget.clear();
 
     Vector2 target = mChaseTarget;
@@ -143,7 +143,7 @@ bool Ghost::isCentered() {
             distFromTileCenterY < ALIGNMENT_THRESHOLD);
 }
 
-std::map<Direction, Vector2> Ghost::getAvailableTurns(std::shared_ptr<Labyrinth> labyrinth) {
+std::map<Direction, Vector2> Ghost::getAvailableTurns(shared_ptr<Labyrinth> labyrinth) {
     int currentTileX = static_cast<int>(mPosition.x / TILE_SIZE);
     int currentTileY = static_cast<int>(mPosition.y / TILE_SIZE);
 
@@ -192,7 +192,7 @@ Vector2 Ghost::getTilePosition() const {
     };
 }
 
-void Ghost::meander(std::shared_ptr<Labyrinth> labyrinth) {
+void Ghost::meander(shared_ptr<Labyrinth> labyrinth) {
     auto availableTurns = getAvailableTurns(labyrinth);
 
     if (availableTurns.size() == 1) {
@@ -246,9 +246,9 @@ void Ghost::updateSpriteFrameAndMove() {
 
     if (newTileY == TUNNEL_ROW) {
         if (newTileX < 0) {
-            newPosition.x = (LABYRINTH_COLS * TILE_SIZE);
+            newPosition.x = LABYRINTH_COLS * TILE_SIZE;
         }
-        if (newTileX > LABYRINTH_COLS) {
+        if (newTileX > LABYRINTH_COLS - 1) {
             newPosition.x = 0;
         }
     }
