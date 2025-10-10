@@ -24,23 +24,23 @@ public:
         GOING_TO_PRISON = 6
     };
 
-    Ghost(std::string, std::string, Vector2, Vector2);
+    Ghost(std::string, std::string, std::pair<int, int>, Vector2);
     ~Ghost();
 
     void         act(shared_ptr<Labyrinth>);
     void         chase(shared_ptr<Labyrinth>);
     void         draw();
-    bool         isCentered();
     Ghost::State getState() const { return mState; }
     std::string  getName() const { return mName; }
-    Vector2      getTilePosition() const;
     void         meander(shared_ptr<Labyrinth>);
-    void         resetDecisionTile() { mLastDecisionTile = Vector2{ -1.f, -1.f }; }
+    void         resetDecisionTile() { mLastDecisionTile = std::make_pair(-1, -1); }
     void         setChaseTarget(const Vector2 &t) { mChaseTarget = t; }
     void         setName(const std::string s) { mName = s; }
     void         setSpeed(const float s) { mSpeed = s; }
     void         setState(const State s) { mState = s; }
     void         updateSprite();
+
+    std::pair <int, int> getTilePosition() const;
 
     float          mChaseSpeed;
     Vector2        mChaseTarget;
@@ -49,7 +49,6 @@ public:
     std::mt19937   mGen;
     AnimatedSprite mGhostSprite;
     std::string    mGhostTexture;
-    Vector2        mLastDecisionTile;
     std::string    mName;
     Vector2        mPosition;
     float          mPrisonSpeed;
@@ -60,6 +59,7 @@ public:
 
     std::vector<std::pair<int, int>>     mTurns;
     std::vector<std::pair<Vector2, int>> mDistanceToTarget;
+    std::pair<int, int>                  mLastDecisionTile;
 
 private:
     std::map<Direction, Vector2> getAvailableTurns(shared_ptr<Labyrinth>);

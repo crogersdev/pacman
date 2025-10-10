@@ -1,6 +1,7 @@
-#include "Pacman.hpp"
-
 #include <cmath>
+
+#include "Pacman.hpp"
+#include "helpers/Movement.hpp"
 
 // if this isn't included last, then the definitions for Vector2
 // get mangled or something.  the Vector2Add() function breaks
@@ -34,23 +35,10 @@ void Pacman::draw() {
     mPacmanSprite.draw(mPosition);
 }
 
-bool Pacman::isCentered() {
-    const float ALIGNMENT_THRESHOLD = 1.5f;
-    const float TILE_CENTER_OFFSET = TILE_SIZE / 2.f;
-    
-    float distFromTileCenterX = fabs(
-        (mPosition.x - TILE_CENTER_OFFSET) -
-        (static_cast<int>(mPosition.x / TILE_SIZE) * TILE_SIZE));
-    float distFromTileCenterY = fabs(
-        (mPosition.y - TILE_CENTER_OFFSET) -
-        (static_cast<int>(mPosition.y / TILE_SIZE) * TILE_SIZE));
-
-    return (distFromTileCenterX < ALIGNMENT_THRESHOLD &&
-            distFromTileCenterY < ALIGNMENT_THRESHOLD);
-}
-
-Vector2 Pacman::getTilePosition() const {
-    return Vector2{ mPosition.x / TILE_SIZE, mPosition.y / TILE_SIZE };
+std::pair<int, int> Pacman::getTilePosition() const {
+    int x = static_cast<int>(mPosition.x / TILE_SIZE);
+    int y = static_cast<int>(mPosition.y / TILE_SIZE);
+    return std::make_pair(x, y);
 }
 
 void Pacman::move(Vector2 intendedDirection, shared_ptr<Labyrinth> labyrinth) {
@@ -62,7 +50,7 @@ void Pacman::move(Vector2 intendedDirection, shared_ptr<Labyrinth> labyrinth) {
         (currentTileY + intendedDirection.y) * TILE_SIZE + TILE_SIZE / 2.f
     };
 
-    if (!isCentered()) {
+    if (!isCentered(mPosition, TILE_SIZE)) {
         updateSpriteFrameAndMove();
         return;
     }

@@ -60,7 +60,6 @@ public:
     
     std::string mPelletSpritePath;
     std::string mPowerupSpritePath;
-    // todo: add fruit
 
     std::map<std::pair<int, int>, LabyrinthObject> mPellets;
     std::map<std::pair<int, int>, LabyrinthObject> mPowerups;

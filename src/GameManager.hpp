@@ -9,7 +9,9 @@
 #include "Ghost.hpp"
 #include "Pacman.hpp"
 
-const float CHASE_TIME = 45.f;
+using std::shared_ptr;
+
+const float CHASE_TIME = 10.f;
 const float POWERUP_TIME = 15.f;
 const float SCATTER_TIME = 5.f;
 const float MAX_PRISON_TIME = 8.f;
@@ -25,9 +27,9 @@ public:
     };
 
     inline GameManager(
-        std::vector< std::shared_ptr<Ghost>> g,
-        std::shared_ptr<Pacman> p,
-        std::shared_ptr<Labyrinth> l)
+        std::vector< shared_ptr<Ghost>> g,
+        shared_ptr<Pacman> p,
+        shared_ptr<Labyrinth> l)
     : mGhosts(g),
       mPacman(p),
       mLabyrinth(l),
@@ -37,58 +39,51 @@ public:
 
     inline void checkCollisions() {
         
-        Vector2 pacmanTilePosition = mPacman->getTilePosition();
-        int pacmanTileX = static_cast<int>(pacmanTilePosition.x);
-        int pacmanTileY = static_cast<int>(pacmanTilePosition.y);
+        auto pacmanTile = mPacman->getTilePosition();
+
+        std::cout << "pacman tile x, y: " << pacmanTile.first << ", " << pacmanTile.second << "\n";
 
         // pellet collisions
-        if (mLabyrinth->mPellets.find({ pacmanTileX, pacmanTileY }) != mLabyrinth->mPellets.end()) {
-            mLabyrinth->mPellets.erase({ pacmanTileX, pacmanTileY });
+        if (mLabyrinth->mPellets.find({ pacmanTile.first, pacmanTile.second }) != mLabyrinth->mPellets.end()) {
+            mLabyrinth->mPellets.erase({ pacmanTile.first, pacmanTile.second });
             onDotsEaten();
         }
 
         // powerup collisions
-        if (mLabyrinth->mPowerups.find({ pacmanTileX, pacmanTileY }) != mLabyrinth->mPowerups.end()) {
-            mLabyrinth->mPowerups.erase({ pacmanTileX, pacmanTileY });
+        if (mLabyrinth->mPowerups.find({ pacmanTile.first, pacmanTile.second }) != mLabyrinth->mPowerups.end()) {
+            mLabyrinth->mPowerups.erase({ pacmanTile.first, pacmanTile.second });
             onPowerUpEaten();
         }
 
-        std::string debugGhost = "Poinky";
         // ghost collisions
         for (const auto& ghost : mGhosts) {
-            Vector2 ghostTile = ghost->getTilePosition();
+            auto ghostTile = ghost->getTilePosition();
 
-            if (ghost->getName() == debugGhost) {
-                std::cout << debugGhost << "'s state: " << ghost->getState();
-                // std::cout << " -- tile target (x, y): (" << 
-                //    static_cast<int>(mChaseTarget.x / TILE_SIZE) << ", " <<
-                //    static_cast<int>(mChaseTarget.y / TILE_SIZE) << ")";
-                std::cout << " -- tile pos (x, y): (" << ghostTile.x << ", " << ghostTile.y << ")\n";
-            } 
+            std::cout << ghost->getName() << " tile x, y: " << ghostTile.first << ", " << ghostTile.second << "\n";
 
-            if (pacmanTilePosition.x == ghostTile.x && pacmanTilePosition.y == ghostTile.y) {
+            if (pacmanTile.first == ghostTile.first && pacmanTile.second == ghostTile.second) {
+                std::cout << "there was a collision between a ghost and pacman\n";
                 if (ghost->getState() == Ghost::State::FRIGHTENED) {
                     ghost->setState(Ghost::State::GOING_TO_PRISON);
                     ghost->setChaseTarget(ghost->mPrisonPosition);
                     ghost->updateSprite();
                 }
                 else {
+                    std::cout << "pacman just died\n";
                     onDeath();
                 }
             }
             
-            float ghostStartingTileX = static_cast<int>(mGhostStartingPoint.x / TILE_SIZE);
-            float ghostStartingTileY = static_cast<int>(mGhostStartingPoint.y / TILE_SIZE);
+            int ghostStartingTileX = static_cast<int>(std::round(mGhostStartingPoint.x/ TILE_SIZE));
+            int ghostStartingTileY = static_cast<int>(std::round(mGhostStartingPoint.y / TILE_SIZE));
 
-            if (ghostTile.x == ghostStartingTileX && ghostTile.y == ghostStartingTileY && ghost->mState == Ghost::State::LEAVING_PRISON) {
-                std::cout << "LEAVE\n";
+            if (ghostTile.first == ghostStartingTileX && ghostTile.second == ghostStartingTileY && ghost->mState == Ghost::State::LEAVING_PRISON) {
                 ghost->setState(Ghost::State::CHASE);
                 ghost->setChaseTarget(mPacman->getPosition());
                 ghost->resetDecisionTile();
             } 
 
             if (isGhostInPrison(ghost) && ghost->getState() == Ghost::State::GOING_TO_PRISON) {
-                std::cout << "oh no!\n";
                 ghost->setState(Ghost::State::LEAVING_PRISON);
                 ghost->resetDecisionTile();
                 ghost->updateSprite();
@@ -105,9 +100,9 @@ public:
     inline int getScore() const { return mScore; }
     inline int getLives() const { return mPacmanLives; }
     
-    inline bool isGhostInPrison(std::shared_ptr<Ghost> ghost) {
-        int ghostTileX = static_cast<int>(ghost->mPosition.x / TILE_SIZE);
-        int ghostTileY = static_cast<int>(ghost->mPosition.y / TILE_SIZE);
+    inline bool isGhostInPrison(shared_ptr<Ghost> ghost) {
+        int ghostTileX = static_cast<int>(std::round(ghost->mPosition.x / TILE_SIZE));
+        int ghostTileY = static_cast<int>(std::round(ghost->mPosition.y / TILE_SIZE));
         return ghostTileX >= 8 && ghostTileX <= 14 && ghostTileY >= 9 && ghostTileY <= 13;
     }
 
@@ -274,7 +269,7 @@ private:
     float   mTimerPowerUp = 0.f;
     float   mTimerLeavePrison = 0.f;
 
-    std::shared_ptr<Pacman>             mPacman;
-    std::shared_ptr<Labyrinth>          mLabyrinth;
-    std::vector<std::shared_ptr<Ghost>> mGhosts;
+    shared_ptr<Pacman>             mPacman;
+    shared_ptr<Labyrinth>          mLabyrinth;
+    std::vector<shared_ptr<Ghost>> mGhosts;
 };

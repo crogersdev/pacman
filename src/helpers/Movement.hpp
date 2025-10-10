@@ -20,6 +20,22 @@ const std::map<Direction, Vector2> directionLut = {
     { Direction::RIGHT, Vector2{  1.f,  0.f } }
 };
 
+inline bool isCentered(const Vector2 pos, const float TILE_SIZE) {
+    const float ALIGNMENT_THRESHOLD = 1.5f; // for 60fps
+    // const float ALIGNMENT_THRESHOLD = 6.f; // for 10fps
+    const float TILE_CENTER_OFFSET = TILE_SIZE / 2.f;
+
+    float distFromTileCenterX = fabs(
+        (pos.x - TILE_CENTER_OFFSET) -
+        (static_cast<int>(pos.x / TILE_SIZE) * TILE_SIZE));
+    float distFromTileCenterY = fabs(
+        (pos.y - TILE_CENTER_OFFSET) -
+        (static_cast<int>(pos.y / TILE_SIZE) * TILE_SIZE));
+
+    return (distFromTileCenterX < ALIGNMENT_THRESHOLD && 
+            distFromTileCenterY < ALIGNMENT_THRESHOLD);
+}
+
 /*
 
 LIGHTGRAY  // Color{ 200, 200, 200, 255 }
