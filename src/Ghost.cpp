@@ -224,8 +224,8 @@ void Ghost::updateSpriteFrameAndMove() {
 
     Vector2 newPosition = Vector2Add(mPosition, Vector2Scale(mDirection, mSpeed * GetFrameTime()));
 
-    int newTileX = static_cast<int>(std::round(newPosition.x / TILE_SIZE));
-    int newTileY = static_cast<int>(std::round(newPosition.y / TILE_SIZE));
+    int newTileX = static_cast<int>(newPosition.x / TILE_SIZE);
+    int newTileY = static_cast<int>(newPosition.y / TILE_SIZE);
 
     if (newTileY == TUNNEL_ROW) {
         if (newTileX < 0) {

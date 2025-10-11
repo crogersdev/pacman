@@ -21,7 +21,8 @@ public:
         MEANDER         = 3,
         IN_PRISON       = 4,
         LEAVING_PRISON  = 5,
-        GOING_TO_PRISON = 6
+        GOING_TO_PRISON = 6,
+        PAUSED          = 7
     };
 
     Ghost(std::string, std::string, std::pair<int, int>, Vector2);

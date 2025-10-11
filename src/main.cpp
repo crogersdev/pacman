@@ -30,17 +30,15 @@ int main() {
 
     gm.startGame();
 
-    bool paused = false;
-
     while (WindowShouldClose() == false) {
         if (IsKeyPressed(KEY_P)) {
-            paused = !paused;
+            gm.mPaused = !gm.mPaused;
         }
  
         BeginDrawing();
         ClearBackground(BLACK);
 
-        if (!paused) {
+        if (gm.mPaused == false) {
             gm.moveStuff();
 
             gm.checkCollisions();

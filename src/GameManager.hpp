@@ -11,9 +11,9 @@
 
 using std::shared_ptr;
 
-const float CHASE_TIME = 10.f;
+const float CHASE_TIME = 1.f;
 const float POWERUP_TIME = 15.f;
-const float SCATTER_TIME = 5.f;
+const float SCATTER_TIME = 55.f;
 const float MAX_PRISON_TIME = 8.f;
 
 class GameManager {
@@ -21,9 +21,10 @@ public:
     enum class State {
         MENU            = 0,
         PLAYING         = 1,
-        PLAYING_POWERUP = 2,
-        GAME_OVER       = 3,
-        GAME_WON        = 4,
+        PAUSED          = 2,
+        PLAYING_POWERUP = 3,
+        GAME_OVER       = 4,
+        GAME_WON        = 5
     };
 
     inline GameManager(
@@ -41,8 +42,6 @@ public:
         
         auto pacmanTile = mPacman->getTilePosition();
 
-        std::cout << "pacman tile x, y: " << pacmanTile.first << ", " << pacmanTile.second << "\n";
-
         // pellet collisions
         if (mLabyrinth->mPellets.find({ pacmanTile.first, pacmanTile.second }) != mLabyrinth->mPellets.end()) {
             mLabyrinth->mPellets.erase({ pacmanTile.first, pacmanTile.second });
@@ -59,23 +58,19 @@ public:
         for (const auto& ghost : mGhosts) {
             auto ghostTile = ghost->getTilePosition();
 
-            std::cout << ghost->getName() << " tile x, y: " << ghostTile.first << ", " << ghostTile.second << "\n";
-
             if (pacmanTile.first == ghostTile.first && pacmanTile.second == ghostTile.second) {
-                std::cout << "there was a collision between a ghost and pacman\n";
                 if (ghost->getState() == Ghost::State::FRIGHTENED) {
                     ghost->setState(Ghost::State::GOING_TO_PRISON);
                     ghost->setChaseTarget(ghost->mPrisonPosition);
                     ghost->updateSprite();
                 }
                 else {
-                    std::cout << "pacman just died\n";
                     onDeath();
                 }
             }
             
-            int ghostStartingTileX = static_cast<int>(std::round(mGhostStartingPoint.x/ TILE_SIZE));
-            int ghostStartingTileY = static_cast<int>(std::round(mGhostStartingPoint.y / TILE_SIZE));
+            int ghostStartingTileX = static_cast<int>(mGhostStartingPoint.x/ TILE_SIZE);
+            int ghostStartingTileY = static_cast<int>(mGhostStartingPoint.y / TILE_SIZE);
 
             if (ghostTile.first == ghostStartingTileX && ghostTile.second == ghostStartingTileY && ghost->mState == Ghost::State::LEAVING_PRISON) {
                 ghost->setState(Ghost::State::CHASE);
@@ -101,9 +96,8 @@ public:
     inline int getLives() const { return mPacmanLives; }
     
     inline bool isGhostInPrison(shared_ptr<Ghost> ghost) {
-        int ghostTileX = static_cast<int>(std::round(ghost->mPosition.x / TILE_SIZE));
-        int ghostTileY = static_cast<int>(std::round(ghost->mPosition.y / TILE_SIZE));
-        return ghostTileX >= 8 && ghostTileX <= 14 && ghostTileY >= 9 && ghostTileY <= 13;
+        auto ghostTile = ghost->getTilePosition();
+        return ghostTile.first >= 8 && ghostTile.first <= 14 && ghostTile.second >= 11 && ghostTile.second <= 13;
     }
 
     inline void moveStuff() {
@@ -129,6 +123,7 @@ public:
     }
 
     inline void onDeath() {
+        mPaused = true;
         mPacmanLives--;
 
         if (mPacmanLives < 0) {
@@ -253,6 +248,8 @@ public:
         }
     }
 
+    bool    mPaused = false;
+
 private:
     // things to keep track of
     int     mDotsEaten = 0;
@@ -261,7 +258,6 @@ private:
     bool    mPowerUpTime = false;
     int     mPacmanLives = 3;
     float   mPacmanSpeed = 50.f;
-    bool    mPaused = false;
     int     mScore = 0;
     int     mScoreExtraLife = 0;
     State   mState = State::MENU;
