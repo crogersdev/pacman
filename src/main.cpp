@@ -29,28 +29,7 @@ int main() {
     GameManager gm = GameManager(ghosts, pacman, labyrinth);
 
     gm.startGame();
-
-    while (WindowShouldClose() == false) {
-        if (IsKeyPressed(KEY_P)) {
-            gm.mPaused = !gm.mPaused;
-        }
- 
-        BeginDrawing();
-        ClearBackground(BLACK);
-
-        if (gm.mPaused == false) {
-            gm.moveStuff();
-
-            gm.checkCollisions();
-
-            gm.updateTimers();
-        }
-
-        gm.drawStuff();
-
-        EndDrawing();
-
-    }
+    gm.runGame();
 
     CloseWindow();
     return 0;

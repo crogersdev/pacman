@@ -21,10 +21,12 @@ public:
     enum class State {
         MENU            = 0,
         PLAYING         = 1,
-        PAUSED          = 2,
-        PLAYING_POWERUP = 3,
-        GAME_OVER       = 4,
-        GAME_WON        = 5
+        PLAYING_POWERUP = 2,
+        PACMAN_DYING    = 3,
+        PAUSED          = 4,
+        GAME_OVER       = 5,
+        GAME_WON        = 6,
+        GAME_START      = 7
     };
 
     inline GameManager(
@@ -58,6 +60,7 @@ public:
         for (const auto& ghost : mGhosts) {
             auto ghostTile = ghost->getTilePosition();
 
+            // pacman eats ghost
             if (pacmanTile.first == ghostTile.first && pacmanTile.second == ghostTile.second) {
                 if (ghost->getState() == Ghost::State::FRIGHTENED) {
                     ghost->setState(Ghost::State::GOING_TO_PRISON);
@@ -65,20 +68,23 @@ public:
                     ghost->updateSprite();
                 }
                 else {
-                    onDeath();
+                    // onDeath();
                 }
             }
             
-            int ghostStartingTileX = static_cast<int>(mGhostStartingPoint.x/ TILE_SIZE);
+            int ghostStartingTileX = static_cast<int>(mGhostStartingPoint.x / TILE_SIZE);
             int ghostStartingTileY = static_cast<int>(mGhostStartingPoint.y / TILE_SIZE);
 
+            // ghost emerges from prison
             if (ghostTile.first == ghostStartingTileX && ghostTile.second == ghostStartingTileY && ghost->mState == Ghost::State::LEAVING_PRISON) {
                 ghost->setState(Ghost::State::CHASE);
                 ghost->setChaseTarget(mPacman->getPosition());
                 ghost->resetDecisionTile();
             } 
 
+            // ghost entered prison after death, now needs to leave
             if (isGhostInPrison(ghost) && ghost->getState() == Ghost::State::GOING_TO_PRISON) {
+                std::cout << ghost->getName() << " eaten, now leaving prison\n";
                 ghost->setState(Ghost::State::LEAVING_PRISON);
                 ghost->resetDecisionTile();
                 ghost->updateSprite();
@@ -87,9 +93,12 @@ public:
     };
 
     inline void drawStuff() {
-        mPacman->draw();
+        if (mPacman->getState() == Pacman::State::PLAYING) {
+            mPaused = false;
+        }
         mLabyrinth->draw();
         for (const auto& ghost : mGhosts) { ghost->draw(); }
+        mPacman->draw();
     }
 
     inline int getScore() const { return mScore; }
@@ -123,8 +132,9 @@ public:
     }
 
     inline void onDeath() {
-        mPaused = true;
+        mState = State::PACMAN_DYING;
         mPacmanLives--;
+        mPacman->setState(Pacman::State::DYING);
 
         if (mPacmanLives < 0) {
             mState = State::GAME_OVER;
@@ -135,8 +145,6 @@ public:
         mScore += 10;
         mScoreExtraLife++;
         mDotsEaten++;
-        std::cout << "dots eaten: " << mDotsEaten << "\n";
-        std::cout << "score: " << mScore << "\n";
 
         for (auto &ghost : mGhosts) {
             auto gs = ghost->getState();
@@ -186,8 +194,63 @@ public:
         onGhostsStartChasing();
     }
 
+    inline void resetGame() {
+        mPacman->setState(Pacman::State::PLAYING);
+        mPacman->resetPosition();
+
+        for (auto &ghost : mGhosts) {
+            ghost->setState(Ghost::State::IN_PRISON);
+            if (ghost->getName() == "Blinky") {
+                ghost->setState(Ghost::State::CHASE);
+            }
+            ghost->resetPosition();
+            ghost->resetDecisionTile();
+        }
+    }
+
+    inline void runGame() {
+        while (WindowShouldClose() == false) {
+            if (IsKeyPressed(KEY_P)) {
+                mPaused = !mPaused;
+            }
+
+            BeginDrawing();
+            ClearBackground(BLACK);
+
+            for (auto &ghost: mGhosts) {
+                if (ghost->getName() == "Blinky") {
+                    std::cout << "blinky's state: " << (unsigned int) ghost->getState() << "\n";
+                }
+            }
+
+            if (mPaused == false && mState != State::PACMAN_DYING) {
+                moveStuff();
+
+                checkCollisions();
+
+                updateTimers();
+            }
+
+            if (mState == State::PACMAN_DYING) {
+                if (mPacman->finishedDying()) {
+                    mState = State::PAUSED;
+                    resetGame();
+                }
+            }
+
+            if (mState == State::GAME_OVER) {
+                std::cout << "game over baby\n";
+            }
+
+            drawStuff();
+
+            EndDrawing();
+        }
+    }
+
     inline void startGame() {
-        mPacmanLives = 3;
+        mState = State::GAME_START;
+        mPacmanLives = 30;
         mScoreExtraLife = 0;
         mScore = 0;
 

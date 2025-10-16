@@ -38,6 +38,15 @@ public:
         );
     }
 
+    inline bool onFinalFrame() {
+        return mCurrentFrame == (mFrameZero + mFrameCount - 1);
+    }
+
+    inline void reset() {
+        mCurrentFrame = mFrameZero;
+        mFrameTimer = 0.f;
+    }
+
     inline bool setTextureFile(std::string tf) {
         if (mTexture.id != 0) {
             UnloadTexture(mTexture);

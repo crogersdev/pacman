@@ -35,6 +35,7 @@ public:
     std::string  getName() const { return mName; }
     void         meander(shared_ptr<Labyrinth>);
     void         resetDecisionTile() { mLastDecisionTile = std::make_pair(-1, -1); }
+    void         resetPosition() { mPosition = mInitialPosition; }
     void         setChaseTarget(const Vector2 &t) { mChaseTarget = t; }
     void         setName(const std::string s) { mName = s; }
     void         setSpeed(const float s) { mSpeed = s; }
@@ -50,6 +51,7 @@ public:
     std::mt19937   mGen;
     AnimatedSprite mGhostSprite;
     std::string    mGhostTexture;
+    Vector2        mInitialPosition;
     std::string    mName;
     Vector2        mPosition;
     float          mPrisonSpeed;

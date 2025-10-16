@@ -14,6 +14,7 @@ Ghost::Ghost(std::string name, std::string texture, std::pair<int, int> initTile
     , mGen(std::random_device{}())
     , mGhostSprite(texture, 26, 26, 2, 4)
     , mGhostTexture(texture)
+    , mInitialPosition{ initTilePos.first * TILE_SIZE - TILE_SIZE / 2.f, initTilePos.second * TILE_SIZE - TILE_SIZE / 2.f }
     , mLastDecisionTile{-1, -1}
     , mName(name)
     , mPrisonSpeed(55.f)

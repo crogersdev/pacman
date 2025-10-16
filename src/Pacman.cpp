@@ -11,9 +11,12 @@ Pacman::Pacman()
     : mColor(GetColor(0xFFFF00FF)),
       mDebugTileColor(GetColor(0x000000FF)),
       mDirection{ 0.f, 0.f },
-      mPacmanSprite("res/pacman.png", 26, 26, 3, 10),
+      mDyingSprite("res/pacman-dying.png", 26, 26, 12, 8),
+      mInitialPosition{ 11.f * TILE_SIZE + TILE_SIZE / 2.f, 14.f * TILE_SIZE + TILE_SIZE / 2.f },
+      mPlayingSprite("res/pacman.png", 26, 26, 3, 10),
       mPosition{ 11.f * TILE_SIZE + TILE_SIZE / 2.f, 14.f * TILE_SIZE + TILE_SIZE / 2.f },
       mRadius(12),
+      mState(State::PLAYING),
       mSpeed(50.f)
 {}
 
@@ -32,7 +35,20 @@ void Pacman::checkMomentumCollision(int currentTileX, int currentTileY, shared_p
 }
 
 void Pacman::draw() {
-    mPacmanSprite.draw(mPosition);
+    if (mState == State::PLAYING) {
+        mPlayingSprite.draw(mPosition);
+    }
+    else if (mState == State::DYING) {
+        mDyingSprite.update();
+        mDyingSprite.draw(mPosition);
+    }
+}
+
+bool Pacman::finishedDying() {
+    if (mDyingSprite.onFinalFrame() == false) return false;
+
+    mDyingSprite.reset();
+    return true;
 }
 
 std::pair<int, int> Pacman::getTilePosition() const {
@@ -77,10 +93,10 @@ void Pacman::updateSpriteFrameAndMove() {
         return;
     }
 
-    if (mDirection == Vector2{  1.f,  0.f}) { mPacmanSprite.setZeroFrame(0); }
-    if (mDirection == Vector2{  0.f,  1.f}) { mPacmanSprite.setZeroFrame(3); }
-    if (mDirection == Vector2{ -1.f,  0.f}) { mPacmanSprite.setZeroFrame(6); }
-    if (mDirection == Vector2{  0.f, -1.f}) { mPacmanSprite.setZeroFrame(9); }
+    if (mDirection == Vector2{  1.f,  0.f}) { mPlayingSprite.setZeroFrame(0); }
+    if (mDirection == Vector2{  0.f,  1.f}) { mPlayingSprite.setZeroFrame(3); }
+    if (mDirection == Vector2{ -1.f,  0.f}) { mPlayingSprite.setZeroFrame(6); }
+    if (mDirection == Vector2{  0.f, -1.f}) { mPlayingSprite.setZeroFrame(9); }
 
     Vector2 newPosition = {
         mPosition.x + (mDirection.x * mSpeed * GetFrameTime()),
@@ -100,5 +116,5 @@ void Pacman::updateSpriteFrameAndMove() {
     }
 
     mPosition = newPosition;
-    mPacmanSprite.update();
+    mPlayingSprite.update();
 }
