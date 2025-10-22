@@ -31,6 +31,7 @@ public:
     void         act(shared_ptr<Labyrinth>);
     void         chase(shared_ptr<Labyrinth>);
     void         draw();
+    void         drawDebugDistances();
     Ghost::State getState() const { return mState; }
     std::string  getName() const { return mName; }
     void         meander(shared_ptr<Labyrinth>);

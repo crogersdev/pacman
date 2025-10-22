@@ -11,7 +11,7 @@
 
 using std::shared_ptr;
 
-const float CHASE_TIME = 1.f;
+const float CHASE_TIME = 1000.f;
 const float POWERUP_TIME = 15.f;
 const float SCATTER_TIME = 55.f;
 const float MAX_PRISON_TIME = 8.f;
@@ -36,12 +36,11 @@ public:
     : mGhosts(g),
       mPacman(p),
       mLabyrinth(l),
-      mGhostStartingPoint({ 11.f * TILE_SIZE, 9.f * TILE_SIZE })
+      mGhostStartingPoint({ 11.f * TILE_SIZE, 8.f * TILE_SIZE })
     {};
     inline ~GameManager() {};
 
     inline void checkCollisions() {
-        
         auto pacmanTile = mPacman->getTilePosition();
 
         // pellet collisions
@@ -64,7 +63,7 @@ public:
             if (pacmanTile.first == ghostTile.first && pacmanTile.second == ghostTile.second) {
                 if (ghost->getState() == Ghost::State::FRIGHTENED) {
                     ghost->setState(Ghost::State::GOING_TO_PRISON);
-                    ghost->setChaseTarget(ghost->mPrisonPosition);
+                    ghost->setChaseTarget(mGhostStartingPoint);
                     ghost->updateSprite();
                 }
                 else {
@@ -76,11 +75,17 @@ public:
             int ghostStartingTileY = static_cast<int>(mGhostStartingPoint.y / TILE_SIZE);
 
             // ghost emerges from prison
-            if (ghostTile.first == ghostStartingTileX && ghostTile.second == ghostStartingTileY && ghost->mState == Ghost::State::LEAVING_PRISON) {
-                ghost->setState(Ghost::State::CHASE);
-                ghost->setChaseTarget(mPacman->getPosition());
+            if (ghostTile.first == ghostStartingTileX && ghostTile.second == ghostStartingTileY) {
+                if (ghost->getState() == Ghost::State::LEAVING_PRISON) {
+                    ghost->setChaseTarget(mPacman->getPosition());
+                    ghost->setState(Ghost::State::CHASE);
+                } 
+                if (ghost->getState() == Ghost::State::GOING_TO_PRISON) {
+                    ghost->setChaseTarget(ghost->mPrisonPosition);
+                }
+
                 ghost->resetDecisionTile();
-            } 
+            }
 
             // ghost entered prison after death, now needs to leave
             if (isGhostInPrison(ghost) && ghost->getState() == Ghost::State::GOING_TO_PRISON) {
@@ -93,11 +98,11 @@ public:
     };
 
     inline void drawStuff() {
-        if (mPacman->getState() == Pacman::State::PLAYING) {
-            mPaused = false;
-        }
         mLabyrinth->draw();
-        for (const auto& ghost : mGhosts) { ghost->draw(); }
+        for (const auto& ghost : mGhosts) { 
+            ghost->draw();
+            ghost->drawDebugDistances();
+        }
         mPacman->draw();
     }
 
@@ -219,11 +224,12 @@ public:
 
             for (auto &ghost: mGhosts) {
                 if (ghost->getName() == "Blinky") {
-                    std::cout << "blinky's state: " << (unsigned int) ghost->getState() << "\n";
+                    // std::cout << "blinky's state: " << (unsigned int) ghost->getState() << "\n";
                 }
             }
 
             if (mPaused == false && mState != State::PACMAN_DYING) {
+                std::cout << mPaused << "\t" << (unsigned int) mState << "\n";
                 moveStuff();
 
                 checkCollisions();

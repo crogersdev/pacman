@@ -22,7 +22,7 @@ public:
     void    checkMomentumCollision(int, int, shared_ptr<Labyrinth>);
     void    draw();
     bool    finishedDying();
-    Vector2 getPosition() const { return mPosition; }
+    Vector2 getPosition() const { return Vector2{ mPosition.x - TILE_SIZE / 2, mPosition.y - TILE_SIZE / 2 }; }
     State   getState() const { return mState; }
     Vector2 handleDirectionInput(Vector2, Vector2, shared_ptr<Labyrinth>);
     float   lerp(float a, float b, float f) { return a + f * (b - a); }

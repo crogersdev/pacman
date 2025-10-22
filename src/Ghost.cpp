@@ -84,6 +84,8 @@ void Ghost::chase(shared_ptr<Labyrinth> labyrinth) {
     int tilePositionX = getTilePosition().first;
     int tilePositionY = getTilePosition().second;
 
+    std::vector<Vector2> bestDistanceDirections;
+
     for (const auto& t: availableTurns ) {
         Vector2 potentialPosition = Vector2Add(mPosition, Vector2Scale(t.second, TILE_SIZE));
 
@@ -106,25 +108,80 @@ void Ghost::chase(shared_ptr<Labyrinth> labyrinth) {
 
         if (distance < bestDistance) {
             bestDistance = distance;
+            bestDistanceDirections.clear();
             turn = t.second;
-        } else if (distance == bestDistance) {
-            Vector2 directionToTarget = Vector2{ target.x - mPosition.x, target.y - mPosition.y };
-
-            // this should help us pick the direction most likely to 
-            // get us closer to our target if we've got two equal distances
-            // to choose from.  higher is better.
-            float potentialDotProd = Vector2DotProduct(t.second, directionToTarget);
-            float currentDotProd = Vector2DotProduct(turn, directionToTarget);
-            if (potentialDotProd > currentDotProd) {
-                turn = t.second;
-            } 
+        }
+        if (distance <= bestDistance) {
+            bestDistanceDirections.push_back(t.second);
         }
     }
+
+    if (bestDistanceDirections.size() > 0) {
+        std::cout << "bdd size: " << bestDistanceDirections.size() << "\n";
+        for (const auto& bdd : bestDistanceDirections) {
+            Color targetColor = Fade(WHITE, 0.5f);
+            if (mName == "Inky")   targetColor = Fade(BLUE,   0.5f);
+            if (mName == "Pinky")  targetColor = Fade(PINK,   0.5f);
+            if (mName == "Blinky") targetColor = Fade(RED,    0.5f);
+            if (mName == "Clyde")  targetColor = Fade(ORANGE, 0.5f);
+            DrawRectangle(bdd.x, bdd.y, 26, 26, targetColor);
+            DrawLine(bdd.x, bdd.y, mChaseTarget.x + 12, mChaseTarget.y + 12, targetColor);
+        }
+
+        Vector2 directionPriorities[] = { {0, -1}, {-1, 0}, {0, 1}, {1, 0} };
+        for (const auto& priority : directionPriorities) {
+
+        
+            if (std::find(bestDistanceDirections.begin(), bestDistanceDirections.end(), priority) != bestDistanceDirections.end()) {
+                turn = priority;
+                break;
+            }
+        }
+    }
+
     mDirection = turn;
 }
 
 void Ghost::draw() {
     mGhostSprite.draw(mPosition);
+}
+
+void Ghost::drawDebugDistances() {
+    if (mDistanceToTarget.empty())
+        return;
+
+    Vector2 directions[] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};  // up, down, left, right
+    Vector2 offsets[] = {{0, -20}, {0, 20}, {-25, 0}, {25, 0}}; // above, below, left, right
+
+    for (int i = 0; i < 4; i++) {
+        Vector2 testPos = Vector2Add(mPosition, Vector2Scale(directions[i], TILE_SIZE));
+
+        // Find matching distance from your mDistanceToTarget vector
+        float dist = -1;
+        for (const auto &pair : mDistanceToTarget) {
+            if (Vector2Distance(pair.first, testPos) < 5.0f)
+            { 
+                dist = pair.second;
+                break;
+            }
+        }
+
+       if (dist >= 0) {
+            Vector2 textPos = Vector2Add(mPosition, offsets[i]);
+            DrawText(TextFormat("%.1f", dist), textPos.x, textPos.y, 10, YELLOW);
+       }
+    }
+    
+    if (mState == State::GOING_TO_PRISON || mState == State::CHASE) {
+        Color targetColor = Fade(WHITE, 0.5f);
+        if (mName == "Inky")   targetColor = Fade(BLUE,   0.5f);
+        if (mName == "Pinky")  targetColor = Fade(PINK,   0.5f);
+        if (mName == "Blinky") targetColor = Fade(RED,    0.5f);
+        if (mName == "Clyde")  targetColor = Fade(ORANGE, 0.5f);
+
+        DrawRectangle(mChaseTarget.x, mChaseTarget.y, 26, 26, targetColor);
+        DrawLine(mPosition.x, mPosition.y, mChaseTarget.x + 12, mChaseTarget.y + 12, targetColor);
+    }
 }
 
 std::map<Direction, Vector2> Ghost::getAvailableTurns(shared_ptr<Labyrinth> labyrinth) {
