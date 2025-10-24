@@ -18,7 +18,7 @@ Ghost::Ghost(std::string name, std::string texture, std::pair<int, int> initTile
     , mLastDecisionTile{-1, -1}
     , mName(name)
     , mPrisonSpeed(55.f)
-    , mPrisonPosition{ 12.f * TILE_SIZE - TILE_SIZE / 2.f, 12.f * TILE_SIZE - TILE_SIZE / 2.f }
+    , mPrisonPosition{ 12.f * TILE_SIZE, 12.f * TILE_SIZE }
     , mPosition{ initTilePos.first * TILE_SIZE - TILE_SIZE / 2.f, initTilePos.second * TILE_SIZE - TILE_SIZE / 2.f }
     , mScatterCornerPosition{ scatterTilePos.x * TILE_SIZE - TILE_SIZE / 2.f, scatterTilePos.y * TILE_SIZE - TILE_SIZE / 2.f }
     , mSpeed(40.f)
@@ -117,7 +117,6 @@ void Ghost::chase(shared_ptr<Labyrinth> labyrinth) {
     }
 
     if (bestDistanceDirections.size() > 0) {
-        std::cout << "bdd size: " << bestDistanceDirections.size() << "\n";
         for (const auto& bdd : bestDistanceDirections) {
             Color targetColor = Fade(WHITE, 0.5f);
             if (mName == "Inky")   targetColor = Fade(BLUE,   0.5f);
@@ -130,8 +129,6 @@ void Ghost::chase(shared_ptr<Labyrinth> labyrinth) {
 
         Vector2 directionPriorities[] = { {0, -1}, {-1, 0}, {0, 1}, {1, 0} };
         for (const auto& priority : directionPriorities) {
-
-        
             if (std::find(bestDistanceDirections.begin(), bestDistanceDirections.end(), priority) != bestDistanceDirections.end()) {
                 turn = priority;
                 break;

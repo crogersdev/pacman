@@ -83,13 +83,12 @@ public:
                 if (ghost->getState() == Ghost::State::GOING_TO_PRISON) {
                     ghost->setChaseTarget(ghost->mPrisonPosition);
                 }
-
                 ghost->resetDecisionTile();
             }
 
             // ghost entered prison after death, now needs to leave
             if (isGhostInPrison(ghost) && ghost->getState() == Ghost::State::GOING_TO_PRISON) {
-                std::cout << ghost->getName() << " eaten, now leaving prison\n";
+                ghost->setChaseTarget(mGhostStartingPoint);
                 ghost->setState(Ghost::State::LEAVING_PRISON);
                 ghost->resetDecisionTile();
                 ghost->updateSprite();
@@ -101,7 +100,7 @@ public:
         mLabyrinth->draw();
         for (const auto& ghost : mGhosts) { 
             ghost->draw();
-            ghost->drawDebugDistances();
+            // ghost->drawDebugDistances();
         }
         mPacman->draw();
     }
@@ -186,7 +185,8 @@ public:
         mPowerUpTime = true;
         for (auto &ghost : mGhosts) {
             if (ghost->getState() != Ghost::State::GOING_TO_PRISON && 
-                ghost->getState() != Ghost::State::IN_PRISON) {
+                ghost->getState() != Ghost::State::IN_PRISON &&
+                ghost->getState() != Ghost::State::LEAVING_PRISON) {
                 ghost->setState(Ghost::State::FRIGHTENED);
                 ghost->updateSprite();
             }
@@ -312,7 +312,6 @@ public:
                     ghost->setChaseTarget(mGhostStartingPoint);
                     ghost->setState(Ghost::State::LEAVING_PRISON);
                 }
-
             }
         }
     }
