@@ -8,15 +8,15 @@
 #include <raymath.h>
 
 Pacman::Pacman()
-    : mColor(GetColor(0xFFFF00FF)),
-      mDebugTileColor(GetColor(0x000000FF)),
-      mDirection{ 0.f, 0.f },
-      mDyingSprite("res/pacman-dying.png", 26, 26, 12, 8),
-      mInitialPosition{ 11.f * TILE_SIZE + TILE_SIZE / 2.f, 14.f * TILE_SIZE + TILE_SIZE / 2.f },
-      mPlayingSprite("res/pacman.png", 26, 26, 3, 10),
-      mPosition{ 11.f * TILE_SIZE + TILE_SIZE / 2.f, 14.f * TILE_SIZE + TILE_SIZE / 2.f },
-      mRadius(12),
-      mState(State::PLAYING),
+    : mColor(GetColor(0xFFFF00FF))
+      mDebugTileColor(GetColor(0x000000FF))
+      mDirection{ 0.f, 0.f }
+      mDyingSprite("res/pacman-dying.png", 26, 26, 12, 8)
+      mInitialPosition{ 11.f * TILE_SIZE + TILE_SIZE / 2.f, 14.f * TILE_SIZE + TILE_SIZE / 2.f }
+      mPlayingSprite("res/pacman.png", 26, 26, 3, 10)
+      mPosition{ 11.f * TILE_SIZE + TILE_SIZE / 2.f, 14.f * TILE_SIZE + TILE_SIZE / 2.f }
+      mRadius(12)
+      mState(State::PLAYING)
       mSpeed(50.f)
 {}
 

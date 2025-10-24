@@ -29,15 +29,15 @@ public:
         GAME_START      = 7
     };
 
-    inline GameManager(
-        std::vector< shared_ptr<Ghost>> g,
-        shared_ptr<Pacman> p,
-        shared_ptr<Labyrinth> l)
-    : mGhosts(g),
-      mPacman(p),
-      mLabyrinth(l),
-      mGhostStartingPoint({ 11.f * TILE_SIZE, 8.f * TILE_SIZE })
-    {};
+    inline GameManager(std::vector< shared_ptr<Ghost>> g, shared_ptr<Pacman> p, shared_ptr<Labyrinth> l)
+        : mGhosts(g)
+        , mHudFont(LoadFont("../res/Bitty.ttf"))
+        , mHudFont1(LoadFont("../res/PublicPixel.ttf"))
+        , mHudFont2(LoadFont("zector.regular.ttf"))
+        , mPacman(p)
+        , mLabyrinth(l)
+        , mGhostStartingPoint({ 11.f * TILE_SIZE, 8.f * TILE_SIZE }) {};
+
     inline ~GameManager() {};
 
     inline void checkCollisions() {
@@ -332,6 +332,10 @@ private:
     float   mTimerChaseMode = 0.f;
     float   mTimerPowerUp = 0.f;
     float   mTimerLeavePrison = 0.f;
+
+    Font    mHudFont;
+    Font    mHudFont1;
+    Font    mHudFont2;
 
     shared_ptr<Pacman>             mPacman;
     shared_ptr<Labyrinth>          mLabyrinth;
