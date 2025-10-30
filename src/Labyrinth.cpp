@@ -4,11 +4,9 @@
 #include "Labyrinth.hpp"
 
 Labyrinth::Labyrinth()
-    :
-      mPelletSpritePath("res/pellet.png"),
-      mPowerupSpritePath("res/powerup.png"),
-      mLabyrinthTileMap{ {}, LoadTexture("res/labyrinth.png"), 26, 26 } {
-
+    : mPelletSpritePath("res/pellet.png")
+    , mPowerupSpritePath("res/powerup.png")
+    , mLabyrinthTileMap{ {}, LoadTexture("res/labyrinth.png"), 26, 26 } {
     float centerTileY, centerTileX;
     int c = 0, r = 0;
 

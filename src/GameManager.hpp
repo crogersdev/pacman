@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iomanip>
+#include <sstream>
 #include <vector>
 
 #include <raylib.h>
@@ -31,12 +32,16 @@ public:
 
     inline GameManager(std::vector< shared_ptr<Ghost>> g, shared_ptr<Pacman> p, shared_ptr<Labyrinth> l)
         : mGhosts(g)
-        , mHudFont(LoadFont("../res/Bitty.ttf"))
-        , mHudFont1(LoadFont("../res/PublicPixel.ttf"))
-        , mHudFont2(LoadFont("zector.regular.ttf"))
+        , mHudFont(LoadFont("res/Bitty.ttf"))
+        , mHudFont1(LoadFont("res/PublicPixel.ttf"))
+        , mHudFont2(LoadFont("res/zector.regular.ttf"))
         , mPacman(p)
+        , mPacmanGuy()
         , mLabyrinth(l)
-        , mGhostStartingPoint({ 11.f * TILE_SIZE, 8.f * TILE_SIZE }) {};
+        , mGhostStartingPoint({ 11.f * TILE_SIZE, 8.f * TILE_SIZE }) {
+
+        mPacmanGuy = LoadTexture("res/pacman.png");
+    };
 
     inline ~GameManager() {};
 
@@ -65,9 +70,10 @@ public:
                     ghost->setState(Ghost::State::GOING_TO_PRISON);
                     ghost->setChaseTarget(mGhostStartingPoint);
                     ghost->updateSprite();
+                    mScore += 100;
                 }
                 else {
-                    // onDeath();
+                    onDeath();
                 }
             }
             
@@ -103,6 +109,27 @@ public:
             // ghost->drawDebugDistances();
         }
         mPacman->draw();
+
+        std::stringstream ss;
+
+        auto font = mHudFont2;
+
+        ss << "Score: " << mScore;
+        Vector2 scoreHudPos = { 0, TILE_SIZE * LABYRINTH_ROWS + 10.f };
+        DrawTextEx(font, ss.str().c_str(), scoreHudPos, 32, 2, WHITE);
+        ss.str("");
+        ss.clear();
+
+        float pacmanGuysHudPosX = TILE_SIZE * LABYRINTH_COLS - (mPacmanLives * TILE_SIZE);
+        float pacmanGuysHudPosY = TILE_SIZE * LABYRINTH_ROWS + 10.f;
+
+        ss << "Lives: ";
+        DrawTextEx(font, ss.str().c_str(), Vector2{ pacmanGuysHudPosX - 100, pacmanGuysHudPosY }, 32, 2, WHITE);
+
+        Rectangle pacmanGuyRect = { 0, 0, TILE_SIZE, TILE_SIZE };
+        for (int guy = 0; guy < mPacmanLives; guy++) {
+            DrawTextureRec(mPacmanGuy, pacmanGuyRect, Vector2{ pacmanGuysHudPosX + (guy * TILE_SIZE), pacmanGuysHudPosY}, WHITE);
+        }
     }
 
     inline int getScore() const { return mScore; }
@@ -256,7 +283,7 @@ public:
 
     inline void startGame() {
         mState = State::GAME_START;
-        mPacmanLives = 30;
+        mPacmanLives = 3;
         mScoreExtraLife = 0;
         mScore = 0;
 
@@ -336,6 +363,8 @@ private:
     Font    mHudFont;
     Font    mHudFont1;
     Font    mHudFont2;
+
+    Texture mPacmanGuy;
 
     shared_ptr<Pacman>             mPacman;
     shared_ptr<Labyrinth>          mLabyrinth;
