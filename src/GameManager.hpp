@@ -167,6 +167,12 @@ public:
         mPacmanLives--;
         mPacman->setState(Pacman::State::DYING);
 
+        for (const auto& ghost: mGhosts) {
+            if (ghost->getName() == "Blinky") { ghost->setState(Ghost::State::CHASE); }
+            else { ghost->setState(Ghost::State::IN_PRISON); }
+            ghost->updateSprite();
+        }
+
         if (mPacmanLives < 0) {
             mState = State::GAME_OVER;
         }
@@ -256,7 +262,6 @@ public:
             }
 
             if (mPaused == false && mState != State::PACMAN_DYING) {
-                std::cout << mPaused << "\t" << (unsigned int) mState << "\n";
                 moveStuff();
 
                 checkCollisions();

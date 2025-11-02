@@ -117,6 +117,7 @@ void Ghost::chase(shared_ptr<Labyrinth> labyrinth) {
     }
 
     if (bestDistanceDirections.size() > 0) {
+        /*
         for (const auto& bdd : bestDistanceDirections) {
             Color targetColor = Fade(WHITE, 0.5f);
             if (mName == "Inky")   targetColor = Fade(BLUE,   0.5f);
@@ -126,6 +127,7 @@ void Ghost::chase(shared_ptr<Labyrinth> labyrinth) {
             DrawRectangle(bdd.x, bdd.y, 26, 26, targetColor);
             DrawLine(bdd.x, bdd.y, mChaseTarget.x + 12, mChaseTarget.y + 12, targetColor);
         }
+        */
 
         Vector2 directionPriorities[] = { {0, -1}, {-1, 0}, {0, 1}, {1, 0} };
         for (const auto& priority : directionPriorities) {
