@@ -66,14 +66,16 @@ public:
 
             // pacman eats ghost
             if (pacmanTile.first == ghostTile.first && pacmanTile.second == ghostTile.second) {
+                if (ghost->getState() == Ghost::State::CHASE ||
+                    ghost->getState() == Ghost::State::MEANDER ||
+                    ghost->getState() == Ghost::State::SCATTER) {
+                        onDeath();
+                    }
                 if (ghost->getState() == Ghost::State::FRIGHTENED) {
                     ghost->setState(Ghost::State::GOING_TO_PRISON);
                     ghost->setChaseTarget(mGhostStartingPoint);
                     ghost->updateSprite();
                     mScore += 100;
-                }
-                else {
-                    onDeath();
                 }
             }
             
@@ -134,7 +136,26 @@ public:
 
     inline int getScore() const { return mScore; }
     inline int getLives() const { return mPacmanLives; }
-    
+
+    inline void initEntities() {
+        mState = State::GAME_START;
+        mPacmanLives = 3;
+        mScoreExtraLife = 0;
+        mScore = 0;
+
+        for (auto &ghost : mGhosts) {
+            if (ghost->getName() == "Blinky") {
+                ghost->setChaseTarget(mPacman->getPosition());
+                ghost->setState(Ghost::State::CHASE);
+            } else if (ghost->getName() == "Pinky") { 
+                ghost->setChaseTarget(mGhostStartingPoint);
+                ghost->setState(Ghost::State::LEAVING_PRISON);
+            } else {
+                ghost->setState(Ghost::State::IN_PRISON);
+            }
+        }
+    };
+ 
     inline bool isGhostInPrison(shared_ptr<Ghost> ghost) {
         auto ghostTile = ghost->getTilePosition();
         return ghostTile.first >= 8 && ghostTile.first <= 14 && ghostTile.second >= 11 && ghostTile.second <= 13;
@@ -166,12 +187,6 @@ public:
         mState = State::PACMAN_DYING;
         mPacmanLives--;
         mPacman->setState(Pacman::State::DYING);
-
-        for (const auto& ghost: mGhosts) {
-            if (ghost->getName() == "Blinky") { ghost->setState(Ghost::State::CHASE); }
-            else { ghost->setState(Ghost::State::IN_PRISON); }
-            ghost->updateSprite();
-        }
 
         if (mPacmanLives < 0) {
             mState = State::GAME_OVER;
@@ -238,11 +253,11 @@ public:
 
         for (auto &ghost : mGhosts) {
             ghost->setState(Ghost::State::IN_PRISON);
-            if (ghost->getName() == "Blinky") {
-                ghost->setState(Ghost::State::CHASE);
-            }
+            if (ghost->getName() == "Blinky") { ghost->setState(Ghost::State::CHASE); }
+            if (ghost->getName() == "Pinky")  { ghost->setState(Ghost::State::LEAVING_PRISON); }
             ghost->resetPosition();
             ghost->resetDecisionTile();
+            ghost->updateSprite();
         }
     }
 
@@ -285,25 +300,6 @@ public:
             EndDrawing();
         }
     }
-
-    inline void startGame() {
-        mState = State::GAME_START;
-        mPacmanLives = 3;
-        mScoreExtraLife = 0;
-        mScore = 0;
-
-        for (auto &ghost : mGhosts) {
-            if (ghost->getName() == "Blinky") {
-                ghost->setChaseTarget(mPacman->getPosition());
-                ghost->setState(Ghost::State::CHASE);
-            } else if (ghost->getName() == "Pinky") { 
-                ghost->setChaseTarget(mGhostStartingPoint);
-                ghost->setState(Ghost::State::LEAVING_PRISON);
-            } else {
-                ghost->setState(Ghost::State::IN_PRISON);
-            }
-        }
-    };
 
     inline void updateTimers() {
         if (mPowerUpTime) { mTimerPowerUp += GetFrameTime(); }

@@ -26,7 +26,7 @@ int main() {
     std::vector< std::shared_ptr<Ghost>> ghosts = { inky, pinky, blinky, clyde };
     GameManager gm = GameManager(ghosts, pacman, labyrinth);
 
-    gm.startGame();
+    gm.initEntities();
     gm.runGame();
 
     CloseWindow();
