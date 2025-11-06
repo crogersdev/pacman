@@ -35,6 +35,7 @@ public:
         , mHudFont(LoadFont("res/Bitty.ttf"))
         , mHudFont1(LoadFont("res/PublicPixel.ttf"))
         , mHudFont2(LoadFont("res/zector.regular.ttf"))
+        , mMenuPacman("res/pacman.png", 26, 26, 3, 10)
         , mPacman(p)
         , mPacmanGuy()
         , mLabyrinth(l)
@@ -138,7 +139,6 @@ public:
     inline int getLives() const { return mPacmanLives; }
 
     inline void initEntities() {
-        mState = State::GAME_START;
         mPacmanLives = 3;
         mScoreExtraLife = 0;
         mScore = 0;
@@ -159,6 +159,45 @@ public:
     inline bool isGhostInPrison(shared_ptr<Ghost> ghost) {
         auto ghostTile = ghost->getTilePosition();
         return ghostTile.first >= 8 && ghostTile.first <= 14 && ghostTile.second >= 11 && ghostTile.second <= 13;
+    }
+
+    inline void menuModal(Vector2 animCurrPos) {
+        BeginBlendMode(BLEND_ALPHA);
+        DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Color{ 0, 0, 0, 133 });
+
+        int x = GetScreenWidth() / 10;
+        int y = GetScreenHeight() / 3;
+        int modalWidth = GetScreenWidth() - 2*x;
+        int modalHeight = y;
+
+        DrawRectangle(x, y, modalWidth, modalHeight, BLACK);
+        DrawRectangleLines(x, y, modalWidth, modalHeight, Color{ 0, 150, 255, 255 });
+
+        // if we try to left/right center justify we'd have to get each character in hud message,
+        // multiply by number of characters (don't forget spacing), subtract from total width,
+        // divide by 2, and use that final value as padding
+        std::string menuHudMsg = "Pacman!";
+        int fontSize = 32;
+        int fontSpacing = 2;
+        auto margin = (modalWidth - (menuHudMsg.size() * (fontSize + fontSpacing))) / 2;
+
+        Vector2 msgPosition = { static_cast<float>(x + margin), static_cast<float>(y + (modalHeight / 12)) };
+        DrawTextEx(mHudFont1, menuHudMsg.c_str(), msgPosition, fontSize, fontSpacing, GetColor(0x5CBBFFFF));
+
+        menuHudMsg = "Press any key to start...";
+        fontSize = 16;
+        fontSpacing = 1;
+        margin = (modalWidth - (menuHudMsg.size() * (fontSize + fontSpacing))) / 2;
+
+        msgPosition = { static_cast<float>(x + margin), msgPosition.y + 32 + 12 };
+        DrawTextEx(mHudFont1, menuHudMsg.c_str(), msgPosition, fontSize, fontSpacing, GetColor(0x5CBBFFFF));
+
+        BeginScissorMode(x, y, modalWidth, modalHeight);
+        mMenuPacman.draw(animCurrPos);
+        EndScissorMode();
+        mMenuPacman.update();
+
+        EndBlendMode();
     }
 
     inline void moveStuff() {
@@ -262,6 +301,11 @@ public:
     }
 
     inline void runGame() {
+
+        float t = 0.0f;
+        float animSpeed = 0.1f;
+        Vector2 animCurrPos = Vector2{ 0.f, 0.f };
+
         while (WindowShouldClose() == false) {
             if (IsKeyPressed(KEY_P)) {
                 mPaused = !mPaused;
@@ -269,12 +313,6 @@ public:
 
             BeginDrawing();
             ClearBackground(BLACK);
-
-            for (auto &ghost: mGhosts) {
-                if (ghost->getName() == "Blinky") {
-                    // std::cout << "blinky's state: " << (unsigned int) ghost->getState() << "\n";
-                }
-            }
 
             if (mPaused == false && mState != State::PACMAN_DYING) {
                 moveStuff();
@@ -296,6 +334,18 @@ public:
             }
 
             drawStuff();
+
+            if (mState == State::MENU) {
+                Vector2 animPathStart = Vector2{ -15.f, 375.f };
+                Vector2 animPathEnd = Vector2{ 600.f, 375.f };
+                
+                t += animSpeed * GetFrameTime();
+                if (t > 1.0f) { t = 0.0f; }
+                animCurrPos = Vector2{ animPathStart.x + (animPathEnd.x - animPathStart.x) * t, animPathStart.y + (animPathEnd.y - animPathStart.y) * t };
+
+                mPaused = true;
+                menuModal(animCurrPos);
+            }
 
             EndDrawing();
         }
@@ -354,18 +404,18 @@ private:
     bool    mPowerUpTime = false;
     int     mPacmanLives = 3;
     float   mPacmanSpeed = 50.f;
+    Texture mPacmanGuy;
     int     mScore = 0;
     int     mScoreExtraLife = 0;
     State   mState = State::MENU;
     float   mTimerChaseMode = 0.f;
     float   mTimerPowerUp = 0.f;
     float   mTimerLeavePrison = 0.f;
+    AnimatedSprite mMenuPacman;
 
     Font    mHudFont;
     Font    mHudFont1;
     Font    mHudFont2;
-
-    Texture mPacmanGuy;
 
     shared_ptr<Pacman>             mPacman;
     shared_ptr<Labyrinth>          mLabyrinth;
