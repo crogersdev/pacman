@@ -17,6 +17,13 @@ const float POWERUP_TIME = 15.f;
 const float SCATTER_TIME = 55.f;
 const float MAX_PRISON_TIME = 8.f;
 
+struct AnimatedEntity {
+    float t, speed;
+    std::string name;
+    Vector2 position;
+    AnimatedSprite* sprite;
+};
+
 class GameManager {
 public:
     enum class State {
@@ -36,7 +43,10 @@ public:
         , mHudFont1(LoadFont("res/PublicPixel.ttf"))
         , mHudFont2(LoadFont("res/zector.regular.ttf"))
         , mMenuPacman("res/pacman.png", 26, 26, 3, 10)
-        , mMenuGhost("res/blinky.png", 26, 26, 2, 4)
+        , mMenuInky("res/inky.png", 26, 26, 2, 4)
+        , mMenuBlinky("res/blinky.png", 26, 26, 2, 4)
+        , mMenuPinky("res/pinky.png", 26, 26, 2, 4)
+        , mMenuClyde("res/clyde.png", 26, 26, 2, 4)
         , mPacman(p)
         , mPacmanGuy()
         , mLabyrinth(l)
@@ -162,7 +172,7 @@ public:
         return ghostTile.first >= 8 && ghostTile.first <= 14 && ghostTile.second >= 11 && ghostTile.second <= 13;
     }
 
-    inline void menuModal(Vector2 animCurrPos) {
+    inline void menuModal(std::vector<AnimatedEntity> splashScreenEntities) {
         BeginBlendMode(BLEND_ALPHA);
         DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Color{ 0, 0, 0, 133 });
 
@@ -194,9 +204,16 @@ public:
         DrawTextEx(mHudFont1, menuHudMsg.c_str(), msgPosition, fontSize, fontSpacing, GetColor(0x5CBBFFFF));
 
         BeginScissorMode(x, y, modalWidth, modalHeight);
-        mMenuPacman.draw(animCurrPos);
+
+        for (auto& entity : splashScreenEntities) {
+            entity.sprite->draw(entity.position);
+        }
+
         EndScissorMode();
-        mMenuPacman.update();
+
+        for (auto& entity : splashScreenEntities) {
+            entity.sprite->update();
+        }
 
         EndBlendMode();
     }
@@ -303,9 +320,13 @@ public:
 
     inline void runGame() {
 
-        float t = 0.0f;
-        float animSpeed = 0.1f;
-        Vector2 animCurrPos = Vector2{ 0.f, 0.f };
+        std::vector<AnimatedEntity> splashScreenEntities = {
+            { 0.f, .1f,   "pacman", Vector2{ 0.f, 0.f }, &mMenuPacman },
+            { 0.f, .082f, "blinky", Vector2{ 0.f, 0.f }, &mMenuBlinky },
+            { 0.f, .076f, "inky",   Vector2{ 0.f, 0.f }, &mMenuInky },
+            { 0.f, .09f,  "pinky",  Vector2{ 0.f, 0.f }, &mMenuPinky },
+            { 0.f, .08f,  "clyde",  Vector2{ 0.f, 0.f }, &mMenuClyde }
+        };
 
         while (WindowShouldClose() == false) {
             if (IsKeyPressed(KEY_P)) {
@@ -340,12 +361,17 @@ public:
                 Vector2 animPathStart = Vector2{ -15.f, 375.f };
                 Vector2 animPathEnd = Vector2{ 600.f, 375.f };
                 
-                t += animSpeed * GetFrameTime();
-                if (t > 1.0f) { t = 0.0f; }
-                animCurrPos = Vector2{ animPathStart.x + (animPathEnd.x - animPathStart.x) * t, animPathStart.y + (animPathEnd.y - animPathStart.y) * t };
+                for (auto& entity : splashScreenEntities) {
+                    entity.t += entity.speed * GetFrameTime();
+                    if (entity.t > 1.0f) { entity.t = 0.0f; }
+                    entity.position = Vector2{
+                        animPathStart.x + (animPathEnd.x - animPathStart.x) * entity.t,
+                        animPathStart.y + (animPathEnd.y - animPathStart.y) * entity.t
+                    };
+                }
 
                 mPaused = true;
-                menuModal(animCurrPos);
+                menuModal(splashScreenEntities);
             }
 
             EndDrawing();
@@ -412,8 +438,12 @@ private:
     float   mTimerChaseMode = 0.f;
     float   mTimerPowerUp = 0.f;
     float   mTimerLeavePrison = 0.f;
+
     AnimatedSprite mMenuPacman;
-    AnimatedSprite mMenuGhost;
+    AnimatedSprite mMenuInky;
+    AnimatedSprite mMenuPinky;
+    AnimatedSprite mMenuBlinky;
+    AnimatedSprite mMenuClyde;
 
     Font    mHudFont;
     Font    mHudFont1;
