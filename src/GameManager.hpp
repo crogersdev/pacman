@@ -36,6 +36,7 @@ public:
         , mHudFont1(LoadFont("res/PublicPixel.ttf"))
         , mHudFont2(LoadFont("res/zector.regular.ttf"))
         , mMenuPacman("res/pacman.png", 26, 26, 3, 10)
+        , mMenuGhost("res/blinky.png", 26, 26, 2, 4)
         , mPacman(p)
         , mPacmanGuy()
         , mLabyrinth(l)
@@ -412,6 +413,7 @@ private:
     float   mTimerPowerUp = 0.f;
     float   mTimerLeavePrison = 0.f;
     AnimatedSprite mMenuPacman;
+    AnimatedSprite mMenuGhost;
 
     Font    mHudFont;
     Font    mHudFont1;
