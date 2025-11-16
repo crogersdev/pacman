@@ -17,10 +17,14 @@ const float POWERUP_TIME = 15.f;
 const float SCATTER_TIME = 55.f;
 const float MAX_PRISON_TIME = 8.f;
 
-struct AnimatedEntity {
-    float t, speed;
+struct MenuEntity {
     std::string name;
     Vector2 position;
+};
+
+struct AnimatedEntity : public MenuEntity {
+    float t, speed;
+    Vector2 initialPosition;
     AnimatedSprite* sprite;
 };
 
@@ -47,6 +51,8 @@ public:
         , mMenuBlinky("res/blinky.png", 26, 26, 2, 4)
         , mMenuPinky("res/pinky.png", 26, 26, 2, 4)
         , mMenuClyde("res/clyde.png", 26, 26, 2, 4)
+        , mMenuPellet("res/pellet.png", 26, 26, 2, 10)
+        , mMenuPowerUp("res/powerup.png", 26, 26, 2, 12)
         , mPacman(p)
         , mPacmanGuy()
         , mLabyrinth(l)
@@ -212,6 +218,9 @@ public:
         EndScissorMode();
 
         for (auto& entity : splashScreenEntities) {
+            if (entity.name != "pacman") {
+                entity.sprite->setZeroFrame(2);
+            }
             entity.sprite->update();
         }
 
@@ -321,11 +330,17 @@ public:
     inline void runGame() {
 
         std::vector<AnimatedEntity> splashScreenEntities = {
-            { 0.f, .1f,   "pacman", Vector2{ 0.f, 0.f }, &mMenuPacman },
-            { 0.f, .082f, "blinky", Vector2{ 0.f, 0.f }, &mMenuBlinky },
-            { 0.f, .076f, "inky",   Vector2{ 0.f, 0.f }, &mMenuInky },
-            { 0.f, .09f,  "pinky",  Vector2{ 0.f, 0.f }, &mMenuPinky },
-            { 0.f, .08f,  "clyde",  Vector2{ 0.f, 0.f }, &mMenuClyde }
+            { 0.f, .1f,   "pacman",  Vector2{ 0.f, 0.f },         Vector2{ 0.f, 0.f }, &mMenuPacman },
+            { 0.f, .082f, "blinky",  Vector2{ -2.f * 26.f, 0.f }, Vector2{ 0.f, 0.f }, &mMenuBlinky },
+            { 0.f, .076f, "inky",    Vector2{ -3.f * 26.f, 0.f }, Vector2{ 0.f, 0.f }, &mMenuInky },
+            { 0.f, .09f,  "pinky",   Vector2{ -4.f * 26.f, 0.f }, Vector2{ 0.f, 0.f }, &mMenuPinky },
+            { 0.f, .08f,  "clyde",   Vector2{ -4.f * 26.f, 0.f }, Vector2{ 0.f, 0.f }, &mMenuClyde },
+        };
+        std::Vector<Animated
+            { 0.f, 0.f,   "pellet0", Vector2{ 0.f, 0.f },         Vector2{ 0.f, 0.f }, &mMenuPellet },
+            { 0.f, 0.f,   "pellet1", Vector2{ 0.f, 0.f },         Vector2{ 0.f, 0.f }, &mMenuPellet },
+            { 0.f, 0.f,   "pellet2", Vector2{ 0.f, 0.f },         Vector2{ 0.f, 0.f }, &mMenuPellet },
+            { 0.f, 0.f,   "powerup", Vector2{ 0.f, 0.f },         Vector2{ 0.f, 0.f }, &mMenuPowerUp }
         };
 
         while (WindowShouldClose() == false) {
@@ -359,14 +374,14 @@ public:
 
             if (mState == State::MENU) {
                 Vector2 animPathStart = Vector2{ -15.f, 375.f };
-                Vector2 animPathEnd = Vector2{ 600.f, 375.f };
+                Vector2 animPathEnd = Vector2{ 650.f, 375.f };
                 
                 for (auto& entity : splashScreenEntities) {
                     entity.t += entity.speed * GetFrameTime();
                     if (entity.t > 1.0f) { entity.t = 0.0f; }
                     entity.position = Vector2{
-                        animPathStart.x + (animPathEnd.x - animPathStart.x) * entity.t,
-                        animPathStart.y + (animPathEnd.y - animPathStart.y) * entity.t
+                        entity.initialPosition.x + animPathStart.x + (animPathEnd.x - animPathStart.x) * entity.t,
+                        entity.initialPosition.y + animPathStart.y + (animPathEnd.y - animPathStart.y) * entity.t
                     };
                 }
 
@@ -444,6 +459,8 @@ private:
     AnimatedSprite mMenuPinky;
     AnimatedSprite mMenuBlinky;
     AnimatedSprite mMenuClyde;
+    AnimatedSprite mMenuPellet;
+    AnimatedSprite mMenuPowerUp;
 
     Font    mHudFont;
     Font    mHudFont1;
