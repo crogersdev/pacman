@@ -20,12 +20,12 @@ const float MAX_PRISON_TIME = 8.f;
 struct MenuEntity {
     std::string name;
     Vector2 position;
+    AnimatedSprite* sprite;
 };
 
 struct AnimatedEntity : public MenuEntity {
     float t, speed;
     Vector2 initialPosition;
-    AnimatedSprite* sprite;
 };
 
 class GameManager {
@@ -178,7 +178,7 @@ public:
         return ghostTile.first >= 8 && ghostTile.first <= 14 && ghostTile.second >= 11 && ghostTile.second <= 13;
     }
 
-    inline void menuModal(std::vector<AnimatedEntity> splashScreenEntities) {
+    inline void menuModal(std::vector<AnimatedEntity> splashScreenEntities, std::vector<MenuEntity> splashScreenFixtures) {
         BeginBlendMode(BLEND_ALPHA);
         DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Color{ 0, 0, 0, 133 });
 
@@ -329,18 +329,20 @@ public:
 
     inline void runGame() {
 
-        std::vector<AnimatedEntity> splashScreenEntities = {
-            { 0.f, .1f,   "pacman",  Vector2{ 0.f, 0.f },         Vector2{ 0.f, 0.f }, &mMenuPacman },
-            { 0.f, .082f, "blinky",  Vector2{ -2.f * 26.f, 0.f }, Vector2{ 0.f, 0.f }, &mMenuBlinky },
-            { 0.f, .076f, "inky",    Vector2{ -3.f * 26.f, 0.f }, Vector2{ 0.f, 0.f }, &mMenuInky },
-            { 0.f, .09f,  "pinky",   Vector2{ -4.f * 26.f, 0.f }, Vector2{ 0.f, 0.f }, &mMenuPinky },
-            { 0.f, .08f,  "clyde",   Vector2{ -4.f * 26.f, 0.f }, Vector2{ 0.f, 0.f }, &mMenuClyde },
+        std::vector<MenuEntity> splashScreenFixtures = {
+            { true, "pellet0", Vector2{ 0.f, 0.f }, &mMenuPellet },
+            { true, "pellet1", Vector2{ 0.f, 0.f }, &mMenuPellet },
+            { true, "pellet2", Vector2{ 0.f, 0.f }, &mMenuPellet },
+            { true, "powerup", Vector2{ 0.f, 0.f }, &mMenuPowerUp }
         };
-        std::Vector<Animated
-            { 0.f, 0.f,   "pellet0", Vector2{ 0.f, 0.f },         Vector2{ 0.f, 0.f }, &mMenuPellet },
-            { 0.f, 0.f,   "pellet1", Vector2{ 0.f, 0.f },         Vector2{ 0.f, 0.f }, &mMenuPellet },
-            { 0.f, 0.f,   "pellet2", Vector2{ 0.f, 0.f },         Vector2{ 0.f, 0.f }, &mMenuPellet },
-            { 0.f, 0.f,   "powerup", Vector2{ 0.f, 0.f },         Vector2{ 0.f, 0.f }, &mMenuPowerUp }
+        
+        // name, position, sprite, t, speed, initialPos
+        std::vector<AnimatedEntity> splashScreenAnimations = {
+            { true, "pacman", Vector2{ 0.f, 0.f }, &mMenuPacman, 0.f, .1f,   Vector2{ 0.f, 0.f }},
+            { true, "blinky", Vector2{ 0.f, 0.f }, &mMenuBlinky, 0.f, .082f, Vector2{ -2.f * 26.f, 0.f }},
+            { true, "inky",   Vector2{ 0.f, 0.f }, &mMenuInky,   0.f, .076f, Vector2{ -3.f * 26.f, 0.f }},
+            { true, "pinky",  Vector2{ 0.f, 0.f }, &mMenuPinky,  0.f, .09f,  Vector2{ -4.f * 26.f, 0.f }},
+            { true, "clyde",  Vector2{ 0.f, 0.f }, &mMenuClyde,  0.f, .08f,  Vector2{ -4.f * 26.f, 0.f }}
         };
 
         while (WindowShouldClose() == false) {
@@ -376,17 +378,29 @@ public:
                 Vector2 animPathStart = Vector2{ -15.f, 375.f };
                 Vector2 animPathEnd = Vector2{ 650.f, 375.f };
                 
-                for (auto& entity : splashScreenEntities) {
+                for (auto& entity : splashScreenAnimations) {
                     entity.t += entity.speed * GetFrameTime();
-                    if (entity.t > 1.0f) { entity.t = 0.0f; }
+                    if (entity.t > 1.f) { entity.t = 0.f; }
+                    if (entity.t < 0.) { entity.t = 0.f; }
                     entity.position = Vector2{
                         entity.initialPosition.x + animPathStart.x + (animPathEnd.x - animPathStart.x) * entity.t,
                         entity.initialPosition.y + animPathStart.y + (animPathEnd.y - animPathStart.y) * entity.t
                     };
+
+                    if (entity.name == "pacman" && entity.t >= .5f) {
+                        for (auto& p : splashScreenFixtures) {
+                            if (std::abs(entity.position.x - p.position.x) < 4.f) {
+                                if (p.name == "powerup") {
+                                    entity.t -= entity.speed * GetFrameTime();
+                                }
+                                p.draw == false;
+                            }
+                        }
+                    }
                 }
 
                 mPaused = true;
-                menuModal(splashScreenEntities);
+                menuModal(splashScreenAnimations, splashScreenFixtures);
             }
 
             EndDrawing();
