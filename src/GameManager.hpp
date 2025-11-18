@@ -18,6 +18,7 @@ const float SCATTER_TIME = 55.f;
 const float MAX_PRISON_TIME = 8.f;
 
 struct MenuEntity {
+    bool draw;
     std::string name;
     Vector2 position;
     AnimatedSprite* sprite;
@@ -26,6 +27,9 @@ struct MenuEntity {
 struct AnimatedEntity : public MenuEntity {
     float t, speed;
     Vector2 initialPosition;
+
+    AnimatedEntity(bool d, std::string n, Vector2 p, AnimatedSprite* s, float t, float sp, Vector2 ip):
+    MenuEntity{d, n, p, s}, t(t), speed(sp), initialPosition(ip) {}
 };
 
 class GameManager {
@@ -214,6 +218,9 @@ public:
         for (auto& entity : splashScreenEntities) {
             entity.sprite->draw(entity.position);
         }
+        for (auto& entity : splashScreenFixtures) {
+            entity.sprite->draw(entity.position);
+        }
 
         EndScissorMode();
 
@@ -330,19 +337,18 @@ public:
     inline void runGame() {
 
         std::vector<MenuEntity> splashScreenFixtures = {
-            { true, "pellet0", Vector2{ 0.f, 0.f }, &mMenuPellet },
-            { true, "pellet1", Vector2{ 0.f, 0.f }, &mMenuPellet },
-            { true, "pellet2", Vector2{ 0.f, 0.f }, &mMenuPellet },
-            { true, "powerup", Vector2{ 0.f, 0.f }, &mMenuPowerUp }
+            { true, "pellet0", Vector2{ 400.f, 370.f }, &mMenuPellet },
+            { true, "pellet1", Vector2{ 400.f, 370.f }, &mMenuPellet },
+            { true, "pellet2", Vector2{ 400.f, 370.f }, &mMenuPellet },
+            { true, "powerup", Vector2{ 400.f, 370.f }, &mMenuPowerUp }
         };
         
-        // name, position, sprite, t, speed, initialPos
         std::vector<AnimatedEntity> splashScreenAnimations = {
-            { true, "pacman", Vector2{ 0.f, 0.f }, &mMenuPacman, 0.f, .1f,   Vector2{ 0.f, 0.f }},
-            { true, "blinky", Vector2{ 0.f, 0.f }, &mMenuBlinky, 0.f, .082f, Vector2{ -2.f * 26.f, 0.f }},
-            { true, "inky",   Vector2{ 0.f, 0.f }, &mMenuInky,   0.f, .076f, Vector2{ -3.f * 26.f, 0.f }},
-            { true, "pinky",  Vector2{ 0.f, 0.f }, &mMenuPinky,  0.f, .09f,  Vector2{ -4.f * 26.f, 0.f }},
-            { true, "clyde",  Vector2{ 0.f, 0.f }, &mMenuClyde,  0.f, .08f,  Vector2{ -4.f * 26.f, 0.f }}
+            { true, "pacman", Vector2{ 0.f, 0.f }, &mMenuPacman, 0.f, .1f,   Vector2{ 0.f, 0.f } },
+            { true, "blinky", Vector2{ 0.f, 0.f }, &mMenuBlinky, 0.f, .082f, Vector2{ -2.f * 26.f, 0.f } },
+            { true, "inky",   Vector2{ 0.f, 0.f }, &mMenuInky,   0.f, .076f, Vector2{ -3.f * 26.f, 0.f } },
+            { true, "pinky",  Vector2{ 0.f, 0.f }, &mMenuPinky,  0.f, .09f,  Vector2{ -4.f * 26.f, 0.f } },
+            { true, "clyde",  Vector2{ 0.f, 0.f }, &mMenuClyde,  0.f, .08f,  Vector2{ -4.f * 26.f, 0.f } }
         };
 
         while (WindowShouldClose() == false) {
@@ -393,10 +399,15 @@ public:
                                 if (p.name == "powerup") {
                                     entity.t -= entity.speed * GetFrameTime();
                                 }
-                                p.draw == false;
+                                p.draw = false;
                             }
                         }
                     }
+                }
+
+                for (auto& entity : splashScreenFixtures) {
+                    if (entity.draw == false) { continue; }
+                    
                 }
 
                 mPaused = true;
