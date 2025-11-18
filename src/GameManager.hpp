@@ -219,7 +219,7 @@ public:
             entity.sprite->draw(entity.position);
         }
         for (auto& entity : splashScreenFixtures) {
-            entity.sprite->draw(entity.position);
+            if (entity.draw) entity.sprite->draw(entity.position);
         }
 
         EndScissorMode();
@@ -337,10 +337,10 @@ public:
     inline void runGame() {
 
         std::vector<MenuEntity> splashScreenFixtures = {
-            { true, "pellet0", Vector2{ 400.f, 370.f }, &mMenuPellet },
-            { true, "pellet1", Vector2{ 400.f, 370.f }, &mMenuPellet },
-            { true, "pellet2", Vector2{ 400.f, 370.f }, &mMenuPellet },
-            { true, "powerup", Vector2{ 400.f, 370.f }, &mMenuPowerUp }
+            { true, "pellet",  Vector2{ 400.f, 378.f }, &mMenuPellet },
+            { true, "pellet",  Vector2{ 426.f, 378.f }, &mMenuPellet },
+            { true, "pellet",  Vector2{ 452.f, 378.f }, &mMenuPellet },
+            { true, "powerup", Vector2{ 478.f, 377.f }, &mMenuPowerUp }
         };
         
         std::vector<AnimatedEntity> splashScreenAnimations = {
@@ -397,9 +397,14 @@ public:
                         for (auto& p : splashScreenFixtures) {
                             if (std::abs(entity.position.x - p.position.x) < 4.f) {
                                 if (p.name == "powerup") {
+                                    std::cout << "ate a powerup\n";
                                     entity.t -= entity.speed * GetFrameTime();
+                                    p.draw = false;
                                 }
-                                p.draw = false;
+                                if (p.name == "pellet") {
+                                    std::cout << "ate a pellet\n";
+                                    p.draw = false;
+                                }
                             }
                         }
                     }
@@ -407,7 +412,6 @@ public:
 
                 for (auto& entity : splashScreenFixtures) {
                     if (entity.draw == false) { continue; }
-                    
                 }
 
                 mPaused = true;
