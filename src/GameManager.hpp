@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <iomanip>
 #include <sstream>
 #include <vector>
@@ -25,11 +26,11 @@ struct MenuEntity {
 };
 
 struct AnimatedEntity : public MenuEntity {
-    float t, speed, direction;
+    float progress, speed, direction;
     Vector2 initialPosition;
 
-    AnimatedEntity(bool d, std::string n, Vector2 p, AnimatedSprite* s, float t, float sp, float dir, Vector2 ip):
-    MenuEntity{d, n, p, s}, t(t), speed(sp), direction(dir), initialPosition(ip) {}
+    AnimatedEntity(bool d, std::string n, Vector2 p, AnimatedSprite* s, float prog, float sp, float dir, Vector2 ip):
+    MenuEntity{d, n, p, s}, progress(prog), speed(sp), direction(dir), initialPosition(ip) {}
 };
 
 class GameManager {
@@ -385,10 +386,9 @@ public:
                 Vector2 animPathEnd = Vector2{ 650.f, 375.f };
                 
                 for (auto& entity : splashScreenAnimations) {
-                    entity.t += entity.direction * entity.speed * GetFrameTime();
+                    entity.progress += entity.direction * entity.speed * GetFrameTime();
 
-                    // Interpolate along the horizontal path
-                    float progress = entity.t; // This goes from 0 to 1 (or 1 to 0 when reversed)
+                    float progress = entity.progress; // This goes from 0 to 1 (or 1 to 0 when reversed)
 
                     Vector2 basePosition = Vector2{
                         animPathStart.x + (animPathEnd.x - animPathStart.x) * progress,
@@ -400,24 +400,34 @@ public:
                         basePosition.x + entity.initialPosition.x,
                         basePosition.y + entity.initialPosition.y
                     };
+                }
 
-                    for (auto& p : splashScreenFixtures) {
-                        if (std::abs(entity.position.x - p.position.x) < 4.f) {
-                            if (p.name == "powerup") {
+                //auto pac = std::find(splashScreenAnimations.begin(), splashScreenAnimations.end(), )
+                auto pac = std::find_if(
+                    splashScreenAnimations.begin(),
+                    splashScreenAnimations.end(),
+                    [](const auto& e) {
+                        return e.name == "pacman";
+                    }
+                );
+
+                for (auto& p : splashScreenFixtures) {
+                    if (std::abs(pac->position.x - p.position.x) < 4.f) {
+                        if (p.name == "powerup") {
+                            for (auto& entity : splashScreenAnimations) {
                                 entity.direction = entity.direction * -1.f;
-                                p.draw = false;
-                            }
-                            if (p.name == "pellet") {
-                                p.draw = false;
+                                if (entity.name == "pacman") {
+                                    entity.sprite->setZeroFrame(6);
+                                } else {
+                                    entity.sprite->setTextureFile("res/frightened.png");
+                                    entity.sprite->setZeroFrame(0);
+                                }
                             }
                         }
+                        p.draw = false;
                     }
                 }
-
-                for (auto& entity : splashScreenFixtures) {
-                    if (entity.draw == false) { continue; }
-                }
-
+                
                 mPaused = true;
                 menuModal(splashScreenAnimations, splashScreenFixtures);
             }
