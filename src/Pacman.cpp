@@ -98,7 +98,7 @@ void Pacman::updateSpriteFrameAndMove() {
     if (mDirection == Vector2{ -1.f,  0.f}) { mPlayingSprite.setZeroFrame(6); }
     if (mDirection == Vector2{  0.f, -1.f}) { mPlayingSprite.setZeroFrame(9); }
 
-    Vector2 newPosition = {
+    Vector2 newPosition = Vector2{
         mPosition.x + (mDirection.x * mSpeed * GetFrameTime()),
         mPosition.y + (mDirection.y * mSpeed * GetFrameTime())
     };

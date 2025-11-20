@@ -25,11 +25,11 @@ struct MenuEntity {
 };
 
 struct AnimatedEntity : public MenuEntity {
-    float t, speed;
+    float t, speed, direction;
     Vector2 initialPosition;
 
-    AnimatedEntity(bool d, std::string n, Vector2 p, AnimatedSprite* s, float t, float sp, Vector2 ip):
-    MenuEntity{d, n, p, s}, t(t), speed(sp), initialPosition(ip) {}
+    AnimatedEntity(bool d, std::string n, Vector2 p, AnimatedSprite* s, float t, float sp, float dir, Vector2 ip):
+    MenuEntity{d, n, p, s}, t(t), speed(sp), direction(dir), initialPosition(ip) {}
 };
 
 class GameManager {
@@ -337,18 +337,18 @@ public:
     inline void runGame() {
 
         std::vector<MenuEntity> splashScreenFixtures = {
-            { true, "pellet",  Vector2{ 400.f, 378.f }, &mMenuPellet },
-            { true, "pellet",  Vector2{ 426.f, 378.f }, &mMenuPellet },
-            { true, "pellet",  Vector2{ 452.f, 378.f }, &mMenuPellet },
+            { true, "pellet",  Vector2{ 400.f, 377.f }, &mMenuPellet },
+            { true, "pellet",  Vector2{ 426.f, 377.f }, &mMenuPellet },
+            { true, "pellet",  Vector2{ 452.f, 377.f }, &mMenuPellet },
             { true, "powerup", Vector2{ 478.f, 377.f }, &mMenuPowerUp }
         };
         
         std::vector<AnimatedEntity> splashScreenAnimations = {
-            { true, "pacman", Vector2{ 0.f, 0.f }, &mMenuPacman, 0.f, .1f,   Vector2{ 0.f, 0.f } },
-            { true, "blinky", Vector2{ 0.f, 0.f }, &mMenuBlinky, 0.f, .082f, Vector2{ -2.f * 26.f, 0.f } },
-            { true, "inky",   Vector2{ 0.f, 0.f }, &mMenuInky,   0.f, .076f, Vector2{ -3.f * 26.f, 0.f } },
-            { true, "pinky",  Vector2{ 0.f, 0.f }, &mMenuPinky,  0.f, .09f,  Vector2{ -4.f * 26.f, 0.f } },
-            { true, "clyde",  Vector2{ 0.f, 0.f }, &mMenuClyde,  0.f, .08f,  Vector2{ -4.f * 26.f, 0.f } }
+            { true, "pacman", Vector2{ 0.f, 0.f }, &mMenuPacman, 0.f, .1f,   1.f, Vector2{ 0.f, 0.f } },
+            { true, "blinky", Vector2{ 0.f, 0.f }, &mMenuBlinky, 0.f, .082f, 1.f, Vector2{ -2.f * 26.f, 0.f } },
+            { true, "inky",   Vector2{ 0.f, 0.f }, &mMenuInky,   0.f, .076f, 1.f, Vector2{ -3.f * 26.f, 0.f } },
+            { true, "pinky",  Vector2{ 0.f, 0.f }, &mMenuPinky,  0.f, .09f,  1.f, Vector2{ -4.f * 26.f, 0.f } },
+            { true, "clyde",  Vector2{ 0.f, 0.f }, &mMenuClyde,  0.f, .08f,  1.f, Vector2{ -4.f * 26.f, 0.f } }
         };
 
         while (WindowShouldClose() == false) {
@@ -385,26 +385,30 @@ public:
                 Vector2 animPathEnd = Vector2{ 650.f, 375.f };
                 
                 for (auto& entity : splashScreenAnimations) {
-                    entity.t += entity.speed * GetFrameTime();
-                    if (entity.t > 1.f) { entity.t = 0.f; }
-                    if (entity.t < 0.) { entity.t = 0.f; }
-                    entity.position = Vector2{
-                        entity.initialPosition.x + animPathStart.x + (animPathEnd.x - animPathStart.x) * entity.t,
-                        entity.initialPosition.y + animPathStart.y + (animPathEnd.y - animPathStart.y) * entity.t
+                    entity.t += entity.direction * entity.speed * GetFrameTime();
+
+                    // Interpolate along the horizontal path
+                    float progress = entity.t; // This goes from 0 to 1 (or 1 to 0 when reversed)
+
+                    Vector2 basePosition = Vector2{
+                        animPathStart.x + (animPathEnd.x - animPathStart.x) * progress,
+                        animPathStart.y + (animPathEnd.y - animPathStart.y) * progress
                     };
 
-                    if (entity.name == "pacman" && entity.t >= .5f) {
-                        for (auto& p : splashScreenFixtures) {
-                            if (std::abs(entity.position.x - p.position.x) < 4.f) {
-                                if (p.name == "powerup") {
-                                    std::cout << "ate a powerup\n";
-                                    entity.t -= entity.speed * GetFrameTime();
-                                    p.draw = false;
-                                }
-                                if (p.name == "pellet") {
-                                    std::cout << "ate a pellet\n";
-                                    p.draw = false;
-                                }
+                    // Add the entity's offset (for spacing between characters)
+                    entity.position = Vector2{
+                        basePosition.x + entity.initialPosition.x,
+                        basePosition.y + entity.initialPosition.y
+                    };
+
+                    for (auto& p : splashScreenFixtures) {
+                        if (std::abs(entity.position.x - p.position.x) < 4.f) {
+                            if (p.name == "powerup") {
+                                entity.direction = entity.direction * -1.f;
+                                p.draw = false;
+                            }
+                            if (p.name == "pellet") {
+                                p.draw = false;
                             }
                         }
                     }
