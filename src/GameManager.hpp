@@ -402,7 +402,6 @@ public:
                     };
                 }
 
-                //auto pac = std::find(splashScreenAnimations.begin(), splashScreenAnimations.end(), )
                 auto pac = std::find_if(
                     splashScreenAnimations.begin(),
                     splashScreenAnimations.end(),
@@ -420,7 +419,7 @@ public:
                                     entity.sprite->setZeroFrame(6);
                                 } else {
                                     entity.sprite->setTextureFile("res/frightened.png");
-                                    entity.sprite->setZeroFrame(0);
+                                    entity.sprite->setZeroFrame(8);
                                 }
                             }
                         }
