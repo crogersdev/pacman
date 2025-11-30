@@ -426,6 +426,26 @@ public:
                         p.draw = false;
                     }
                 }
+
+                if (pac->direction < 0.f && pac->progress <= 0.f) {
+                    pac->progress = 0.f;
+                    pac->direction = 1.f;
+                    pac->sprite->setTextureFile("res/pacman.png");
+                    pac->sprite->setZeroFrame(0);
+
+                    for (auto& animation : splashScreenAnimations) {
+                        animation.progress = 0.f;
+                        animation.direction = 1.f;
+                        if (animation.name == "blinky") { animation.sprite->setTextureFile("res/blinky.png"); animation.sprite->setZeroFrame(0); }
+                        if (animation.name == "inky")   { animation.sprite->setTextureFile("res/inky.png"); animation.sprite->setZeroFrame(0); }
+                        if (animation.name == "pinky")  { animation.sprite->setTextureFile("res/pinky.png"); animation.sprite->setZeroFrame(0); }
+                        if (animation.name == "clyde")  { animation.sprite->setTextureFile("res/clyde.png"); animation.sprite->setZeroFrame(0); }
+                        
+                        for (auto& p : splashScreenFixtures) {
+                            p.draw = true;
+                        }
+                    }
+                }
                 
                 mPaused = true;
                 menuModal(splashScreenAnimations, splashScreenFixtures);
