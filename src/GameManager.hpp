@@ -183,6 +183,36 @@ public:
         return ghostTile.first >= 8 && ghostTile.first <= 14 && ghostTile.second >= 11 && ghostTile.second <= 13;
     }
 
+    inline void gameStartModal() {
+        BeginBlendMode(BLEND_ALPHA);
+        DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Color{ 0, 0, 0, 200 });
+
+        float localTimer = fmod(mTimerGameStart, 1.0f);
+        float scale;
+
+        if (localTimer < 0.8f) {
+            float animationProgress = localTimer / .8f;
+            scale = animationProgress * animationProgress;
+        } else {
+            scale = 1.f;
+        }
+
+        float fontSize = 128 * scale;
+
+        std::string text;
+        if (mTimerGameStart < 1.0f) text = "3";
+        else if (mTimerGameStart < 2.0f) text = "2";
+        else if (mTimerGameStart < 3.0f) text = "1";
+        else text = "GO!";
+
+        Vector2 textSize = MeasureTextEx(mHudFont1, text.c_str(), fontSize, 2);
+        Vector2 center = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+        Vector2 pos = { center.x - textSize.x / 2, center.y - textSize.y/2 };
+
+        DrawTextEx(mHudFont1, text.c_str(), pos, fontSize, 2, WHITE);
+        EndBlendMode();
+    }
+
     inline void menuModal(std::vector<AnimatedEntity> splashScreenEntities, std::vector<MenuEntity> splashScreenFixtures) {
         BeginBlendMode(BLEND_ALPHA);
         DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Color{ 0, 0, 0, 133 });
@@ -370,9 +400,10 @@ public:
 
             if (mState == State::PACMAN_DYING) {
                 if (mPacman->finishedDying()) {
-                    mState = State::PAUSED;
+                    mState = State::GAME_START;
                     resetGame();
                 }
+                gameStartModal();
             }
 
             if (mState == State::GAME_OVER) {
@@ -381,7 +412,26 @@ public:
 
             drawStuff();
 
+            if (mState == State::GAME_START) {
+                mPaused = true;
+                mTimerGameStart += GetFrameTime();
+
+                if (mTimerGameStart >= 4.0f) {
+                    mState = State::PLAYING;
+                    mPaused = false;
+                    mTimerGameStart = 0.f;
+                }
+                gameStartModal();
+            }
+
             if (mState == State::MENU) {
+                mPaused = true;
+
+                if (GetKeyPressed() != 0) {
+                    mPaused = false;
+                    mState = State::GAME_START;
+                }
+
                 Vector2 animPathStart = Vector2{ -15.f, 375.f };
                 Vector2 animPathEnd = Vector2{ 650.f, 375.f };
                 
@@ -447,7 +497,6 @@ public:
                     }
                 }
                 
-                mPaused = true;
                 menuModal(splashScreenAnimations, splashScreenFixtures);
             }
 
@@ -456,6 +505,7 @@ public:
     }
 
     inline void updateTimers() {
+        std::cout << "updating timers\n";
         if (mPowerUpTime) { mTimerPowerUp += GetFrameTime(); }
 
         if (mTimerPowerUp >= POWERUP_TIME) { 
@@ -501,7 +551,6 @@ public:
     bool    mPaused = false;
 
 private:
-    // things to keep track of
     int     mDotsEaten = 0;
     Vector2 mGhostStartingPoint;
     int     mPowerUpsEaten = 0;
@@ -513,6 +562,7 @@ private:
     int     mScoreExtraLife = 0;
     State   mState = State::MENU;
     float   mTimerChaseMode = 0.f;
+    float   mTimerGameStart = 0.f;
     float   mTimerPowerUp = 0.f;
     float   mTimerLeavePrison = 0.f;
 

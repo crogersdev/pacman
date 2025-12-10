@@ -5,7 +5,7 @@ project(pacman)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Dependencies
-set(RAYLIB_VERSION 5.0)
+set(RAYLIB_VERSION 5.5)
 
 # Our Project
 add_executable(${PROJECT_NAME})
