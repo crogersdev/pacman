@@ -75,6 +75,9 @@ public:
         if (mLabyrinth->mPellets.find({ pacmanTile.first, pacmanTile.second }) != mLabyrinth->mPellets.end()) {
             mLabyrinth->mPellets.erase({ pacmanTile.first, pacmanTile.second });
             onDotsEaten();
+            if (mLabyrinth->getRemainingPellets() == 0) {
+                mState = State::GAME_WON;
+            }
         }
 
         // powerup collisions
@@ -197,7 +200,7 @@ public:
             scale = 1.f;
         }
 
-        float fontSize = 128 * scale;
+        float fontSize = 128.f * scale;
 
         std::string text;
         if (mTimerGameStart < 1.0f) text = "3";
@@ -206,11 +209,32 @@ public:
         else text = "GO!";
 
         Vector2 textSize = MeasureTextEx(mHudFont1, text.c_str(), fontSize, 2);
-        Vector2 center = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
-        Vector2 pos = { center.x - textSize.x / 2, center.y - textSize.y/2 };
+        Vector2 center = Vector2{ GetScreenWidth() / 2.f, GetScreenHeight() / 2.f };
+        Vector2 pos = Vector2{ center.x - textSize.x / 2.f, center.y - textSize.y / 2.f };
 
         DrawTextEx(mHudFont1, text.c_str(), pos, fontSize, 2, WHITE);
         EndBlendMode();
+    }
+
+    inline void gameOverModal() {
+        BeginBlendMode(BLEND_ALPHA);
+        float fontSize = 64.f;
+        Vector2 textSize = MeasureTextEx(mHudFont1, "GAME OVER!", fontSize, 2);
+        Vector2 center = Vector2{ GetScreenWidth() / 2.f, GetScreenHeight() / 2.f };
+        Vector2 pos = Vector2{ center.x - textSize.x / 2.f, center.y - textSize.y / 2.f };
+        DrawTextEx(mHudFont1, "GAME OVER!", pos, fontSize, 2, BLUE);
+        EndBlendMode();
+    }
+
+    inline void gameWonModal() {
+        BeginBlendMode(BLEND_ALPHA);
+        float fontSize = 64.f;
+        Vector2 textSize = MeasureTextEx(mHudFont1, "GAME WON!", fontSize, 2);
+        Vector2 center = Vector2{ GetScreenWidth() / 2.f, GetScreenHeight() / 2.f };
+        Vector2 pos = Vector2{ center.x - textSize.x / 2.f, center.y - textSize.y / 2.f };
+        DrawTextEx(mHudFont1, "GAME OVER!", pos, fontSize, 2, BLUE);
+        EndBlendMode();
+
     }
 
     inline void menuModal(std::vector<AnimatedEntity> splashScreenEntities, std::vector<MenuEntity> splashScreenFixtures) {
@@ -407,7 +431,7 @@ public:
             }
 
             if (mState == State::GAME_OVER) {
-                std::cout << "game over baby\n";
+                gameOverModal();
             }
 
             drawStuff();
