@@ -160,6 +160,18 @@ public:
         }
     }
 
+    inline void drawTranslucentOverlay() {
+        DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Color{ 0, 0, 0, 133 });
+
+        int x = GetScreenWidth() / 10;
+        int y = GetScreenHeight() / 3;
+        int modalWidth = GetScreenWidth() - 2*x;
+        int modalHeight = y;
+
+        DrawRectangle(x, y, modalWidth, modalHeight, BLACK);
+        DrawRectangleLines(x, y, modalWidth, modalHeight, Color{ 0, 150, 255, 255 });
+    }
+
     inline int getScore() const { return mScore; }
     inline int getLives() const { return mPacmanLives; }
 
@@ -218,6 +230,9 @@ public:
 
     inline void gameOverModal() {
         BeginBlendMode(BLEND_ALPHA);
+
+        drawTranslucentOverlay();
+
         float fontSize = 64.f;
         Vector2 textSize = MeasureTextEx(mHudFont1, "GAME OVER!", fontSize, 2);
         Vector2 center = Vector2{ GetScreenWidth() / 2.f, GetScreenHeight() / 2.f };
@@ -228,13 +243,15 @@ public:
 
     inline void gameWonModal() {
         BeginBlendMode(BLEND_ALPHA);
+
+        drawTranslucentOverlay();
+
         float fontSize = 64.f;
         Vector2 textSize = MeasureTextEx(mHudFont1, "GAME WON!", fontSize, 2);
         Vector2 center = Vector2{ GetScreenWidth() / 2.f, GetScreenHeight() / 2.f };
         Vector2 pos = Vector2{ center.x - textSize.x / 2.f, center.y - textSize.y / 2.f };
         DrawTextEx(mHudFont1, "GAME OVER!", pos, fontSize, 2, BLUE);
         EndBlendMode();
-
     }
 
     inline void menuModal(std::vector<AnimatedEntity> splashScreenEntities, std::vector<MenuEntity> splashScreenFixtures) {
@@ -431,7 +448,13 @@ public:
             }
 
             if (mState == State::GAME_OVER) {
+                mPaused = true;
                 gameOverModal();
+            }
+
+            if (mState == State::GAME_WON) {
+                mPaused = true;
+                gameWonModal();
             }
 
             drawStuff();
@@ -584,7 +607,7 @@ private:
     Texture mPacmanGuy;
     int     mScore = 0;
     int     mScoreExtraLife = 0;
-    State   mState = State::MENU;
+    State   mState = State::GAME_OVER;
     float   mTimerChaseMode = 0.f;
     float   mTimerGameStart = 0.f;
     float   mTimerPowerUp = 0.f;
