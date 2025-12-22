@@ -23,7 +23,7 @@ public:
             mTexture = LoadTexture(sp.c_str());
         }
         mSourceRect = { 0, 0, static_cast<float>(fw), static_cast<float>(fh) };
-    } 
+    }
 
     inline ~AnimatedSprite() { }
 

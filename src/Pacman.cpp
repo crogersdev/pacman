@@ -17,7 +17,7 @@ Pacman::Pacman()
     , mPosition{ 11.f * TILE_SIZE + TILE_SIZE / 2.f, 14.f * TILE_SIZE + TILE_SIZE / 2.f }
     , mRadius(12)
     , mState(State::PLAYING)
-    , mSpeed(50.f)
+    , mSpeed(100.f)
 {}
 
 Pacman::~Pacman() { std::cout << "PACMAN DESTROYED\n"; }

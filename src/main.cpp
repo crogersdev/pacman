@@ -13,6 +13,7 @@ int main() {
     const int SCREEN_WIDTH = LABYRINTH_COLS * TILE_SIZE;
     const int SCREEN_HEIGHT = 800;
 
+    InitAudioDevice();
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pacman!");
     SetTargetFPS(60);
 

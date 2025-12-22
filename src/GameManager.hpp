@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iomanip>
+#include <memory>
 #include <sstream>
 #include <vector>
 
@@ -11,11 +12,13 @@
 #include "Ghost.hpp"
 #include "Pacman.hpp"
 
+#include "helpers/AudioManager.hpp"
+
 using std::shared_ptr;
 
-const float CHASE_TIME = 1000.f;
-const float POWERUP_TIME = 15.f;
-const float SCATTER_TIME = 55.f;
+const float CHASE_TIME      = 1000.f;
+const float POWERUP_TIME    = 15.f;
+const float SCATTER_TIME    = 55.f;
 const float MAX_PRISON_TIME = 8.f;
 
 struct MenuEntity {
@@ -47,7 +50,8 @@ public:
     };
 
     inline GameManager(std::vector< shared_ptr<Ghost>> g, shared_ptr<Pacman> p, shared_ptr<Labyrinth> l)
-        : mGhosts(g)
+        : mAudioManager()
+        , mGhosts(g)
         , mHudFont(LoadFont("res/Bitty.ttf"))
         , mHudFont1(LoadFont("res/PublicPixel.ttf"))
         , mHudFont2(LoadFont("res/zector.regular.ttf"))
@@ -60,6 +64,7 @@ public:
         , mMenuPowerUp("res/powerup.png", 26, 26, 2, 12)
         , mPacman(p)
         , mPacmanGuy()
+        , mState(State::MENU)
         , mLabyrinth(l)
         , mGhostStartingPoint({ 11.f * TILE_SIZE, 8.f * TILE_SIZE }) {
 
@@ -104,7 +109,7 @@ public:
                     mScore += 100;
                 }
             }
-            
+
             int ghostStartingTileX = static_cast<int>(mGhostStartingPoint.x / TILE_SIZE);
             int ghostStartingTileY = static_cast<int>(mGhostStartingPoint.y / TILE_SIZE);
 
@@ -126,7 +131,7 @@ public:
                 ghost->setState(Ghost::State::LEAVING_PRISON);
                 ghost->resetDecisionTile();
                 ghost->updateSprite();
-            } 
+            }
         }
     };
 
@@ -192,7 +197,7 @@ public:
             }
         }
     };
- 
+
     inline bool isGhostInPrison(shared_ptr<Ghost> ghost) {
         auto ghostTile = ghost->getTilePosition();
         return ghostTile.first >= 8 && ghostTile.first <= 14 && ghostTile.second >= 11 && ghostTile.second <= 13;
@@ -224,7 +229,7 @@ public:
         Vector2 center = Vector2{ GetScreenWidth() / 2.f, GetScreenHeight() / 2.f };
         Vector2 pos = Vector2{ center.x - textSize.x / 2.f, center.y - textSize.y / 2.f };
 
-        DrawTextEx(mHudFont1, text.c_str(), pos, fontSize, 2, WHITE);
+        DrawTextEx(mHudFont1, text.c_str(), pos, fontSize, 2, BLUE);
         EndBlendMode();
     }
 
@@ -233,7 +238,7 @@ public:
 
         drawTranslucentOverlay();
 
-        float fontSize = 64.f;
+        float fontSize = 40.f;
         Vector2 textSize = MeasureTextEx(mHudFont1, "GAME OVER!", fontSize, 2);
         Vector2 center = Vector2{ GetScreenWidth() / 2.f, GetScreenHeight() / 2.f };
         Vector2 pos = Vector2{ center.x - textSize.x / 2.f, center.y - textSize.y / 2.f };
@@ -246,11 +251,11 @@ public:
 
         drawTranslucentOverlay();
 
-        float fontSize = 64.f;
+        float fontSize = 40.f;
         Vector2 textSize = MeasureTextEx(mHudFont1, "GAME WON!", fontSize, 2);
         Vector2 center = Vector2{ GetScreenWidth() / 2.f, GetScreenHeight() / 2.f };
         Vector2 pos = Vector2{ center.x - textSize.x / 2.f, center.y - textSize.y / 2.f };
-        DrawTextEx(mHudFont1, "GAME OVER!", pos, fontSize, 2, BLUE);
+        DrawTextEx(mHudFont1, "YOU WIN!", pos, fontSize, 2, BLUE);
         EndBlendMode();
     }
 
@@ -343,6 +348,8 @@ public:
         mScoreExtraLife++;
         mDotsEaten++;
 
+        mAudioManager.play(AudioManager::GameSound::EAT_PELLET);
+
         for (auto &ghost : mGhosts) {
             auto gs = ghost->getState();
             auto gn = ghost->getName();
@@ -414,7 +421,7 @@ public:
             { true, "pellet",  Vector2{ 452.f, 377.f }, &mMenuPellet },
             { true, "powerup", Vector2{ 478.f, 377.f }, &mMenuPowerUp }
         };
-        
+
         std::vector<AnimatedEntity> splashScreenAnimations = {
             { true, "pacman", Vector2{ 0.f, 0.f }, &mMenuPacman, 0.f, .1f,   1.f, Vector2{ 0.f, 0.f } },
             { true, "blinky", Vector2{ 0.f, 0.f }, &mMenuBlinky, 0.f, .082f, 1.f, Vector2{ -2.f * 26.f, 0.f } },
@@ -439,6 +446,8 @@ public:
                 updateTimers();
             }
 
+            drawStuff();
+
             if (mState == State::PACMAN_DYING) {
                 if (mPacman->finishedDying()) {
                     mState = State::GAME_START;
@@ -456,8 +465,6 @@ public:
                 mPaused = true;
                 gameWonModal();
             }
-
-            drawStuff();
 
             if (mState == State::GAME_START) {
                 mPaused = true;
@@ -481,7 +488,7 @@ public:
 
                 Vector2 animPathStart = Vector2{ -15.f, 375.f };
                 Vector2 animPathEnd = Vector2{ 650.f, 375.f };
-                
+
                 for (auto& entity : splashScreenAnimations) {
                     entity.progress += entity.direction * entity.speed * GetFrameTime();
 
@@ -537,13 +544,13 @@ public:
                         if (animation.name == "inky")   { animation.sprite->setTextureFile("res/inky.png"); animation.sprite->setZeroFrame(0); }
                         if (animation.name == "pinky")  { animation.sprite->setTextureFile("res/pinky.png"); animation.sprite->setZeroFrame(0); }
                         if (animation.name == "clyde")  { animation.sprite->setTextureFile("res/clyde.png"); animation.sprite->setZeroFrame(0); }
-                        
+
                         for (auto& p : splashScreenFixtures) {
                             p.draw = true;
                         }
                     }
                 }
-                
+
                 menuModal(splashScreenAnimations, splashScreenFixtures);
             }
 
@@ -559,7 +566,7 @@ public:
             onPowerUpWearsOff();
             mTimerPowerUp = 0.f;
         }
-        
+
         mTimerChaseMode += GetFrameTime();
         mTimerLeavePrison += GetFrameTime();
 
@@ -620,6 +627,8 @@ private:
     AnimatedSprite mMenuClyde;
     AnimatedSprite mMenuPellet;
     AnimatedSprite mMenuPowerUp;
+
+    AudioManager mAudioManager;
 
     Font    mHudFont;
     Font    mHudFont1;
