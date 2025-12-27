@@ -29,6 +29,7 @@ public:
     void    move(Vector2, shared_ptr<Labyrinth>);
     void    resetPosition() { mPosition = mInitialPosition; }
     void    setState(const State s) { mState = s; }
+    void    setSpeed(const float s) { mSpeed = s; }
     void    updateSpriteFrameAndMove();
 
     std::pair<int, int> getTilePosition() const;

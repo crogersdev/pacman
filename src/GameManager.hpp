@@ -70,8 +70,7 @@ public:
 
     inline ~GameManager() {
         UnloadMusicStream(mGameStartMusic);
-        UnloadSound(mChompStart);
-        UnloadSound(mChompEnd);
+        UnloadSound(mChomp);
         UnloadSound(mEatGhost);
         UnloadSound(mPacmanDies);
     };
@@ -189,6 +188,8 @@ public:
         mScoreExtraLife = 0;
         mScore = 0;
 
+        mPacman->setSpeed(100.f);
+
         for (auto &ghost : mGhosts) {
             if (ghost->getName() == "Blinky") {
                 ghost->setChaseTarget(mPacman->getPosition());
@@ -299,6 +300,7 @@ public:
         for (auto& entity : splashScreenEntities) {
             entity.sprite->draw(entity.position);
         }
+
         for (auto& entity : splashScreenFixtures) {
             if (entity.draw) entity.sprite->draw(entity.position);
         }
@@ -342,6 +344,9 @@ public:
         mPacmanLives--;
         mPacman->setState(Pacman::State::DYING);
 
+        SetSoundPitch(mPacmanDies, 2.25f);
+        PlaySound(mPacmanDies);
+
         if (mPacmanLives < 0) {
             mState = State::GAME_OVER;
         }
@@ -353,8 +358,7 @@ public:
         mPelletsEaten++;
 
         if (mState != State::MENU) {
-            PlaySound(mChompToggle ? mChompEnd : mChompStart);
-            mChompToggle = !mChompToggle;
+            PlaySound(mChomp);
         }
 
         for (auto &ghost : mGhosts) {
@@ -389,6 +393,9 @@ public:
 
     inline void onPowerUpEaten() {
         mState = State::PLAYING_POWERUP;
+
+        PlaySound(mEatPowerup);
+
         mPowerUpTime = true;
         for (auto &ghost : mGhosts) {
             if (ghost->getState() != Ghost::State::GOING_TO_PRISON && 
@@ -402,6 +409,7 @@ public:
 
     inline void onPowerUpWearsOff() {
         mState = State::PLAYING;
+        mTimerPowerUp = 0.f;
         mPowerUpTime = false;
         onGhostsStartChasing();
     }
@@ -462,6 +470,26 @@ public:
                     resetGame();
                 }
                 gameStartModal();
+            }
+
+            if (mState == State::PLAYING) {
+                if (IsMusicStreamPlaying(mGamePlayMusic)) { UpdateMusicStream(mGamePlayMusic); }
+                else { PlayMusicStream(mGamePlayMusic); }
+
+                if (mPaused) {
+                    StopMusicStream(mGamePlayMusic);
+                }
+
+            }
+
+            if (mState == State::PLAYING_POWERUP) {
+                bool ghostsDead = true;
+                for (auto &ghost : mGhosts) {
+                    ghostsDead = ghostsDead && (ghost->getState() == Ghost::State::GOING_TO_PRISON);
+                }
+                if (ghostsDead) {
+                    onPowerUpWearsOff();
+                }
             }
 
             if (mState == State::GAME_OVER) {
@@ -571,9 +599,8 @@ public:
     inline void updateTimers() {
         if (mPowerUpTime) { mTimerPowerUp += GetFrameTime(); }
 
-        if (mTimerPowerUp >= POWERUP_TIME) { 
+        if (mTimerPowerUp >= POWERUP_TIME) {
             onPowerUpWearsOff();
-            mTimerPowerUp = 0.f;
         }
 
         mTimerChaseMode += GetFrameTime();
@@ -635,11 +662,10 @@ private:
     Music mGameStartMusic = LoadMusicStream("../../res/start.ogg");
     Music mGamePlayMusic  = LoadMusicStream("../../res/siren1.ogg");
 
-    Sound mChompStart     = LoadSound("../../res/eat_pellet0.ogg");
-    Sound mChompEnd       = LoadSound("../../res/eat_pellet1.ogg");
-    Sound mEatGhost       = LoadSound("../../res/eat_ghost.ogg");
-    Sound mEatPowerup     = LoadSound("../../res/fright.ogg");
-    Sound mPacmanDies     = LoadSound("../../res/pacman_dies.ogg");
+    Sound mChomp       = LoadSound("../../res/chomp.ogg");
+    Sound mEatGhost    = LoadSound("../../res/eat_ghost.ogg");
+    Sound mEatPowerup  = LoadSound("../../res/fright.ogg");
+    Sound mPacmanDies  = LoadSound("../../res/pacman_dies.ogg");
 
     bool  mChompToggle    = false;
 
