@@ -12,8 +12,6 @@
 #include "Ghost.hpp"
 #include "Pacman.hpp"
 
-#include "helpers/AudioManager.hpp"
-
 using std::shared_ptr;
 
 const float CHASE_TIME      = 1000.f;
@@ -50,23 +48,22 @@ public:
     };
 
     inline GameManager(std::vector< shared_ptr<Ghost>> g, shared_ptr<Pacman> p, shared_ptr<Labyrinth> l)
-        : mAudioManager()
-        , mGhosts(g)
-        , mHudFont(LoadFont("res/Bitty.ttf"))
-        , mHudFont1(LoadFont("res/PublicPixel.ttf"))
-        , mHudFont2(LoadFont("res/zector.regular.ttf"))
-        , mMenuPacman("res/pacman.png", 26, 26, 3, 10)
-        , mMenuInky("res/inky.png", 26, 26, 2, 4)
-        , mMenuBlinky("res/blinky.png", 26, 26, 2, 4)
-        , mMenuPinky("res/pinky.png", 26, 26, 2, 4)
-        , mMenuClyde("res/clyde.png", 26, 26, 2, 4)
-        , mMenuPellet("res/pellet.png", 26, 26, 2, 10)
-        , mMenuPowerUp("res/powerup.png", 26, 26, 2, 12)
-        , mPacman(p)
-        , mPacmanGuy()
-        , mState(State::MENU)
-        , mLabyrinth(l)
-        , mGhostStartingPoint({ 11.f * TILE_SIZE, 8.f * TILE_SIZE }) {
+    : mGhosts(g)
+    , mHudFont(LoadFont("res/Bitty.ttf"))
+    , mHudFont1(LoadFont("res/PublicPixel.ttf"))
+    , mHudFont2(LoadFont("res/zector.regular.ttf"))
+    , mMenuPacman("res/pacman.png", 26, 26, 3, 10)
+    , mMenuInky("res/inky.png", 26, 26, 2, 4)
+    , mMenuBlinky("res/blinky.png", 26, 26, 2, 4)
+    , mMenuPinky("res/pinky.png", 26, 26, 2, 4)
+    , mMenuClyde("res/clyde.png", 26, 26, 2, 4)
+    , mMenuPellet("res/pellet.png", 26, 26, 2, 10)
+    , mMenuPowerUp("res/powerup.png", 26, 26, 2, 12)
+    , mPacman(p)
+    , mPacmanGuy()
+    , mState(State::MENU)
+    , mLabyrinth(l)
+    , mGhostStartingPoint({ 11.f * TILE_SIZE, 8.f * TILE_SIZE }) {
 
         mPacmanGuy = LoadTexture("res/pacman.png");
     };
@@ -79,7 +76,7 @@ public:
         // pellet collisions
         if (mLabyrinth->mPellets.find({ pacmanTile.first, pacmanTile.second }) != mLabyrinth->mPellets.end()) {
             mLabyrinth->mPellets.erase({ pacmanTile.first, pacmanTile.second });
-            onDotsEaten();
+            onPelletEaten();
             if (mLabyrinth->getRemainingPellets() == 0) {
                 mState = State::GAME_WON;
             }
@@ -343,22 +340,25 @@ public:
         }
     };
 
-    inline void onDotsEaten() {
+    inline void onPelletEaten() {
         mScore += 10;
         mScoreExtraLife++;
-        mDotsEaten++;
+        mPelletsEaten++;
 
-        mAudioManager.play(AudioManager::GameSound::EAT_PELLET);
+        if (mState != State::MENU) {
+            PlaySound(mChompToggle ? mChompEnd : mChompStart);
+            mChompToggle = !mChompToggle;
+        }
 
         for (auto &ghost : mGhosts) {
             auto gs = ghost->getState();
             auto gn = ghost->getName();
 
-            if (mDotsEaten > 30 && gs == Ghost::State::IN_PRISON && gn == "Blinky" ) {
+            if (mPelletsEaten > 30 && gs == Ghost::State::IN_PRISON && gn == "Blinky" ) {
                 ghost->setChaseTarget(mGhostStartingPoint);
                 ghost->setState(Ghost::State::LEAVING_PRISON);
             }
-            if (mDotsEaten > 60 && gs == Ghost::State::IN_PRISON && gn == "Clyde") {
+            if (mPelletsEaten > 60 && gs == Ghost::State::IN_PRISON && gn == "Clyde") {
                 ghost->setChaseTarget(mGhostStartingPoint);
                 ghost->setState(Ghost::State::LEAVING_PRISON);
             }
@@ -438,12 +438,13 @@ public:
             BeginDrawing();
             ClearBackground(BLACK);
 
-            if (mPaused == false && mState != State::PACMAN_DYING) {
+            if (mPaused == false && mState != State::GAME_START && mState != State::PACMAN_DYING) {
                 moveStuff();
 
                 checkCollisions();
 
                 updateTimers();
+
             }
 
             drawStuff();
@@ -467,6 +468,8 @@ public:
             }
 
             if (mState == State::GAME_START) {
+                if (IsMusicStreamPlaying(mGameStartMusic)) { UpdateMusicStream(mGameStartMusic); }
+                else { PlayMusicStream(mGameStartMusic); }
                 mPaused = true;
                 mTimerGameStart += GetFrameTime();
 
@@ -559,7 +562,6 @@ public:
     }
 
     inline void updateTimers() {
-        std::cout << "updating timers\n";
         if (mPowerUpTime) { mTimerPowerUp += GetFrameTime(); }
 
         if (mTimerPowerUp >= POWERUP_TIME) { 
@@ -573,17 +575,12 @@ public:
         for (auto &ghost : mGhosts) {
             if (ghost->getState() == Ghost::State::CHASE && !isGhostInPrison(ghost)) {
                 if (mTimerChaseMode >= CHASE_TIME) {
-                    // std::cout << "chase timer: " << std::fixed << std::setprecision(2) << mTimerChaseMode << std::endl;
-                    // std::cout << "toggling " << ghost->getName() << " to chasing\n";
-                    ghost->setChaseTarget(ghost->mScatterCornerPosition);
                     ghost->setState(Ghost::State::SCATTER);
                     mTimerChaseMode = 0.f;
                 }
             }
             if (ghost->getState() == Ghost::State::SCATTER && !isGhostInPrison(ghost)) {
                 if (mTimerChaseMode >= SCATTER_TIME) {
-                    // std::cout << "chase timer: " << std::fixed << std::setprecision(2) << mTimerChaseMode << std::endl;
-                    // std::cout << "toggling " << ghost->getName() << " to scatter\n";
                     ghost->setChaseTarget(mPacman->getPosition());
                     ghost->setState(Ghost::State::CHASE);
                     mTimerChaseMode = 0.f;
@@ -605,7 +602,7 @@ public:
     bool    mPaused = false;
 
 private:
-    int     mDotsEaten = 0;
+    int     mPelletsEaten = 0;
     Vector2 mGhostStartingPoint;
     int     mPowerUpsEaten = 0;
     bool    mPowerUpTime = false;
@@ -628,7 +625,10 @@ private:
     AnimatedSprite mMenuPellet;
     AnimatedSprite mMenuPowerUp;
 
-    AudioManager mAudioManager;
+    Music mGameStartMusic = LoadMusicStream("../../res/start.ogg");
+    Sound mChompStart     = LoadSound("../../res/eat_pellet0.ogg");
+    Sound mChompEnd       = LoadSound("../../res/eat_pellet1.ogg");
+    bool  mChompToggle    = false;
 
     Font    mHudFont;
     Font    mHudFont1;
