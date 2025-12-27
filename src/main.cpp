@@ -30,6 +30,7 @@ int main() {
     gm.initEntities();
     gm.runGame();
 
+    CloseAudioDevice();
     CloseWindow();
     return 0;
 }

@@ -68,7 +68,13 @@ public:
         mPacmanGuy = LoadTexture("res/pacman.png");
     };
 
-    inline ~GameManager() {};
+    inline ~GameManager() {
+        UnloadMusicStream(mGameStartMusic);
+        UnloadSound(mChompStart);
+        UnloadSound(mChompEnd);
+        UnloadSound(mEatGhost);
+        UnloadSound(mPacmanDies);
+    };
 
     inline void checkCollisions() {
         auto pacmanTile = mPacman->getTilePosition();
@@ -103,6 +109,7 @@ public:
                     ghost->setState(Ghost::State::GOING_TO_PRISON);
                     ghost->setChaseTarget(mGhostStartingPoint);
                     ghost->updateSprite();
+                    PlaySound(mEatGhost);
                     mScore += 100;
                 }
             }
@@ -626,8 +633,14 @@ private:
     AnimatedSprite mMenuPowerUp;
 
     Music mGameStartMusic = LoadMusicStream("../../res/start.ogg");
+    Music mGamePlayMusic  = LoadMusicStream("../../res/siren1.ogg");
+
     Sound mChompStart     = LoadSound("../../res/eat_pellet0.ogg");
     Sound mChompEnd       = LoadSound("../../res/eat_pellet1.ogg");
+    Sound mEatGhost       = LoadSound("../../res/eat_ghost.ogg");
+    Sound mEatPowerup     = LoadSound("../../res/fright.ogg");
+    Sound mPacmanDies     = LoadSound("../../res/pacman_dies.ogg");
+
     bool  mChompToggle    = false;
 
     Font    mHudFont;
