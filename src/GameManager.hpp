@@ -119,9 +119,22 @@ public:
             // ghost emerges from prison
             if (ghostTile.first == ghostStartingTileX && ghostTile.second == ghostStartingTileY) {
                 if (ghost->getState() == Ghost::State::LEAVING_PRISON) {
-                    ghost->setChaseTarget(mPacman->getPosition());
+
+                    Vector2 p = mPacman->getPosition();
+                    Vector2 d = mPacman->getDirection();
+                    Vector2 o = Vector2{ d.y, -d.x };
+
+                    if (ghost->getName() == "Inky") {
+                        p = Vector2{ p.x + 4.f*TILE_SIZE*(d.x), p.y + 4.f*TILE_SIZE*(d.y) };
+                    } else if (ghost->getName() == "Blinky") {
+                        p = Vector2{ p.x - 4.f*TILE_SIZE*(d.x), p.y - 4.f*TILE_SIZE*(d.y) };
+                    } else if (ghost->getName() == "Clyde") {
+                        p = Vector2{ (p.x + 5.f*TILE_SIZE), (p.y + 3.f*TILE_SIZE) };
+                    }
+
+                    ghost->setChaseTarget(p);
                     ghost->setState(Ghost::State::CHASE);
-                } 
+                }
                 if (ghost->getState() == Ghost::State::GOING_TO_PRISON) {
                     ghost->setChaseTarget(ghost->mPrisonPosition);
                 }
@@ -333,8 +346,23 @@ public:
         }
 
         mPacman->move(intendedDirection, mLabyrinth);
+
         for (const auto& ghost : mGhosts) {
-            if (ghost->getState() == Ghost::State::CHASE) { ghost->setChaseTarget(mPacman->getPosition()); }
+            if (ghost->getState() == Ghost::State::CHASE) {
+                Vector2 p = mPacman->getPosition();
+                Vector2 d = mPacman->getDirection();
+                Vector2 o = Vector2{ d.y, -d.x };
+
+                if (ghost->getName() == "Inky") {
+                    p = Vector2{ p.x + 4.f*TILE_SIZE*(d.x), p.y + 4.f*TILE_SIZE*(d.y) };
+                } else if (ghost->getName() == "Blinky") {
+                    p = Vector2{ p.x - 4.f*TILE_SIZE*(d.x), p.y - 4.f*TILE_SIZE*(d.y) };
+                } else if (ghost->getName() == "Clyde") {
+                    p = Vector2{ (p.x + 5.f*TILE_SIZE), (p.y + 3.f*TILE_SIZE) };
+                }
+
+                ghost->setChaseTarget(p);
+            }
             ghost->act(mLabyrinth);
         }
     }
@@ -384,7 +412,19 @@ public:
     inline void onGhostsStartChasing() {
         for (auto &ghost : mGhosts) {
             if (ghost->getState() == Ghost::State::FRIGHTENED) {
-                ghost->setChaseTarget(mPacman->getPosition());
+                Vector2 p = mPacman->getPosition();
+                Vector2 d = mPacman->getDirection();
+                Vector2 o = Vector2{ d.y, -d.x };
+
+                if (ghost->getName() == "Inky") {
+                    p = Vector2{ p.x + 4.f*TILE_SIZE*(d.x), p.y + 4.f*TILE_SIZE*(d.y) };
+                } else if (ghost->getName() == "Blinky") {
+                    p = Vector2{ p.x - 4.f*TILE_SIZE*(d.x), p.y - 4.f*TILE_SIZE*(d.y) };
+                } else if (ghost->getName() == "Clyde") {
+                    p = Vector2{ (p.x + 5.f*TILE_SIZE), (p.y + 3.f*TILE_SIZE) };
+                }
+
+                ghost->setChaseTarget(p);
                 ghost->setState(Ghost::State::CHASE);
                 ghost->updateSprite();
             }
@@ -459,7 +499,6 @@ public:
                 checkCollisions();
 
                 updateTimers();
-
             }
 
             drawStuff();
@@ -479,7 +518,6 @@ public:
                 if (mPaused) {
                     StopMusicStream(mGamePlayMusic);
                 }
-
             }
 
             if (mState == State::PLAYING_POWERUP) {
@@ -614,8 +652,19 @@ public:
                 }
             }
             if (ghost->getState() == Ghost::State::SCATTER && !isGhostInPrison(ghost)) {
+                Vector2 p = mPacman->getPosition();
+                Vector2 d = mPacman->getDirection();
+                Vector2 o = Vector2{ d.y, -d.x };
                 if (mTimerChaseMode >= SCATTER_TIME) {
-                    ghost->setChaseTarget(mPacman->getPosition());
+                    if (ghost->getName() == "Inky") {
+                        p = Vector2{ p.x + 4.f*TILE_SIZE*(d.x), p.y + 4.f*TILE_SIZE*(d.y) };
+                    } else if (ghost->getName() == "Blinky") {
+                        p = Vector2{ p.x - 4.f*TILE_SIZE*(d.x), p.y - 4.f*TILE_SIZE*(d.y) };
+                    } else if (ghost->getName() == "Clyde") {
+                        p = Vector2{ (p.x + 5.f*TILE_SIZE), (p.y + 3.f*TILE_SIZE) };
+                    }
+
+                    ghost->setChaseTarget(p);
                     ghost->setState(Ghost::State::CHASE);
                     mTimerChaseMode = 0.f;
                 }
