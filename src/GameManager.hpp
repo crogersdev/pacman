@@ -1,7 +1,6 @@
 #pragma once
 
 #include <algorithm>
-#include <iomanip>
 #include <memory>
 #include <sstream>
 #include <vector>
@@ -708,13 +707,13 @@ private:
     AnimatedSprite mMenuPellet;
     AnimatedSprite mMenuPowerUp;
 
-    Music mGameStartMusic = LoadMusicStream("../../res/start.ogg");
-    Music mGamePlayMusic  = LoadMusicStream("../../res/siren1.ogg");
+    Music mGameStartMusic = LoadMusicStream("res/start.ogg");
+    Music mGamePlayMusic  = LoadMusicStream("res/siren1.ogg");
 
-    Sound mChomp       = LoadSound("../../res/chomp.ogg");
-    Sound mEatGhost    = LoadSound("../../res/eat_ghost.ogg");
-    Sound mEatPowerup  = LoadSound("../../res/fright.ogg");
-    Sound mPacmanDies  = LoadSound("../../res/pacman_dies.ogg");
+    Sound mChomp       = LoadSound("res/chomp.ogg");
+    Sound mEatGhost    = LoadSound("res/eat_ghost.ogg");
+    Sound mEatPowerup  = LoadSound("res/fright.ogg");
+    Sound mPacmanDies  = LoadSound("res/pacman_dies.ogg");
 
     bool  mChompToggle    = false;
 
